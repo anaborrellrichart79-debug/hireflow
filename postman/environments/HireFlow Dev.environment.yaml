@@ -1,0 +1,8 @@
+name: HireFlow Dev
+values:
+  - key: base_url
+    value: 'http://localhost:3000/api'
+  - key: token
+    value: ''
+    disabled: true
+color: 120

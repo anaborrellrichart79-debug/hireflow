@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: c49dc2f4-655b-4562-87ef-9a8660761c6b
+
+localResources:
+  specs:
+    - ..\postman\specs\HireFlow API\HireFlow API.yaml

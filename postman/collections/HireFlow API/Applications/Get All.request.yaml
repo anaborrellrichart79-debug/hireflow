@@ -1,0 +1,13 @@
+$kind: http-request
+name: Get All
+url: "{{base_url}}/applications"
+method: GET
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status OK\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });"
+    language: text/javascript
+order: 1109526567227401

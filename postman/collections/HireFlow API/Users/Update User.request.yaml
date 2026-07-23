@@ -1,0 +1,24 @@
+$kind: http-request
+name: Update User
+url: "{{base_url}}/users/:id"
+method: PUT
+pathVariables:
+  id: ""
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Nuevo Nombre\",\r
+
+    \  \"sector\": \"Frontend\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status OK\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });"
+    language: text/javascript
+order: 2929342034981932

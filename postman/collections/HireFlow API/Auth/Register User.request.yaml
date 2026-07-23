@@ -1,0 +1,23 @@
+$kind: http-request
+name: Register User
+description: HireFlow
+url: "{{base_url}}/auth/register"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"name\": \"Ana\",\r
+
+    \  \"email\": \"ana@hireflow.com\",\r
+
+    \  \"password\": \"123456\",\r
+
+    \  \"role\": \"candidate\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: "console.log(pm);\r\n"
+    language: text/javascript
+order: 1782304062816

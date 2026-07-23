@@ -1,0 +1,15 @@
+$kind: http-request
+name: Delete
+url: "{{base_url}}/applications/:id"
+method: DELETE
+pathVariables:
+  id: ""
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status OK\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });"
+    language: text/javascript
+order: 3845589717750319

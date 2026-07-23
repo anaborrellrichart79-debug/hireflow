@@ -1,0 +1,13 @@
+$kind: http-request
+name: Create Jobs
+url: "{{base_url}}/jobs"
+method: GET
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status OK\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });"
+    language: text/javascript
+order: 1782308992105

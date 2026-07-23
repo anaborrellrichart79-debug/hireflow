@@ -1,0 +1,34 @@
+$kind: http-request
+name: Login User
+url: "{{base_url}}/auth/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"email\": \"carlos@hireflow.com\",\r
+
+    \  \"password\": \"123456\"\r
+
+    }"
+auth:
+  type: bearer
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status 200\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.environment.set(\r
+
+      \    \"token\",\r
+
+      \    pm.response.json().token\r
+
+      );"
+    language: text/javascript
+order: 3056588733069843

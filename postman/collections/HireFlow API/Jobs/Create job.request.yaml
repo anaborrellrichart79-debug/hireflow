@@ -1,0 +1,24 @@
+$kind: http-request
+name: Create job
+url: "{{base_url}}/jobs"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"company\": \"Google\",\r
+
+    \  \"position\": \"Frontend Developer\",\r
+
+    \  \"location\": \"Remote\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Created\", function () {\r
+
+      \    pm.response.to.have.status(201);\r
+
+      });"
+    language: text/javascript
+order: 2103945662695724

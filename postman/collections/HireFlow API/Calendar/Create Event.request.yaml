@@ -1,0 +1,24 @@
+$kind: http-request
+name: Create Event
+url: "{{base_url}}/calendar"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"title\": \"Entrevista Google\",\r
+
+    \  \"date\": \"2026-06-25\",\r
+
+    \  \"type\": \"interview\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Created\", function () {\r
+
+      \    pm.response.to.have.status(201);\r
+
+      });"
+    language: text/javascript
+order: 1142223101485906

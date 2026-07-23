@@ -1,0 +1,15 @@
+$kind: http-request
+name: Get by Application
+url: "{{base_url}}/interviews?applicationId=1"
+method: GET
+queryParams:
+  applicationId: "1"
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status OK\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });"
+    language: text/javascript
+order: 4096552386727769

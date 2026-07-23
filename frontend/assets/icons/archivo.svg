@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512">
+  <!-- Generator: Adobe Illustrator 30.4.0, SVG Export Plug-In . SVG Version: 2.1.4 Build 226)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #fccc96;
+      }
+
+      .st1 {
+        fill: #fcdf96;
+      }
+
+      .st2 {
+        fill: #fcb896;
+      }
+    </style>
+  </defs>
+  <g>
+    <path class="st1" d="M475.37,8.56h-100.01s-29.86,25.34-36.03,41.8v67.91H60.7c-28.76.11-53.17,51.67-53.17,51.67v280.74c0,28.48,23.27,51.56,51.98,51.56h379.36c36.5,0,66.36-29.62,66.36-65.82V38.19c0-16.36-13.37-29.62-29.86-29.62Z"/>
+    <rect class="st2" x="62.83" y="63.42" width="276.5" height="54.85"/>
+    <polygon class="st0" points="339.33 63.42 90.56 63.42 62.83 63.42 62.83 118.27 339.33 118.27 339.33 63.42"/>
+  </g>
+  <image width="291" height="86" transform="translate(57 33)" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASMAAABWCAYAAACEuPDrAAAACXBIWXMAAAsSAAALEgHS3X78AAACu0lEQVR4nO3da5KqMBCA0WCxWvfj3axWMX/GW46FCkJIJzlnBdQ8PrsJzAyJLtymf1Ppa4B3htIXUNp1ukwppTT4UkAx43Ae/Ab+MjlAOeNwHk6lLyICIYLyuo+REEEMXcdIiCCObmN0v3ENxNBljK7TZXJ6BrF0FyMhgpi6ipHVDOLqJkYeboTYxtIXkNvjNCREEFfTk5G1DOrRbIyeQ2QqgtiajJEQQX2ai5HVDOoyDuchpcZiNBciUxHUoZkYCRHUrYkYWc2gflU/Z/QuQqYiqEu1k5EQQVuqjJEQQXuqi5H7Q9CmqmL0KUSmIqhXNTESImhbFTGymkH7Qh/tL42QqQjqF3YyEiLoS8gYWcugP+HGijUhMhVB3e5v7KcU7J7R2oloSgao1vnA6UeYGFnNeCRC/Skeo9t0mVQIKHoDW4iAu2IxEiJesaL1qUiMhAh4dniMhAiYc2iMhIhPrGj9OixGQgS8k/1o/x4hIQLeyToZmYZYw4rWt2wxEiJgjSwxEiLgk8eXZFPKECMh4htWNHaNkRAB39otRkIEbLH5aN/RPVtZ0Uhp42RkGgL28nWMhIg9mIq4+ypGVyECdrY6Rv48LJDDqhgJEXuyovFocYxuQgRk9PFo39E9cIS3k5ETM3KxovHsZYyECDjSbIyECMjp+Y39lGZiJETkZkVjzp8YCRFQyv8YeaoaKOmUkmeIOI4VjVey/3cQ6jCkIU2eJguh1+/C6D4RKaXfEOWfWvys8UqQycjoDr0bj97ifTICc8accTDvAEvtsqaJDrDVLv8dxOoFbLV5MjIVAXtYHCPRAXJavKZZxYCcFk1GpiIgtz8xEh3oW8kGnB4vwCoGfSvZgPEeopJFNJEBh7+bJjzAnF0eegTYSoyAEMQICEGMgBDECAhBjIAQxAgIQYyAEMQICEGMgBB+AJ1KCyu5lrxQAAAAAElFTkSuQmCC"/>
+</svg>

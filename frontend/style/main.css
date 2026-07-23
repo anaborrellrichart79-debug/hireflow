@@ -1,0 +1,13 @@
+body {
+    margin: 0;
+    font-family: "Lato", Roboto, sans-serif;
+}
+
+/*Fondo principal*/
+.main-container {
+    min-height: calc(100vh - 80px);
+    background: linear-gradient(to right, #ebad64, #ffffff, #fff9e4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

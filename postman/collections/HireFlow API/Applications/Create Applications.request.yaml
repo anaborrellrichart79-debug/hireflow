@@ -1,0 +1,39 @@
+$kind: http-request
+name: Create Applications
+description: |-
+  Crea una nueva postulación laboral para el usuario autenticado.
+
+  Requiere:
+
+  - JWT válido
+      
+  - job_offer_id existente
+      
+
+  Devuelve:
+
+  - id de la postulación
+      
+  - estado inicial wishlist
+url: "{{base_url}}/applications"
+method: POST
+headers:
+  Authorization: " Bearer {{token}}"
+body:
+  type: json
+  content: "{\r
+
+    \  \"job_offer_id\": 1,\r
+
+    \  \"notes\": \"Oferta interesante\"\r
+
+    }"
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Created\", function () {\r
+
+      \    pm.response.to.have.status(201);\r
+
+      });"
+    language: text/javascript
+order: 1782306275692

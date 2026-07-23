@@ -1,0 +1,17 @@
+$kind: http-request
+name: Get Users
+url: "{{base_url}}/users?Authorization=Bearer{{token}}"
+method: GET
+headers:
+  Authorization: Bearer {{token}}
+queryParams:
+  Authorization: Bearer{{token}}
+scripts:
+  - type: beforeRequest
+    code: "pm.test(\"Status OK\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });"
+    language: text/javascript
+order: 1782306002610
