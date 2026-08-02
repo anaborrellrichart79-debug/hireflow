@@ -3,20 +3,10 @@ import { createApplication,
     getApplicationById, 
     updateApplication, 
     deleteApplication } from "../models/application.js";
-
-export const APPLICATION_STATUS = {
-    WISHLIST: "wishlist",
-    APPLIED: "applied",
-    INTERVIEW: "interview",
-    OFFER: "offer",
-    REJECTED: "rejected"
-};
+import { APPLICATION_STATUS } from "../constants/applicationStatus.js";
 
 export const createNewApplication = async (req, res) => {
     try {
-
-        console.log("req.user:", req.user);
-        console.log("req.body:", req.body);
 
         const application = await createApplication({
     
@@ -54,7 +44,7 @@ export const getUserApplications = async (req, res) => {
 export const getApplication = async (req, res) => {
     try {
 
-        const application = await getApplicationById(req.params.id);
+        const application = await getApplicationById(req.params.id, req.user.id);
     
         if (!application) {
             return res.status(404).json({
@@ -80,6 +70,7 @@ export const updateExistingApplication = async (req, res) => {
 
         const result = await updateApplication(
             req.params.id,
+            req.user.id,
             status,
             notes
         );
@@ -105,7 +96,7 @@ export const updateExistingApplication = async (req, res) => {
 
 export const removeApplication = async (req, res) => {
     try {
-        const result = await deleteApplication(req.params.id);
+        const result = await deleteApplication(req.params.id, req.user.id);
 
         if (result.affectedRows === 0) {
             return res.status(404).json ({

@@ -3,7 +3,9 @@ import bcrypt from "bcryptjs";
 
 // GET ALL USERS
 export const getAllUsers = async () => {
-    const [rows] = await db.query("SELECT * FROM users");
+    const [rows] = await db.query(
+        "SELECT id, name, email, role, sector, phone, location, profile_visible, created_at, updated_at FROM users"
+    );
     return rows;
 };
 
@@ -17,7 +19,6 @@ export const createUser = async (userData) => {
     }
 
     //encriptar la contraseña
-    const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, 10);
 
     // guardar en DB
@@ -32,12 +33,6 @@ export const createUser = async (userData) => {
     email,
     role
     };
-};
-
-//autentificación del usuario
-export const authentificateUser = async (email, password) => {
-    const [rows] = await db.query("SELECT * FROM users WHERE email = ? AND password_hash = ?", [email, password]);
-    return rows[0];
 };
 
 //Buscar usuario por email

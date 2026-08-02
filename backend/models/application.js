@@ -8,16 +8,8 @@ export const createApplication = async (applicationData) => {
         notes,
     } = applicationData;
 
-    console.log("Datos recibidos en createApplication:");
-    console.log(applicationData);
+    const appliedDate = status === "applied" ? new Date() : null;
 
-    console.log({
-    user_id,
-    job_offer_id,
-    status,
-    notes
-    });
-    
     const [ result ] = await db.execute(
         `
         INSERT INTO applications (
@@ -27,9 +19,9 @@ export const createApplication = async (applicationData) => {
         notes,
         applied_date
         )
-        VALUES (?,?,?,?,NOW())
+        VALUES (?,?,?,?,?)
         `,
-        [user_id, job_offer_id, status, notes]
+        [user_id, job_offer_id, status, notes, appliedDate]
     );
     return {
         id: result.insertId,
@@ -37,7 +29,7 @@ export const createApplication = async (applicationData) => {
         job_offer_id,
         status,
         notes,
-        applied_date: new Date()
+        applied_date: appliedDate
     };
 };
 
@@ -52,39 +44,42 @@ export const getApplicationByUser = async (userId) => {
     return rows;
 };
 
-export const getApplicationById = async (id) => {
+export const getApplicationById = async (id, userId) => {
     const [rows] = await db.execute(
         `
         SELECT * FROM applications
-        WHERE id = ?
+        WHERE id = ? AND user_id = ?
         `, 
-        [id]
+        [id, userId]
     );
 
-    console.log("ID recibido:", id);
-    console.log("Rows:", rows);
     return rows[0];
 };
 
-export const updateApplication = async (id, status, notes) => {
+export const updateApplication = async (id, userId, status, notes) => {
     const [result] = await db.execute(
         `
         UPDATE applications
-        SET status = ?, notes = ?
-        WHERE id = ?
+        SET status = ?,
+            notes = ?,
+            applied_date = CASE
+                WHEN ? = 'applied' AND applied_date IS NULL THEN CURDATE()
+                ELSE applied_date
+            END
+        WHERE id = ? AND user_id = ?
         `,
-        [status, notes, id]
+        [status, notes, status, id, userId]
     );
     return result;
 };
 
-export const deleteApplication = async (id) => {
+export const deleteApplication = async (id, userId) => {
     const [result] = await db.execute(
         `
         DELETE FROM applications
-        WHERE id = ?
+        WHERE id = ? AND user_id = ?
         `,
-        [id]
+        [id, userId]
     );
     
     return result;

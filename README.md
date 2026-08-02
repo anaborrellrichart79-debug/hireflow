@@ -96,7 +96,7 @@ El objetivo del proyecto es crear una herramienta realista que combine gestión 
     Esto permite centralizar oportunidades laborales en un único panel.
 
         Se puede importar ofertas desde:
-            - Linkedln
+            - linkedin
             - APIs de empleo externas
   
     ### Curriculum IA
