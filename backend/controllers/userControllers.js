@@ -1,6 +1,6 @@
 import bcrypt  from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { findUserByEmail, createUser, getAllUsers} from "../models/User.js";
+import { findUserByEmail, createUser, getAllUsers, getUserById, updateUser, deleteUser } from "../models/User.js";
 
 export const getUsers = async (req, res) => {
     try {
@@ -57,5 +57,45 @@ export const loginUser = async (req,res) => {
         res.json({ message: "contraseña correcta", token });
     } catch (error) {
         res.status(500).json({ message: "Error al iniciar sesión" });
+    }
+};
+
+// GET /users/me
+export const getProfile = async (req, res) => {
+    try {
+        const user = await getUserById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener el perfil" });
+    }
+};
+
+// PUT /users/me
+export const updateProfile = async (req, res) => {
+    try {
+        const result = await updateUser(req.user.id, req.body);
+
+        if (!result) {
+            return res.status(400).json({ message: "Ningún campo válido para actualizar" });
+        }
+
+        res.json({ message: "Perfil actualizado correctamente" });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar el perfil" });
+    }
+};
+
+// DELETE /users/me
+export const deleteProfile = async (req, res) => {
+    try {
+        await deleteUser(req.user.id);
+        res.json({ message: "Cuenta eliminada correctamente" });
+    } catch (error) {
+        res.status(500).json({ message: "Error al eliminar la cuenta" });
     }
 };
