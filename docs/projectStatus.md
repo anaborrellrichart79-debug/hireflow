@@ -109,7 +109,16 @@ Decisión de arquitectura: `interviews` no tiene `user_id` propio, hereda el due
 ---
 ## Calendar
 Estado
-🔴 No iniciado
+🟢 CRUD Completo
+✔ Crear (evento propio, `related_application` validado por propiedad, no solo por existencia)
+✔ Obtener todos (propios)
+✔ Obtener por ID (propio)
+✔ Actualizar (propio)
+✔ Eliminar (propio)
+✔ Validación de entrada (title obligatorio, event_type ENUM, related_application entero)
+✔ Tests manuales verificados (curl: IDOR bloqueado en `related_application` y en las 4 operaciones CRUD, con dos usuarios distintos)
+
+Decisión de arquitectura: `related_application` se valida por propiedad reutilizando `getApplicationById`, no solo por la FK de la BD, ver `docs/decisions.md`, entrada 009. Integración real con Google Calendar sigue pendiente (fuera de alcance de este CRUD).
 ---
 ## AI
 Estado
@@ -167,9 +176,9 @@ Project Status
 Decisions
 🟢 (creado agosto 2026)
 Frontend Design
-🟢 (creado agosto 2026)
+🔴 Referenciado como `FRONTEND_DESIGN.md` en varios documentos, pero el archivo no existe en el repositorio (comprobado agosto 2026, tampoco está en el historial de git)
 Sprint Plan (2 meses)
-🟢 (creado agosto 2026)
+🔴 Referenciado como `SPRINT_PLAN_2MESES.md`, mismo caso — no existe en el repositorio
 ---
 # Próximo objetivo
 Sprint actual (Semana 1 → Semana 2 del plan de 2 meses)
@@ -183,8 +192,9 @@ Implementar:
 ✔ Fix `database/seed.sql` de `interview_types` — completo
 ✔ Middleware de errores centralizado — completo
 ✔ Validaciones de entrada — completo
+✔ CRUD Calendar — completo
 
-Con esto se completa el backend previsto para el MVP (Users, Companies, Job Offers, Applications, Interviews, manejo de errores y validaciones). Quedan fuera del MVP actual: Calendar y AI (ver más abajo), y el frontend completo.
+Con esto se completa el backend previsto para el MVP (Users, Companies, Job Offers, Applications, Interviews, Calendar, manejo de errores y validaciones). Queda fuera del alcance actual: módulo AI, y el frontend completo.
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -199,12 +209,12 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-█████████████████░░░ 85% (MVP completo; Calendar y AI quedan fuera de este sprint)
+██████████████████░░ 90% (MVP completo incl. Calendar; solo queda AI fuera de alcance)
 Frontend
-░░░░░░░░░░░░░░░░░░ 0% (diseño cerrado)
+░░░░░░░░░░░░░░░░░░ 0% (el diseño referenciado como "cerrado" en `FRONTEND_DESIGN.md` no existe en el repositorio, ver nota en Documentación más arriba)
 Base de datos
 ██████████████░░░ 75%
 Documentación
-████████████████░░ 90%
+██████████████░░░░░░ 70% (bajado: 2 documentos referenciados no existen — ver Frontend Design / Sprint Plan arriba)
 Proyecto completo
-███████████░░░░░░░░░ 52%
+███████████░░░░░░░░░ 54%

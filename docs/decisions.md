@@ -184,3 +184,23 @@ Ningún endpoint validaba el `body` antes de llegar al modelo. Los únicos "guar
 **Archivos afectados:** `middleware/validate.js` (nuevo), `validators/*.js` (5 archivos nuevos), las 5 rutas (validadores añadidos antes de `asyncHandler`), `models/application.js` (`notes = null` por defecto en `updateApplication`), `package.json` (nueva dependencia `express-validator`).
 
 ---
+
+## 009 — CRUD Calendar: `related_application` validado por propiedad, no solo por FK
+**Fecha:** Agosto 2026
+
+**Problema:**
+`calendar_events` tiene `user_id` propio (FK directa, igual que Applications) — el patrón de propiedad aquí es simple. Pero también tiene `related_application`, una FK **opcional** hacia `applications(id)`. Si se deja que solo la constraint de la BD valide ese campo (como se hizo con `company_id` en Job Offers o `interview_type_id` en Interviews), un usuario podría enlazar su propio evento de calendario al `id` de una `application` de otro usuario, simplemente probando IDs — no expondría los datos de esa `application` ajena (no hay ningún `JOIN` que los devuelva), pero sí permitiría una referencia cruzada indebida y confirmar por fuerza bruta qué IDs de `application` existen.
+
+**Alternativas consideradas:**
+- (a) Dejar que la FK de la BD valide solo existencia (mismo patrón que `company_id` en Job Offers), sin comprobar propiedad.
+- (b) Cuando se envía `related_application`, comprobar explícitamente que esa `application` pertenece al usuario autenticado antes de crear o actualizar el evento, reutilizando `getApplicationById(id, userId)` (ya existe en `models/application.js` y ya filtra por `id` + `user_id`).
+
+**Decisión:** (b).
+
+**Motivo:** coherente con el criterio general del proyecto (entradas 001 y 005) de no confiar únicamente en la existencia de un ID ajeno como comprobación de acceso. A diferencia de `company_id` en Job Offers (donde cualquier `recruiter` puede referenciar cualquier `company`, por diseño — entrada 004), aquí `related_application` sí tiene un dueño individual real, así que el mismo criterio de "un usuario no debe poder referenciar sin permiso un recurso que no es suyo" aplica. La comprobación se hace en el **controller** (`controllers/calendarControllers.js`, función `isRelatedApplicationOwnedByUser`), no en el modelo, para poder reutilizar `getApplicationById` tal cual sin duplicar SQL; se ejecuta antes del `INSERT`/`UPDATE` porque `related_application` es opcional y solo aplica cuando se envía (a diferencia de Interviews, donde `application_id` es obligatorio y por eso ahí sí compensa resolverlo en una sola query `INSERT ... SELECT`).
+
+**Archivos afectados:** `models/calendarEvent.js` (nuevo), `controllers/calendarControllers.js` (nuevo), `validators/calendarEventValidators.js` (nuevo), `routes/calendarRoutes.js` (nuevo), `server.js`.
+
+---
+
+---

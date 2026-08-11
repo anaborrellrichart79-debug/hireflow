@@ -597,9 +597,101 @@ Requerida (verifyToken)
 ---
 
 # CALENDAR
-Estado
-🔴 Futuro
-Integración Google Calendar
+
+CRUD de `calendar_events` (eventos propios del usuario, opcionalmente ligados a una `application`). La integración con Google Calendar sigue siendo futura — esto es solo la representación interna (ver `Database.md`). Todas las rutas requieren `verifyToken`. `calendar_events` tiene `user_id` propio, así que todas las operaciones filtran por `id` + `user_id`, mismo patrón que Applications.
+
+## Crear evento
+POST /calendar
+Body
+{
+    "title": "Entrevista técnica",
+    "description": "Entrevista con el equipo de backend",
+    "event_type": "interview",
+    "related_application": 9
+}
+`title` es obligatorio. `description`, `event_type` (por defecto `"reminder"`) y `related_application` son opcionales.
+
+**`related_application` se valida por propiedad, no solo por existencia** (ver `docs/decisions.md`, entrada 009): si se envía, debe ser el `id` de una `application` del propio usuario — si no existe o pertenece a otro usuario, se rechaza con el mismo mensaje en ambos casos (no revela si el ID existe).
+
+Validación
+`title` obligatorio (máx. 150). `description` opcional, texto libre. `event_type` opcional, debe ser una de `interview`/`job_search`/`reminder`/`meeting`. `related_application` opcional, entero válido.
+
+Respuesta
+201 Created
+{
+    "id": 1,
+    "user_id": 17,
+    "title": "Entrevista técnica",
+    "description": "Entrevista con el equipo de backend",
+    "event_type": "interview",
+    "related_application": 9
+}
+Errores
+400 — validación (ver sección "Errores de validación")
+400 — `related_application` no existe o no es tuya: `{"message":"La postulación indicada (related_application) no existe o no te pertenece"}`
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Obtener todos
+GET /calendar
+Respuesta
+200 OK
+[ ... ]
+Devuelve únicamente los eventos del usuario autenticado.
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Obtener por ID
+GET /calendar/:id
+Respuesta
+200 OK
+{ ... }
+404
+{
+    "message":"Evento no encontrado"
+}
+Se devuelve 404 tanto si el ID no existe como si pertenece a otro usuario.
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Actualizar
+PUT /calendar/:id
+Body (todos los campos opcionales, se actualizan solo los enviados)
+{
+    "title": "Entrevista técnica (reprogramada)"
+}
+Validación
+Mismas reglas que en la creación, todos los campos opcionales.
+Respuesta
+200 OK
+{
+    "message":"Evento actualizado correctamente"
+}
+Errores
+400 — validación, o `related_application` no existe/no es tuya
+404 — evento no encontrado (o de otro usuario)
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Eliminar
+DELETE /calendar/:id
+Respuesta
+200 OK
+{
+    "message":"Evento eliminado correctamente"
+}
+Errores
+404 — evento no encontrado (o de otro usuario)
+Autenticación
+Requerida (verifyToken)
 
 ---
 

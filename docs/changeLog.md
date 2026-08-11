@@ -4,6 +4,21 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.8.0] - Agosto 2026 — CRUD Calendar
+
+## Añadido
+### Calendar
+- `GET /calendar` — listar eventos del usuario autenticado
+- `GET /calendar/:id` — obtener un evento propio
+- `POST /calendar` — crear evento propio (`title` obligatorio, `related_application` opcional)
+- `PUT /calendar/:id` — actualizar evento propio, solo campos enviados
+- `DELETE /calendar/:id` — eliminar evento propio
+- `related_application` (FK opcional hacia `applications`) se valida por propiedad, no solo por existencia — reutiliza `getApplicationById` para impedir enlazar un evento a una `application` de otro usuario (ver `docs/decisions.md`, entrada 009)
+
+Detalle y alternativas consideradas en `docs/decisions.md`, entrada 009.
+
+---
+
 # [0.7.0] - Agosto 2026 — Validaciones de entrada
 
 ## Añadido
@@ -225,6 +240,6 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.8.0)
+# Próxima versión (0.9.0)
 Objetivos:
-- Frontend (ver `FRONTEND_DESIGN.md` y `SPRINT_PLAN_2MESES.md`)
+- A decidir: módulo AI, endpoints pendientes de Users (cambio de contraseña, rol `admin`), o frontend

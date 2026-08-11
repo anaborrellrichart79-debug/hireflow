@@ -4,6 +4,7 @@ import applicationRouter from "./routes/applicationRoutes.js";
 import companyRouter from "./routes/companyRoutes.js";
 import jobOfferRouter from "./routes/jobOfferRoutes.js";
 import interviewRouter from "./routes/interviewRoutes.js";
+import calendarRouter from "./routes/calendarRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import dotenv from "dotenv";
 
@@ -16,6 +17,7 @@ app.use("/api/applications", applicationRouter);
 app.use("/api/companies", companyRouter);
 app.use("/api/jobs", jobOfferRouter);
 app.use("/api/interviews", interviewRouter);
+app.use("/api/calendar", calendarRouter);
 
 //user API routes
 app.use("/api/users", userRoutes);
