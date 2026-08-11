@@ -56,7 +56,7 @@ export const getApplicationById = async (id, userId) => {
     return rows[0];
 };
 
-export const updateApplication = async (id, userId, status, notes) => {
+export const updateApplication = async (id, userId, status, notes = null) => {
     const [result] = await db.execute(
         `
         UPDATE applications

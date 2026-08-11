@@ -4,6 +4,22 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.7.0] - Agosto 2026 — Validaciones de entrada
+
+## Añadido
+- Dependencia `express-validator`
+- `middleware/validate.js` — corta la petición con 400 si falla algún validador
+- `validators/userValidators.js`, `validators/companyValidators.js`, `validators/jobOfferValidators.js`, `validators/applicationValidators.js`, `validators/interviewValidators.js` — reglas de creación y actualización por recurso (obligatorio/opcional, formato, longitud máxima según columnas reales de `shema.sql`, valores de ENUM permitidos)
+- Formato de respuesta de error de validación consistente: `{"message":"Datos de entrada no válidos","errors":[{"field":...,"message":...}]}`
+
+## Corregido
+- `PUT /applications/:id` ahora exige `status` obligatorio, lo que convierte un bug de bind `undefined` (omitir `status` tumbaba la petición con 500 porque `updateApplication` sobreescribe siempre ambos campos) en un 400 claro. `notes = null` añadido como valor por defecto en `updateApplication` (`models/application.js`) para que omitir `notes`, que sí es opcional, tampoco falle
+- Documentación de `POST /applications` corregida: no acepta `status` en el body (el controller siempre fuerza `"wishlist"` al crear), la documentación anterior sugería erróneamente que era configurable
+
+Detalle y alternativas consideradas en `docs/decisions.md`, entrada 008.
+
+---
+
 # [0.6.0] - Agosto 2026 — Middleware de errores centralizado
 
 ## Añadido
@@ -209,6 +225,6 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.7.0)
+# Próxima versión (0.8.0)
 Objetivos:
-- Validaciones de entrada
+- Frontend (ver `FRONTEND_DESIGN.md` y `SPRINT_PLAN_2MESES.md`)

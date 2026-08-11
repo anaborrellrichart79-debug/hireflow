@@ -159,3 +159,28 @@ Cada función de cada controller (25 en total, entre Users, Applications, Compan
 **Archivos afectados:** `middleware/asyncHandler.js` (nuevo), `middleware/errorMiddleware.js` (nuevo), los 5 controllers (`userControllers.js`, `applicationControllers.js`, `companyControllers.js`, `jobOfferControllers.js`, `interviewControllers.js`, simplificados), las 5 rutas (handlers envueltos en `asyncHandler`), `server.js` (registro de `notFound` + `errorHandler` al final, después de todas las rutas).
 
 ---
+
+## 008 — Validaciones de entrada con `express-validator`
+**Fecha:** Agosto 2026
+
+**Problema:**
+Ningún endpoint validaba el `body` antes de llegar al modelo. Los únicos "guardarraíles" existentes eran las constraints de la propia base de datos (`NOT NULL`, `UNIQUE`, `FOREIGN KEY`, `ENUM`), lo que producía errores poco claros (500 genéricos, o el error crudo de mysql2 antes de la entrada 007) ante datos mal formados, y en el caso de `PUT /applications/:id` un bug real: `updateApplication` sobreescribe siempre `status` y `notes` sin comprobar que vengan en el body, así que omitir `status` producía `Bind parameters must not contain undefined` (el mismo tipo de fallo que la entrada 006, no detectado hasta ahora porque nadie había probado ese caso).
+
+**Alternativas consideradas:**
+- (a) Validación manual: un `middleware/validators.js` propio con funciones tipo `isValidEmail`, sin dependencias nuevas.
+- (b) `express-validator`: librería estándar de validación para Express, se define un array de validadores por ruta (`body("email").isEmail()...`) más un middleware genérico que corta con 400 si falla alguno.
+
+**Decisión:** (b), consultado con el usuario dado que suponía añadir la primera dependencia de validación al proyecto.
+
+**Motivo:** menos código repetido por endpoint que escribir cada comprobación a mano, mensajes de error consistentes y estructurados (`{message, errors: [{field, message}]}`), y es la opción más estándar dentro del ecosistema Express — encaja con `validators/` como carpeta ya prevista desde el principio del proyecto (ver `CHANGELOG.md`, v0.1.0, "Nueva estructura: constants/ services/ validators/ utils/") aunque nunca se había creado hasta ahora.
+
+**Diseño:**
+- `middleware/validate.js`: middleware genérico que ejecuta `validationResult(req)` y devuelve 400 si hay errores; se coloca siempre después del array de validadores y antes de `asyncHandler(controller)` en cada ruta.
+- Un archivo de validadores por recurso en `validators/` (`userValidators.js`, `companyValidators.js`, `jobOfferValidators.js`, `applicationValidators.js`, `interviewValidators.js`), con un array de creación y otro de actualización por recurso.
+- Los límites de longitud de los validadores (`isLength({max: ...})`) reflejan los tamaños reales de columna en `shema.sql` (p. ej. `name` de `companies` es `varchar(150)`), para devolver un 400 claro en vez de dejar que MySQL trunque o rechace el dato.
+- `scheduled_date` de Interviews no usa `isISO8601()` (que exige separador `T`) sino una regex propia que acepta tanto `YYYY-MM-DD HH:mm:ss` (formato nativo de MySQL DATETIME, el que ya usaba toda la documentación y las pruebas manuales) como la variante con `T`.
+- **`PUT /applications/:id` ahora exige `status` obligatorio** (uno de los 5 valores del ENUM) precisamente porque el modelo no hace update parcial — esto convierte el bug de bind `undefined` en un 400 claro en vez de un crash. De paso se añadió `notes = null` como valor por defecto en `updateApplication` (`models/application.js`) para que omitir `notes` (que sí es opcional) tampoco produzca el mismo error.
+
+**Archivos afectados:** `middleware/validate.js` (nuevo), `validators/*.js` (5 archivos nuevos), las 5 rutas (validadores añadidos antes de `asyncHandler`), `models/application.js` (`notes = null` por defecto en `updateApplication`), `package.json` (nueva dependencia `express-validator`).
+
+---

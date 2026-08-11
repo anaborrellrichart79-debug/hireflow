@@ -20,10 +20,25 @@ Duración del token: 1 hora (`expiresIn: "1h"` en la generación del JWT). Pasad
 
 # Errores
 
-Todas las respuestas de error tienen la forma `{"message": "..."}`. Manejo centralizado (`middleware/errorMiddleware.js`, ver `docs/decisions.md`, entrada 007):
+Todas las respuestas de error tienen al menos `{"message": "..."}`. Manejo centralizado (`middleware/errorMiddleware.js`, ver `docs/decisions.md`, entrada 007):
 - Cualquier ruta no definida devuelve `404 {"message":"Ruta no encontrada: <método> <ruta>"}`.
 - Los errores esperados (validación, duplicados, IDOR bloqueado, FK inválida) devuelven el mensaje específico documentado en cada endpoint, con status < 500.
 - Cualquier error no controlado explícitamente devuelve siempre `500 {"message":"Error interno del servidor"}` — nunca se expone el mensaje interno del error ni detalles del driver de MySQL al cliente; el detalle completo se registra solo en el log del servidor.
+
+## Errores de validación
+
+Todos los endpoints con body (`POST`/`PUT`) validan la entrada antes de llegar al controller (`express-validator`, ver `docs/decisions.md`, entrada 008). Si algún campo no cumple las reglas, la respuesta es siempre:
+```
+400 Bad Request
+{
+    "message": "Datos de entrada no válidos",
+    "errors": [
+        { "field": "email", "message": "email no es válido" },
+        { "field": "password", "message": "password debe tener al menos 6 caracteres" }
+    ]
+}
+```
+Las reglas de cada campo (obligatorio/opcional, tipo, longitud máxima, valores permitidos) están documentadas en cada endpoint más abajo.
 
 ---
 
@@ -38,6 +53,8 @@ Body
     "password":"123456",
     "role":"candidate"
 }
+Validación
+`name` obligatorio (máx. 100). `email` obligatorio, formato válido (máx. 150). `password` obligatorio, mínimo 6 caracteres. `role` opcional, debe ser `candidate` o `recruiter` si se envía.
 Respuesta
 201 Created
 {
@@ -47,6 +64,7 @@ Respuesta
     "role": "candidate"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — email ya registrado: `{"message":"El email ya está registrado"}`
 Autenticación
 No requerida
@@ -63,6 +81,8 @@ Body
     "email": "ana@hireflow.com",
     "password": "123456"
 }
+Validación
+`email` y `password` obligatorios; `email` debe tener formato válido.
 Respuesta
 200 OK
 {
@@ -70,6 +90,7 @@ Respuesta
     "token": "JWT..."
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — usuario no encontrado: `{"message":"Usuario no encontrado"}`
 400 — contraseña incorrecta: `{"message":"contraseña incorrecta"}`
 500 — error interno (ej. JWT_SECRET no configurado en .env)
@@ -141,12 +162,16 @@ Body (todos los campos opcionales, se actualizan solo los enviados)
 
 **Fuera de alcance de este endpoint (decisión, ver `docs/decisions.md`):** cambio de `email` y `password` no se gestionan aquí — quedan para un endpoint dedicado más adelante (`PUT /users/me/password`, ya previsto como pendiente en `roadmap.md` bajo "Cambio de contraseña"), porque cambiar email/password implica validaciones adicionales (verificar contraseña actual, revalidar unicidad de email) que no queremos mezclar con una actualización de perfil simple.
 
+Validación
+Todos los campos opcionales, pero si se envían: `name` no puede ser cadena vacía (máx. 100). `sector` (máx. 100), `phone` (máx. 30) y `location` (máx. 120) deben ser texto. `profile_visible` debe ser `true`/`false`.
+
 Respuesta
 200 OK
 {
     "message": "Perfil actualizado correctamente"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — ningún campo válido enviado
 Autenticación
 Requerida (verifyToken) — solo puede actualizar el propio perfil, no admite `:id`.
@@ -179,10 +204,12 @@ POST /applications
 Body
 {
     "job_offer_id": 1,
-    "notes": "Oferta interesante",
-    "status": "wishlist"
+    "notes": "Oferta interesante"
 }
-`status` es opcional, por defecto `"wishlist"`.
+Ambos campos son opcionales. **`status` no se acepta en la creación** — el controller fija siempre `"wishlist"`, ignorando cualquier valor de `status` que se envíe en el body (por diseño: toda postulación nace en `wishlist`, y solo avanza de estado vía `PUT /applications/:id`).
+
+Validación
+`job_offer_id` opcional, si se envía debe ser un entero válido. `notes` opcional, texto libre.
 
 Respuesta
 201 Created
@@ -195,9 +222,10 @@ Respuesta
     "applied_date": null
 }
 
-**Nota sobre `applied_date`:** solo se rellena automáticamente si el `status` de creación ya es `"applied"`. Si es `"wishlist"` (o cualquier otro), queda `null`.
+**Nota sobre `applied_date`:** siempre `null` al crear, ya que el status de creación siempre es `"wishlist"`. Se rellena más adelante, ver nota en `PUT /applications/:id`.
 
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — `job_offer_id` no existe (constraint FK)
 
 ---
@@ -231,11 +259,16 @@ Body
     "status":"applied",
     "notes":"Entrevista el viernes"
 }
+Validación
+**`status` es obligatorio** (uno de: `wishlist`, `applied`, `interview`, `offer`, `rejected`) — a diferencia del resto de recursos, `updateApplication` sobreescribe siempre ambos campos, no hace update parcial, así que omitir `status` está bloqueado por validación (antes de la validación esto producía un error 500, ver `docs/decisions.md`, entrada 008). `notes` es opcional.
 Respuesta
 200 OK
 {
     "message":"Postulación actualizada correctamente"
 }
+Errores
+400 — validación (ver sección "Errores de validación")
+404 — postulación no encontrada (o de otro usuario)
 
 **Nota sobre `applied_date`:** si el `status` enviado es `"applied"` y la postulación todavía no tenía `applied_date`, se rellena automáticamente con la fecha actual. Si ya tenía fecha (por ejemplo, viene de `interview` de vuelta a `applied`), no se sobrescribe.
 
@@ -273,6 +306,9 @@ Body
 
 `created_by_user` **no** se acepta del body — se fija siempre al `id` del usuario autenticado (ver `docs/decisions.md`, entrada 004).
 
+Validación
+`company_id` obligatorio, entero válido. `title` obligatorio (máx. 150). `salary` (máx. 100), `location` (máx. 120), `employment_type` (máx. 50) opcionales. `source` opcional, debe ser una de `internal`/`linkedin`/`api`. `external_url` opcional, debe ser una URL válida si se envía.
+
 Respuesta
 201 Created
 {
@@ -283,6 +319,7 @@ Respuesta
     "created_by_user": 7
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — `company_id` no existe: `{"message":"La empresa indicada (company_id) no existe"}`
 403 — autenticado pero no es `recruiter`
 Autenticación
@@ -321,12 +358,16 @@ Body (todos los campos opcionales, se actualizan solo los enviados)
     "salary": "40000-50000"
 }
 `created_by_user` no es actualizable — no se puede reasignar la autoría de una oferta.
+
+Validación
+Mismas reglas que en la creación, pero todos los campos opcionales (solo se validan los que se envían).
 Respuesta
 200 OK
 {
     "message":"Oferta actualizada correctamente"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — ningún campo válido enviado, o `company_id` no existe
 404 — oferta no encontrada
 403 — autenticado pero no es `recruiter`
@@ -367,6 +408,9 @@ Body
 }
 Solo `name` y `email` son obligatorios (constraint de la BD), el resto es opcional.
 
+Validación
+`name` obligatorio (máx. 150). `email` obligatorio, formato válido (máx. 150). `industry` (máx. 120), `location` (máx. 120), `phone` (máx. 30) opcionales.
+
 Respuesta
 201 Created
 {
@@ -379,6 +423,7 @@ Respuesta
     "phone": "600000000"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — email ya registrado: `{"message":"El email de la empresa ya está registrado"}`
 403 — autenticado pero no es `recruiter`: `{"message":"No tienes permisos para realizar esta acción"}`
 Autenticación
@@ -417,12 +462,15 @@ Body (todos los campos opcionales, se actualizan solo los enviados)
 {
     "location": "Barcelona"
 }
+Validación
+Mismas reglas que en la creación, pero todos los campos opcionales (solo se validan los que se envían).
 Respuesta
 200 OK
 {
     "message":"Empresa actualizada correctamente"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — ningún campo válido enviado, o email duplicado
 404 — empresa no encontrada
 403 — autenticado pero no es `recruiter`
@@ -460,7 +508,10 @@ Body
     "location": "Oficina",
     "notes": "Primera entrevista"
 }
-`application_id` y `scheduled_date` son obligatorios. `interview_type_id` es opcional (catálogo `interview_types`, actualmente sin datos — ver nota en `docs/decisions.md`, entrada 005).
+`application_id` y `scheduled_date` son obligatorios. `interview_type_id` es opcional (catálogo `interview_types`, poblado con 14 valores desde agosto 2026, ver `docs/decisions.md`, entrada 006).
+
+Validación
+`application_id` obligatorio, entero válido. `scheduled_date` obligatorio, formato `YYYY-MM-DD HH:mm:ss` (o con `T` en vez de espacio). `interview_type_id` opcional, entero válido. `location` opcional (máx. 150). `notes` opcional, texto libre.
 
 Respuesta
 201 Created
@@ -473,6 +524,7 @@ Respuesta
     "notes": "Primera entrevista"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 404 — `application_id` no existe o pertenece a otro usuario: `{"message":"Postulación no encontrada"}` (no revela si el ID existe pero es ajeno)
 400 — `interview_type_id` no existe (constraint FK)
 Autenticación
@@ -513,12 +565,16 @@ Body (todos los campos opcionales, se actualizan solo los enviados)
     "location": "Oficina Central"
 }
 `application_id` no es actualizable — no se reasigna una entrevista a otra postulación desde un update simple.
+
+Validación
+Mismas reglas que en la creación (salvo `application_id`, que no aplica), todos los campos opcionales.
 Respuesta
 200 OK
 {
     "message":"Entrevista actualizada correctamente"
 }
 Errores
+400 — validación (ver sección "Errores de validación")
 400 — ningún campo válido enviado, o `interview_type_id` no existe
 404 — entrevista no encontrada (o de otro usuario)
 Autenticación

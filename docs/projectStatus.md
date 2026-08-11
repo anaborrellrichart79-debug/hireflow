@@ -32,6 +32,17 @@ Estado
 
 Decisión de arquitectura: ver `docs/decisions.md`, entrada 007.
 ---
+## Validaciones de entrada
+Estado
+🟢 Completado
+✔ Dependencia `express-validator` añadida
+✔ `middleware/validate.js` + un archivo de validadores por recurso en `validators/` (Users, Companies, Job Offers, Applications, Interviews)
+✔ Reglas de creación y actualización: obligatorio/opcional, formato (email, entero, URL, fecha), longitud máxima según columnas reales de la BD, valores de ENUM permitidos
+✔ Fix de paso: `PUT /applications/:id` exige `status` obligatorio, lo que bloquea con 400 un bug de bind `undefined` que antes producía un 500
+✔ Tests manuales verificados en los 5 recursos (campos obligatorios, formatos inválidos, límites de longitud, casos válidos)
+
+Decisión de arquitectura: ver `docs/decisions.md`, entrada 008.
+---
 ## Users
 Estado
 🟢 CRUD Completo
@@ -171,7 +182,9 @@ Implementar:
 ✔ Fix bug `createApplication` (bind parameters undefined) — completo
 ✔ Fix `database/seed.sql` de `interview_types` — completo
 ✔ Middleware de errores centralizado — completo
-⬜ Validaciones de entrada — siguiente paso
+✔ Validaciones de entrada — completo
+
+Con esto se completa el backend previsto para el MVP (Users, Companies, Job Offers, Applications, Interviews, manejo de errores y validaciones). Quedan fuera del MVP actual: Calendar y AI (ver más abajo), y el frontend completo.
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -186,7 +199,7 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-███████████████░░░░░ 75%
+█████████████████░░░ 85% (MVP completo; Calendar y AI quedan fuera de este sprint)
 Frontend
 ░░░░░░░░░░░░░░░░░░ 0% (diseño cerrado)
 Base de datos
@@ -194,4 +207,4 @@ Base de datos
 Documentación
 ████████████████░░ 90%
 Proyecto completo
-██████████░░░░░░░░░░ 46%
+███████████░░░░░░░░░ 52%
