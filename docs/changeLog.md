@@ -4,6 +4,17 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.9.1] - Agosto 2026 — Documentación de diseño de frontend
+
+## Añadido
+- Creado `docs/FRONTEND_DESIGN.md` a partir de 9 capturas de Canva y la descripción del usuario: principio de diseño (una interfaz para ambos roles), paleta/estilo visual observado, layout base, inventario de 8 pantallas (objetivo, flujo, componentes, datos, endpoints por pantalla), mapa de componentes y pendientes de definir antes de implementar
+
+## Documentado (hallazgos, sin corregir en este cambio)
+- `AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md` y `SPRINT_PLAN_2MESES.md` están referenciados en varios documentos del proyecto pero **no existen en el repositorio** (`projectStatus.md` los tenía marcados como 🟢 completados incorrectamente, corregido a 🔴)
+- Pendientes detectados al mapear el diseño de frontend contra el backend real: CRUD de `user_profiles` (no existe), columna `urgency` en `job_offers` (no existe en el schema), endpoint de "candidatos que encajan con una oferta" (no existe), y decisión pendiente sobre si el Asistente IA (pantalla 8) se queda como consulta de catálogo o se amplía a un LLM real con conversación libre
+
+---
+
 # [0.9.0] - Agosto 2026 — Módulo AI (basado en catálogo) — backend del MVP cerrado
 
 ## Añadido

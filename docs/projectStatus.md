@@ -170,9 +170,9 @@ Frontend
 README
 🟢
 Architecture
-🟢
+🔴 Referenciado como `architecture.md` (ver `docs/decisions.md`), pero no existe en el repositorio (comprobado agosto 2026)
 Roadmap
-🟢
+🔴 Referenciado como `roadmap.md` (ver `docs/api.md`), pero no existe en el repositorio (comprobado agosto 2026)
 Changelog
 🟢
 API
@@ -183,10 +183,12 @@ Project Status
 🟢
 Decisions
 🟢 (creado agosto 2026)
+AI Instructions
+🔴 Referenciado como `AI_INSTRUCTIONS.md` (la propia regla que `docs/decisions.md` y `docs/FRONTEND_DESIGN.md` citan como motivo de su existencia), pero no existe en el repositorio (comprobado agosto 2026)
 Frontend Design
-🔴 Referenciado como `FRONTEND_DESIGN.md` en varios documentos, pero el archivo no existe en el repositorio (comprobado agosto 2026, tampoco está en el historial de git)
+🟢 (creado agosto 2026, a partir de 9 capturas de Canva + descripción del usuario)
 Sprint Plan (2 meses)
-🔴 Referenciado como `SPRINT_PLAN_2MESES.md`, mismo caso — no existe en el repositorio
+🔴 Referenciado como `SPRINT_PLAN_2MESES.md` — no existe en el repositorio
 ---
 # Próximo objetivo
 Sprint actual (Semana 1 → Semana 2 del plan de 2 meses)
@@ -220,10 +222,10 @@ Un usuario podrá:
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, errores, validaciones)
 Frontend
-░░░░░░░░░░░░░░░░░░ 0% (el diseño referenciado como "cerrado" en `FRONTEND_DESIGN.md` no existe en el repositorio, ver nota en Documentación más arriba)
+░░░░░░░░░░░░░░░░░░ 0% (diseño ya cerrado en `FRONTEND_DESIGN.md`, agosto 2026 — implementación sin empezar)
 Base de datos
 ██████████████░░░ 75%
 Documentación
-██████████████░░░░░░ 70% (bajado: 2 documentos referenciados no existen — ver Frontend Design / Sprint Plan arriba)
+█████████████░░░░░░░ 65% (Frontend Design creado; siguen sin existir AI Instructions, Architecture, Roadmap y Sprint Plan — ver tabla de arriba)
 Proyecto completo
-█████████████░░░░░░░ 62% (backend cerrado; queda pendiente sobre todo el frontend)
+█████████████░░░░░░░ 63% (backend cerrado, diseño de frontend cerrado; queda pendiente la implementación del frontend)
