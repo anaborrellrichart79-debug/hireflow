@@ -438,12 +438,96 @@ Requerida (verifyToken) + role `recruiter`
 ---
 
 # INTERVIEWS
-Estado
-🔴 Pendiente (tabla ya existe en BD, falta CRUD)
+
+Todas las rutas protegidas mediante `verifyToken`. `interviews` no tiene `user_id` propio — su dueño es el usuario de la `application` a la que pertenece. Todas las operaciones filtran siempre por propiedad heredada de `applications` en la propia query SQL (`JOIN`), nunca en el controller tras leer el registro (mismo patrón que Applications, ver `docs/decisions.md`, entrada 005).
+
+## Crear entrevista
 POST /interviews
+Body
+{
+    "application_id": 5,
+    "interview_type_id": null,
+    "scheduled_date": "2026-09-01 10:00:00",
+    "location": "Oficina",
+    "notes": "Primera entrevista"
+}
+`application_id` y `scheduled_date` son obligatorios. `interview_type_id` es opcional (catálogo `interview_types`, actualmente sin datos — ver nota en `docs/decisions.md`, entrada 005).
+
+Respuesta
+201 Created
+{
+    "id": 1,
+    "application_id": 5,
+    "interview_type_id": null,
+    "scheduled_date": "2026-09-01 10:00:00",
+    "location": "Oficina",
+    "notes": "Primera entrevista"
+}
+Errores
+404 — `application_id` no existe o pertenece a otro usuario: `{"message":"Postulación no encontrada"}` (no revela si el ID existe pero es ajeno)
+400 — `interview_type_id` no existe (constraint FK)
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Obtener todas
 GET /interviews
+Respuesta
+200 OK
+[ ... ]
+Devuelve únicamente las entrevistas de postulaciones del usuario autenticado, ordenadas por `scheduled_date` ascendente.
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Obtener por ID
+GET /interviews/:id
+Respuesta
+200 OK
+{ ... }
+404
+{
+    "message":"Entrevista no encontrada"
+}
+Se devuelve 404 tanto si el ID no existe como si pertenece a otro usuario.
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Actualizar
 PUT /interviews/:id
+Body (todos los campos opcionales, se actualizan solo los enviados)
+{
+    "location": "Oficina Central"
+}
+`application_id` no es actualizable — no se reasigna una entrevista a otra postulación desde un update simple.
+Respuesta
+200 OK
+{
+    "message":"Entrevista actualizada correctamente"
+}
+Errores
+400 — ningún campo válido enviado, o `interview_type_id` no existe
+404 — entrevista no encontrada (o de otro usuario)
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Eliminar
 DELETE /interviews/:id
+Respuesta
+200 OK
+{
+    "message":"Entrevista eliminada correctamente"
+}
+Errores
+404 — entrevista no encontrada (o de otro usuario)
+Autenticación
+Requerida (verifyToken)
 
 ---
 

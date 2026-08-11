@@ -4,6 +4,22 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.5.0] - Agosto 2026 — CRUD Interviews
+
+## Añadido
+### Interviews
+- `GET /interviews` — listar entrevistas del usuario autenticado (vía `JOIN` con `applications`)
+- `GET /interviews/:id` — obtener una entrevista propia
+- `POST /interviews` — crear entrevista sobre una `application` propia; usa `INSERT ... SELECT` para que la propiedad se compruebe en la propia query, no en el controller
+- `PUT /interviews/:id` — actualizar entrevista propia, solo campos enviados (`application_id` no reasignable)
+- `DELETE /interviews/:id` — eliminar entrevista propia
+- Aplica el mismo patrón de filtrado por propiedad en SQL que Applications (ver `docs/decisions.md`, entrada 005), ya que `interviews` no tiene `user_id` propio — hereda el dueño de su `application`
+
+## Hallazgo (sin corregir en este cambio)
+- `interview_types` está vacía en la BD real: `database/seed.sql` usa columnas `name`/`description` que no existen en la tabla (el esquema real usa `name_interview_types`/`description_interview_types`). No bloquea Interviews porque `interview_type_id` es opcional.
+
+---
+
 # [0.4.0] - Agosto 2026 — CRUD Job Offers
 
 ## Añadido
@@ -166,8 +182,9 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.5.0)
+# Próxima versión (0.6.0)
 Objetivos:
-- CRUD Interviews
-- Validaciones
-- Manejo centralizado de errores
+- Middleware de errores centralizado
+- Corregir bug: `createApplication` (`models/application.js`) falla con "Bind parameters must not contain undefined" si se omiten `job_offer_id` o `notes` en el body en vez de enviarlos como `null` explícito (los modelos nuevos de Companies/Job Offers/Interviews ya usan valores por defecto para evitar este problema)
+- Corregir `database/seed.sql` (columnas de `interview_types` no coinciden con el esquema real)
+- Validaciones de entrada

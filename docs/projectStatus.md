@@ -72,7 +72,17 @@ Estado
 ---
 ## Interviews
 Estado
-🔴 No iniciado (tabla ya existe en BD, falta CRUD)
+🟢 CRUD Completo
+✔ Crear (sobre application propia, `INSERT ... SELECT` valida propiedad en la query)
+✔ Obtener todas (propias, vía JOIN con applications)
+✔ Obtener por ID (propia)
+✔ Actualizar (propia)
+✔ Eliminar (propia)
+✔ Tests manuales verificados (curl: IDOR bloqueado con dos candidatos distintos en las 4 operaciones)
+
+Decisión de arquitectura: `interviews` no tiene `user_id` propio, hereda el dueño de su `application`; filtrado por propiedad vía JOIN en la propia query SQL, mismo patrón que Applications (ver `docs/decisions.md`, entrada 005).
+
+Hallazgo pendiente (no bloqueante): `interview_types` está vacía en la BD real, `seed.sql` usa nombres de columna incorrectos.
 ---
 ## Calendar
 Estado
@@ -145,8 +155,9 @@ Implementar:
 ✔ Fix seguridad IDOR en Applications — completo
 ✔ CRUD Companies — completo
 ✔ CRUD Job Offers — completo
-⬜ CRUD Interviews — siguiente paso
-⬜ Middleware de errores centralizado
+✔ CRUD Interviews — completo
+⬜ Middleware de errores centralizado — siguiente paso
+⬜ Bug menor: `createApplication` falla si se omiten `job_offer_id`/`notes` en vez de enviarlos como `null`
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -161,7 +172,7 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-████████████░░░░░░░░ 60%
+██████████████░░░░░░ 70%
 Frontend
 ░░░░░░░░░░░░░░░░░░ 0% (diseño cerrado)
 Base de datos
@@ -169,4 +180,4 @@ Base de datos
 Documentación
 ████████████████░░ 90%
 Proyecto completo
-██████████░░░░░░░░░░ 40%
+█████████░░░░░░░░░░░ 44%

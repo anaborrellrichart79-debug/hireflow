@@ -3,6 +3,7 @@ import userRoutes from "./routes/userRoutes.js";
 import applicationRouter from "./routes/applicationRoutes.js";
 import companyRouter from "./routes/companyRoutes.js";
 import jobOfferRouter from "./routes/jobOfferRoutes.js";
+import interviewRouter from "./routes/interviewRoutes.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use("/api/applications", applicationRouter);
 app.use("/api/companies", companyRouter);
 app.use("/api/jobs", jobOfferRouter);
+app.use("/api/interviews", interviewRouter);
 
 //user API routes
 app.use("/api/users", userRoutes);
