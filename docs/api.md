@@ -696,11 +696,113 @@ Requerida (verifyToken)
 ---
 
 # AI
-Estado
-🔴 Futuro
-POST /ai/cv-review
-POST /ai/interview-feedback
-POST /ai/interview-questions
-POST /ai/job-match
 
-Ver `FRONTEND_DESIGN.md` para el diseño de comportamiento condicionado por rol (candidate/company) de estos 4 endpoints — no se crean rutas separadas por rol.
+**Importante:** estos 4 endpoints son consultas sobre las tablas catálogo (`ai_interview_questions`, `ai_resume_guides`, `ai_skill_improvement`), **no** llamadas a un LLM externo — no hay ninguna API key de IA configurada en el proyecto (ver `docs/decisions.md`, entrada 010). Todas las rutas requieren `verifyToken`.
+
+## Revisión de CV
+POST /ai/cv-review
+Body
+{
+    "industry": "startups",
+    "company_type": "programación, marketing, Data Science, Fintech"
+}
+`industry` es obligatorio. `company_type` es opcional — si se envía, se busca coincidencia exacta de ambos; si no hay resultados (o no se envía `industry` reconocido), se devuelven las guías genéricas (`industry: "none"`).
+
+Validación
+`industry` obligatorio (máx. 120). `company_type` opcional (máx. 120).
+
+Respuesta
+200 OK
+{
+    "industry": "startups",
+    "company_type": null,
+    "guides": [ { "id": 4, "industry": "startups", "company_type": "...", "recomendations": "...", "created_at": "..." } ]
+}
+Errores
+400 — validación (ver sección "Errores de validación")
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Preguntas de entrevista
+POST /ai/interview-questions
+Body
+{
+    "category": "technical",
+    "difficulty": "intermediate",
+    "limit": 5
+}
+Todos los campos opcionales. Sin filtros, devuelve una muestra aleatoria del catálogo completo.
+
+Validación
+`category` opcional, una de `personal`/`technical`/`behavioral`/`stress`/`culture_fit`. `difficulty` opcional, una de `basic`/`intermediate`/`advanced`. `limit` opcional, entero entre 1 y 50 (por defecto 10).
+
+Respuesta
+200 OK
+{
+    "count": 5,
+    "questions": [ { "id": 8, "question": "...", "category": "technical", "difficulty": "intermediate", "example_answer": null, "created_at": "..." } ]
+}
+Errores
+400 — validación (ver sección "Errores de validación")
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Feedback / consejos de mejora
+POST /ai/interview-feedback
+Body
+{
+    "skills": ["liderazgo", "comunicación"]
+}
+Busca en `ai_skill_improvement` coincidencias parciales (`LIKE`) para cada skill indicada. Una skill sin coincidencia en el catálogo simplemente no aparece en la respuesta (no es un error).
+
+Validación
+`skills` obligatorio, array con al menos 1 elemento; cada elemento debe ser texto no vacío.
+
+Respuesta
+200 OK
+{
+    "requested_skills": ["liderazgo", "comunicación"],
+    "suggestions": [ { "id": 6, "skill_name": "Liderazgo e Influencia", "description": "...", "improvement_methods": "...", "resources": "...", "created_at": "..." } ]
+}
+Errores
+400 — validación (ver sección "Errores de validación")
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Match con una oferta
+POST /ai/job-match
+Body
+{
+    "job_offer_id": 10,
+    "skills": "Node.js, MySQL, Docker"
+}
+Compara el texto de `skills_required` de la oferta indicada contra las `skills` que envía el candidato (texto libre), por solapamiento de palabras — no lee de un perfil guardado, ver nota abajo.
+
+**Nota:** no se compara contra `user_profiles` porque ese recurso todavía no tiene CRUD implementado (ver `docs/decisions.md`, entrada 010) — las `skills` se envían siempre en el body. Cuando exista el CRUD de perfil, este endpoint podrá leerlas de ahí.
+
+**Limitación conocida:** el matching es solo solapamiento de palabras, sin detectar negación ni contexto — escribir "no tengo experiencia en Docker" cuenta "docker" como coincidencia igualmente. Es una primera versión a ampliar más adelante.
+
+Validación
+`job_offer_id` obligatorio, entero válido. `skills` obligatorio, texto (máx. 2000 caracteres).
+
+Respuesta
+200 OK
+{
+    "job_offer_id": 10,
+    "score": 75,
+    "matched_skills": ["node.js", "mysql", "docker"],
+    "missing_skills": ["liderazgo"],
+    "improvement_suggestions": [ { "id": 6, "skill_name": "Liderazgo e Influencia", "...": "..." } ]
+}
+`score` es el porcentaje (0-100) de palabras de `skills_required` encontradas en las `skills` del candidato; `null` si la oferta no tiene `skills_required`.
+Errores
+400 — validación (ver sección "Errores de validación")
+404 — oferta no encontrada: `{"message":"Oferta no encontrada"}`
+Autenticación
+Requerida (verifyToken)

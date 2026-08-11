@@ -203,4 +203,24 @@ Ningún endpoint validaba el `body` antes de llegar al modelo. Los únicos "guar
 
 ---
 
+## 010 — Módulo AI: consultas sobre catálogo, sin LLM real
+**Fecha:** Agosto 2026
+
+**Problema:**
+`api.md` preveía 4 endpoints de IA (`cv-review`, `interview-feedback`, `interview-questions`, `job-match`) sin especificar su implementación. El proyecto no tiene ninguna API key de LLM configurada en `.env`, y las 3 tablas catálogo (`ai_interview_questions`, `ai_resume_guides`, `ai_skill_improvement`) ya existían en el schema pero solo `ai_interview_questions` tenía datos (sembrada por accidente al corregir `interview_types`, ver entrada 006) — `ai_resume_guides` y `ai_skill_improvement` estaban vacías por el mismo motivo: el `seed.sql` original se dividía mal en sentencias por culpa de puntos y coma dentro del propio texto de las descripciones (p. ej. "No resumas tanto; en este sector...").
+
+**Decisión (consultada y aprobada con el usuario):** los 4 endpoints son consultas sobre las 3 tablas catálogo, sin llamar a ningún LLM externo:
+- `cv-review` → `ai_resume_guides`, filtrando por `industry` (+ `company_type` opcional); si no hay coincidencia exacta, cae a las guías genéricas (`industry = 'none'`).
+- `interview-questions` → `ai_interview_questions`, filtrando por `category`/`difficulty` opcionales, selección aleatoria (`ORDER BY RAND()`) limitada por `limit` (1-50, por defecto 10).
+- `interview-feedback` → `ai_skill_improvement`, buscando por una lista de `skills` (array de texto) enviada en el body, con `LIKE` sobre `skill_name`.
+- `job-match` → compara `job_offers.skills_required` (texto libre) contra las `skills` que envía el candidato en el body, tokenizando ambos textos y calculando un porcentaje de solapamiento; las skills que faltan se cruzan con `ai_skill_improvement` para sugerir mejoras.
+
+**Desviación respecto a la propuesta original — `job-match` no lee de `user_profiles`:** la propuesta inicial planteaba comparar contra `user_profiles.skills` (perfil guardado del candidato), pero `user_profiles` no tiene ningún modelo ni endpoint implementado todavía (tabla existe en el schema, cero código backend) — construir ese acceso de lectura solo para este endpoint habría sido una implementación parcial e inconsistente de un recurso que no se ha diseñado como tal. En su lugar, `job-match` recibe las `skills` directamente en el body de la petición. Cuando se implemente el CRUD de `user_profiles`, este endpoint puede pasar a leerlas de ahí en vez de exigirlas en el body — no es un cambio de contrato grave (se podría aceptar `skills` opcional en el body y usarlo solo si no hay perfil guardado).
+
+**Limitación conocida y aceptada:** el matching de `job-match` es solapamiento de palabras (tokeniza y compara conjuntos), sin analizar negación ni contexto — si el candidato escribe "no tengo experiencia en Docker", la palabra "docker" igualmente cuenta como match. Es una limitación explícita de un cálculo local sin IA real, aceptada porque el propio usuario planteó esta primera versión como una base a ampliar más adelante ("ahora unas cuantas [respuestas] y luego, después del frontend, la ampliamos").
+
+**Motivo general:** confirma en código lo que ya sugería el propio schema (tablas catálogo, no tablas de sesiones/prompts/respuestas de un LLM): la "IA" de este proyecto, en esta fase, es una capa de recomendaciones basada en contenido curado a mano en la BD, no generación de texto en tiempo real. Es coherente con el enfoque general del proyecto hasta ahora (sin dependencias de servicios externos de pago).
+
+**Archivos afectados:** `models/ai.js` (nuevo), `controllers/aiControllers.js` (nuevo), `validators/aiValidators.js` (nuevo), `routes/aiRoutes.js` (nuevo), `server.js`, `database/seed.sql` (poblada correctamente en la BD real: `ai_resume_guides` 0→7 filas, `ai_skill_improvement` 0→12 filas).
+
 ---

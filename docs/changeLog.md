@@ -4,6 +4,24 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.9.0] - Agosto 2026 — Módulo AI (basado en catálogo) — backend del MVP cerrado
+
+## Añadido
+### AI
+- `POST /ai/cv-review` — recomendaciones de `ai_resume_guides` por `industry`/`company_type`, con fallback a guías genéricas
+- `POST /ai/interview-questions` — preguntas de `ai_interview_questions` filtradas por `category`/`difficulty`, selección aleatoria con `limit`
+- `POST /ai/interview-feedback` — consejos de `ai_skill_improvement` para una lista de `skills`
+- `POST /ai/job-match` — compara `skills_required` de una oferta contra las `skills` enviadas por el candidato (solapamiento de palabras), sugiere mejoras para las que faltan
+
+**Importante:** ninguno de los 4 endpoints llama a un LLM externo — son consultas sobre las 3 tablas catálogo ya existentes en el schema. Detalle y limitaciones conocidas en `docs/decisions.md`, entrada 010.
+
+## Corregido
+- `database/seed.sql`: `ai_resume_guides` y `ai_skill_improvement` estaban vacías en la BD real por el mismo tipo de fallo de división de sentencias que afectó a `interview_types` (punto y coma dentro del propio texto de las descripciones). Pobladas correctamente: `ai_resume_guides` 0→7 filas, `ai_skill_improvement` 0→12 filas
+
+Con este cambio se completa el backend previsto para el MVP.
+
+---
+
 # [0.8.0] - Agosto 2026 — CRUD Calendar
 
 ## Añadido
@@ -240,6 +258,7 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.9.0)
+# Próxima versión (1.0.0)
 Objetivos:
-- A decidir: módulo AI, endpoints pendientes de Users (cambio de contraseña, rol `admin`), o frontend
+- Frontend (backend del MVP completo)
+- Pendiente para más adelante: CRUD de `user_profiles`, cambio de contraseña, rol `admin`, ampliar contenido de las tablas catálogo de AI

@@ -122,7 +122,15 @@ Decisión de arquitectura: `related_application` se valida por propiedad reutili
 ---
 ## AI
 Estado
-🔴 No iniciado
+🟢 Completado (basado en catálogo, primera versión)
+✔ `POST /ai/cv-review` — recomendaciones de `ai_resume_guides` por industria (con fallback genérico)
+✔ `POST /ai/interview-questions` — preguntas de `ai_interview_questions` filtradas y aleatorias
+✔ `POST /ai/interview-feedback` — consejos de `ai_skill_improvement` por skill
+✔ `POST /ai/job-match` — compara `skills_required` de una oferta contra las skills del candidato (texto libre en el body, no lee `user_profiles` porque ese CRUD no existe aún)
+✔ Fix: `ai_resume_guides` y `ai_skill_improvement` estaban vacías en la BD real (mismo tipo de fallo que `interview_types`), pobladas correctamente (7 y 12 filas)
+✔ Tests manuales verificados (los 4 endpoints, casos válidos + validación + 404)
+
+**Importante:** no usa ningún LLM real — son consultas sobre las 3 tablas catálogo ya existentes. Decisión, alternativas y limitaciones conocidas (matching de `job-match` sin detectar negación) en `docs/decisions.md`, entrada 010. Pendiente para más adelante: ampliar el contenido de las 3 tablas ("ahora unas cuantas, luego se amplía tras el frontend", como pidió el usuario).
 ---
 # Frontend
 Estado general
@@ -193,8 +201,9 @@ Implementar:
 ✔ Middleware de errores centralizado — completo
 ✔ Validaciones de entrada — completo
 ✔ CRUD Calendar — completo
+✔ Módulo AI (basado en catálogo) — completo
 
-Con esto se completa el backend previsto para el MVP (Users, Companies, Job Offers, Applications, Interviews, Calendar, manejo de errores y validaciones). Queda fuera del alcance actual: módulo AI, y el frontend completo.
+**Backend cerrado.** Con esto se completa todo lo previsto para el backend del MVP (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores y validaciones). Siguiente paso: frontend (ver nota en Documentación sobre `FRONTEND_DESIGN.md`, que no existe todavía y habrá que crear o rehacer).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -209,7 +218,7 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-██████████████████░░ 90% (MVP completo incl. Calendar; solo queda AI fuera de alcance)
+████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, errores, validaciones)
 Frontend
 ░░░░░░░░░░░░░░░░░░ 0% (el diseño referenciado como "cerrado" en `FRONTEND_DESIGN.md` no existe en el repositorio, ver nota en Documentación más arriba)
 Base de datos
@@ -217,4 +226,4 @@ Base de datos
 Documentación
 ██████████████░░░░░░ 70% (bajado: 2 documentos referenciados no existen — ver Frontend Design / Sprint Plan arriba)
 Proyecto completo
-███████████░░░░░░░░░ 54%
+█████████████░░░░░░░ 62% (backend cerrado; queda pendiente sobre todo el frontend)
