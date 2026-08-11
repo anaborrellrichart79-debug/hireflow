@@ -36,13 +36,15 @@ Decisión de arquitectura: se usa `/users/me` en vez de `/users/:id` para evitar
 ---
 ## Companies
 Estado
-🔴 Pendiente
-Modelo
-Controlador
-Rutas
-CRUD
+🟢 CRUD Completo
+✔ Crear (solo `recruiter`)
+✔ Obtener todas
+✔ Obtener por ID
+✔ Actualizar (solo `recruiter`)
+✔ Eliminar (solo `recruiter`)
+✔ Tests manuales verificados (curl: permisos por rol, email duplicado, 404)
 
-Siguiente objetivo del sprint.
+Decisión de arquitectura: primer control de acceso basado en rol del proyecto (`middleware/roleMiddleware.js`), ver `docs/decisions.md`, entrada 003.
 ---
 ## Job Offers
 Estado
@@ -137,7 +139,8 @@ Sprint actual (Semana 1 → Semana 2 del plan de 2 meses)
 Implementar:
 ✔ CRUD Users — completo
 ✔ Fix seguridad IDOR en Applications — completo
-⬜ CRUD Companies — siguiente paso
+✔ CRUD Companies — completo
+⬜ CRUD Job Offers — siguiente paso
 ⬜ Middleware de errores centralizado
 ---
 # Objetivo MVP
@@ -153,7 +156,7 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-████████░░░░░░░░░░ 40%
+██████████░░░░░░░░░░ 50%
 Frontend
 ░░░░░░░░░░░░░░░░░░ 0% (diseño cerrado)
 Base de datos
@@ -161,4 +164,4 @@ Base de datos
 Documentación
 ████████████████░░ 90%
 Proyecto completo
-████████░░░░░░░░░░ 32%
+█████████░░░░░░░░░░░ 36%

@@ -4,6 +4,22 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.3.0] - Agosto 2026 — CRUD Companies y control de acceso por rol
+
+## Añadido
+### Companies
+- `GET /companies` — listar todas (cualquier usuario autenticado)
+- `GET /companies/:id` — obtener una empresa (cualquier usuario autenticado)
+- `POST /companies` — crear empresa (solo `role = "recruiter"`)
+- `PUT /companies/:id` — actualizar empresa, solo campos enviados (solo `role = "recruiter"`)
+- `DELETE /companies/:id` — eliminar empresa (solo `role = "recruiter"`)
+- Nuevo `middleware/roleMiddleware.js` (`requireRole`), primer control de acceso basado en rol del proyecto — reutilizable para Job Offers y rutas de `admin` (ver `docs/decisions.md`, entrada 003)
+
+### Limpieza
+- Eliminados `console.log` de depuración reintroducidos en `server.js`
+
+---
+
 # [0.2.0] - Agosto 2026 — Seguridad, Users CRUD y documentación
 
 ## Seguridad
@@ -137,9 +153,8 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.3.0)
+# Próxima versión (0.4.0)
 Objetivos:
-- CRUD Companies
 - CRUD Job Offers
 - Relaciones empresa/ofertas
 - Validaciones

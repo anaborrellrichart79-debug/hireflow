@@ -255,13 +255,98 @@ DELETE /jobs/:id
 ---
 
 # COMPANIES
-Estado
-🔴 Pendiente
-Endpoints previstos
-GET /companies
+
+Todas las rutas requieren `verifyToken`. `POST`, `PUT` y `DELETE` requieren además `role = "recruiter"` (ver `docs/decisions.md`, entrada 003) — un `candidate` autenticado puede leer pero no escribir. La tabla `companies` no tiene columna de propietario, así que no hay filtrado por usuario en lectura/escritura, solo por rol.
+
+## Crear empresa
 POST /companies
+Body
+{
+    "name": "Acme Inc",
+    "email": "contacto@acme.com",
+    "description": "Empresa de tecnología",
+    "industry": "Tech",
+    "location": "Madrid",
+    "phone": "600000000"
+}
+Solo `name` y `email` son obligatorios (constraint de la BD), el resto es opcional.
+
+Respuesta
+201 Created
+{
+    "id": 2,
+    "name": "Acme Inc",
+    "email": "contacto@acme.com",
+    "description": "Empresa de tecnología",
+    "industry": "Tech",
+    "location": "Madrid",
+    "phone": "600000000"
+}
+Errores
+400 — email ya registrado: `{"message":"El email de la empresa ya está registrado"}`
+403 — autenticado pero no es `recruiter`: `{"message":"No tienes permisos para realizar esta acción"}`
+Autenticación
+Requerida (verifyToken) + role `recruiter`
+
+---
+
+## Obtener todas
+GET /companies
+Respuesta
+200 OK
+[ ... ]
+Devuelve todas las empresas (no hay filtrado por usuario, es un catálogo compartido).
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Obtener por ID
+GET /companies/:id
+Respuesta
+200 OK
+{ ... }
+404
+{
+    "message":"Empresa no encontrada"
+}
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Actualizar
 PUT /companies/:id
+Body (todos los campos opcionales, se actualizan solo los enviados)
+{
+    "location": "Barcelona"
+}
+Respuesta
+200 OK
+{
+    "message":"Empresa actualizada correctamente"
+}
+Errores
+400 — ningún campo válido enviado, o email duplicado
+404 — empresa no encontrada
+403 — autenticado pero no es `recruiter`
+Autenticación
+Requerida (verifyToken) + role `recruiter`
+
+---
+
+## Eliminar
 DELETE /companies/:id
+Respuesta
+200 OK
+{
+    "message":"Empresa eliminada correctamente"
+}
+Errores
+404 — empresa no encontrada
+403 — autenticado pero no es `recruiter`
+Autenticación
+Requerida (verifyToken) + role `recruiter`
 
 ---
 
