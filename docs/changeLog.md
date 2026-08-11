@@ -4,6 +4,19 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.4.0] - Agosto 2026 — CRUD Job Offers
+
+## Añadido
+### Job Offers
+- `GET /jobs` — listar todas (cualquier usuario autenticado)
+- `GET /jobs/:id` — obtener una oferta (cualquier usuario autenticado)
+- `POST /jobs` — crear oferta (solo `role = "recruiter"`), `created_by_user` se fija siempre por servidor a partir del token, nunca del body
+- `PUT /jobs/:id` — actualizar oferta, solo campos enviados (solo `role = "recruiter"`), `created_by_user` no es reasignable
+- `DELETE /jobs/:id` — eliminar oferta (solo `role = "recruiter"`)
+- Mismo modelo de permisos que Companies, reutilizando `requireRole` (ver `docs/decisions.md`, entrada 004)
+
+---
+
 # [0.3.0] - Agosto 2026 — CRUD Companies y control de acceso por rol
 
 ## Añadido
@@ -153,9 +166,8 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.4.0)
+# Próxima versión (0.5.0)
 Objetivos:
-- CRUD Job Offers
-- Relaciones empresa/ofertas
+- CRUD Interviews
 - Validaciones
 - Manejo centralizado de errores

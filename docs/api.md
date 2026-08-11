@@ -243,14 +243,101 @@ Respuesta
 ---
 
 # JOB OFFERS
-Estado
-🔴 Pendiente
-Endpoints previstos
-GET /jobs
-GET /jobs/:id
+
+Todas las rutas requieren `verifyToken`. `POST`, `PUT` y `DELETE` requieren además `role = "recruiter"` (mismo modelo de permisos que Companies, ver `docs/decisions.md`, entrada 004). No hay restricción por `company_id`: cualquier `recruiter` puede gestionar ofertas de cualquier empresa (varios usuarios de una misma empresa pueden publicar ofertas, ver `Database.md`).
+
+## Crear oferta
 POST /jobs
+Body
+{
+    "company_id": 3,
+    "title": "Backend Developer",
+    "description": "Oferta de prueba",
+    "salary": "30000-40000",
+    "location": "Remoto",
+    "employment_type": "full_time",
+    "skills_required": "Node.js, MySQL",
+    "source": "internal",
+    "external_url": null
+}
+`company_id` y `title` son obligatorios. El resto es opcional. `source` por defecto es `"internal"`.
+
+`created_by_user` **no** se acepta del body — se fija siempre al `id` del usuario autenticado (ver `docs/decisions.md`, entrada 004).
+
+Respuesta
+201 Created
+{
+    "id": 6,
+    "company_id": 3,
+    "title": "Backend Developer",
+    ...
+    "created_by_user": 7
+}
+Errores
+400 — `company_id` no existe: `{"message":"La empresa indicada (company_id) no existe"}`
+403 — autenticado pero no es `recruiter`
+Autenticación
+Requerida (verifyToken) + role `recruiter`
+
+---
+
+## Obtener todas
+GET /jobs
+Respuesta
+200 OK
+[ ... ]
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Obtener por ID
+GET /jobs/:id
+Respuesta
+200 OK
+{ ... }
+404
+{
+    "message":"Oferta no encontrada"
+}
+Autenticación
+Requerida (verifyToken)
+
+---
+
+## Actualizar
 PUT /jobs/:id
+Body (todos los campos opcionales, se actualizan solo los enviados)
+{
+    "salary": "40000-50000"
+}
+`created_by_user` no es actualizable — no se puede reasignar la autoría de una oferta.
+Respuesta
+200 OK
+{
+    "message":"Oferta actualizada correctamente"
+}
+Errores
+400 — ningún campo válido enviado, o `company_id` no existe
+404 — oferta no encontrada
+403 — autenticado pero no es `recruiter`
+Autenticación
+Requerida (verifyToken) + role `recruiter`
+
+---
+
+## Eliminar
 DELETE /jobs/:id
+Respuesta
+200 OK
+{
+    "message":"Oferta eliminada correctamente"
+}
+Errores
+404 — oferta no encontrada
+403 — autenticado pero no es `recruiter`
+Autenticación
+Requerida (verifyToken) + role `recruiter`
 
 ---
 

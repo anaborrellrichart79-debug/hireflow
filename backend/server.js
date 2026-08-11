@@ -2,6 +2,7 @@ import express from "express";
 import userRoutes from "./routes/userRoutes.js";
 import applicationRouter from "./routes/applicationRoutes.js";
 import companyRouter from "./routes/companyRoutes.js";
+import jobOfferRouter from "./routes/jobOfferRoutes.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,6 +12,7 @@ const app = express();
 app.use(express.json());
 app.use("/api/applications", applicationRouter);
 app.use("/api/companies", companyRouter);
+app.use("/api/jobs", jobOfferRouter);
 
 //user API routes
 app.use("/api/users", userRoutes);

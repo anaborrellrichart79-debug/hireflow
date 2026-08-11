@@ -48,11 +48,15 @@ Decisión de arquitectura: primer control de acceso basado en rol del proyecto (
 ---
 ## Job Offers
 Estado
-🔴 Pendiente
-Modelo
-Controlador
-Rutas
-CRUD
+🟢 CRUD Completo
+✔ Crear (solo `recruiter`, `created_by_user` fijado por servidor)
+✔ Obtener todas
+✔ Obtener por ID
+✔ Actualizar (solo `recruiter`)
+✔ Eliminar (solo `recruiter`)
+✔ Tests manuales verificados (curl: permisos por rol, FK company_id inválida, 404)
+
+Decisión de arquitectura: mismo modelo de permisos que Companies, ver `docs/decisions.md`, entrada 004.
 ---
 ## Applications
 Estado
@@ -140,7 +144,8 @@ Implementar:
 ✔ CRUD Users — completo
 ✔ Fix seguridad IDOR en Applications — completo
 ✔ CRUD Companies — completo
-⬜ CRUD Job Offers — siguiente paso
+✔ CRUD Job Offers — completo
+⬜ CRUD Interviews — siguiente paso
 ⬜ Middleware de errores centralizado
 ---
 # Objetivo MVP
@@ -156,7 +161,7 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-██████████░░░░░░░░░░ 50%
+████████████░░░░░░░░ 60%
 Frontend
 ░░░░░░░░░░░░░░░░░░ 0% (diseño cerrado)
 Base de datos
@@ -164,4 +169,4 @@ Base de datos
 Documentación
 ████████████████░░ 90%
 Proyecto completo
-█████████░░░░░░░░░░░ 36%
+██████████░░░░░░░░░░ 40%
