@@ -1,21 +1,26 @@
 USE hireflow;
 
 
-INSERT INTO interview_types (name, description) VALUES
-('Estructurada','El reclutador sigue un guion preestablecido con preguntas concretas e iguales para todos los candidatos, lo que permite una evaluación objetiva.'),
-('No estructurada','Es una conversación flexible y abierta. Permite al aspirante expresarse libremente, facilitando la naturalidad, aunque es menos objetiva.'),
-('Semiestructurada','Una mezcla de las dos anteriores. Hay una guía inicial, pero el entrevistador tiene libertad para profundizar en respuestas interesantes.'),
-('competencias','Busca ejemplos específicos de cómo has demostrado habilidades (liderazgo, trabajo en equipo, resolución de problemas) en situaciones pasadas.'),
-('conductual','Se centra en tus comportamientos pasados para predecir tu comportamiento futuro en el puesto, pidiendo ejemplos concretos de tu experiencia.'),
-('tensión',' Poco común. Se utiliza para observar cómo gestionas situaciones de presión, tensión o conflicto'),
-('caso','Se presenta un problema o situación hipotética de la empresa para evaluar tu capacidad analítica y resolución de problemas.'),
-('Técnica','Profundiza en los conocimientos técnicos, habilidades específicas y herramientas necesarias para el puesto.'),
-('Telefónica','Suele ser el primer filtro para validar datos básicos del currículum, explican Job Teaser.'),
-('Online','Muy común en procesos remotos o internacionales, permitiendo el contacto visual sin desplazamiento.'),
-('Presencial','El formato clásico cara a cara entre un reclutador y el candidato.'),
-('Panel','Te entrevistan varias personas de la empresa a la vez, lo que permite evaluar el puesto desde diferentes perspectivas'),
-('Seguimiento','Se realiza después de una primera entrevista para aclarar dudas o profundizar en ciertos aspectos.'),
-('Dinámica de grupo','Varios candidatos son entrevistados a la vez para evaluar su interacción, liderazgo y capacidad de trabajo en equipo.');
+-- Columnas y valores de ENUM corregidos para coincidir con el esquema real
+-- (shema.sql / BD real usan name_interview_types + description_interview_types,
+-- con name_interview_types como ENUM en inglés, no texto libre en español).
+-- Ver docs/decisions.md, entrada 006, para el detalle de este fix y el
+-- mapeo de las categorías originales en español a los valores del ENUM.
+INSERT INTO interview_types (name_interview_types, description_interview_types) VALUES
+('structured','El reclutador sigue un guion preestablecido con preguntas concretas e iguales para todos los candidatos, lo que permite una evaluación objetiva.'),
+('unstructured','Es una conversación flexible y abierta. Permite al aspirante expresarse libremente, facilitando la naturalidad, aunque es menos objetiva.'),
+('semistructured','Una mezcla de las dos anteriores. Hay una guía inicial, pero el entrevistador tiene libertad para profundizar en respuestas interesantes.'),
+('competency_based','Busca ejemplos específicos de cómo has demostrado habilidades (liderazgo, trabajo en equipo, resolución de problemas) en situaciones pasadas.'),
+('behavioral','Se centra en tus comportamientos pasados para predecir tu comportamiento futuro en el puesto, pidiendo ejemplos concretos de tu experiencia.'),
+('tension',' Poco común. Se utiliza para observar cómo gestionas situaciones de presión, tensión o conflicto'),
+('technique','Se presenta un problema o situación hipotética de la empresa para evaluar tu capacidad analítica y resolución de problemas (entrevista de caso).'),
+('technique','Profundiza en los conocimientos técnicos, habilidades específicas y herramientas necesarias para el puesto.'),
+('telephone','Suele ser el primer filtro para validar datos básicos del currículum, explican Job Teaser.'),
+('online','Muy común en procesos remotos o internacionales, permitiendo el contacto visual sin desplazamiento.'),
+('in_person','El formato clásico cara a cara entre un reclutador y el candidato.'),
+('group_dynamics','Te entrevistan varias personas de la empresa a la vez, lo que permite evaluar el puesto desde diferentes perspectivas (panel).'),
+('follow-up','Se realiza después de una primera entrevista para aclarar dudas o profundizar en ciertos aspectos.'),
+('group_dynamics','Varios candidatos son entrevistados a la vez para evaluar su interacción, liderazgo y capacidad de trabajo en equipo.');
 
 
 INSERT INTO ai_interview_questions (question, category, difficulty) VALUES

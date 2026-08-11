@@ -1,11 +1,11 @@
 import { db } from "../config/database.js";
 
 export const createApplication = async (applicationData) => {
-    const { 
+    const {
         user_id,
-        job_offer_id,
+        job_offer_id = null,
         status = "wishlist",
-        notes,
+        notes = null,
     } = applicationData;
 
     const appliedDate = status === "applied" ? new Date() : null;

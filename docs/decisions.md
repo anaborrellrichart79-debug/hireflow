@@ -114,8 +114,25 @@ La tabla `interviews` no tiene columna `user_id` propia — su dueño real es el
 
 Igual que con Applications, se devuelve 404 ("Entrevista no encontrada" / "Postulación no encontrada" en creación) tanto si el ID no existe como si pertenece a otro usuario, nunca 403 — no se revela la existencia de entrevistas ajenas.
 
-**Nota aparte (no es parte de esta decisión, solo un hallazgo):** la tabla `interview_types` está vacía en la BD real — `database/seed.sql` intenta insertarla con columnas `name`/`description`, pero el esquema real usa `name_interview_types`/`description_interview_types`, así que ese `INSERT` nunca ha podido funcionar. No bloquea Interviews porque `interview_type_id` es opcional (nullable), pero queda pendiente de corregir el seed.
-
 **Archivos afectados:** `models/interview.js` (nuevo), `controllers/interviewControllers.js` (nuevo), `routes/interviewRoutes.js` (nuevo), `server.js`.
+
+---
+
+## 006 — Corrección de dos bugs detectados durante el CRUD de Interviews
+**Fecha:** Agosto 2026
+
+**Problema 1:** `createApplication` (`models/application.js`) desestructuraba `job_offer_id` y `notes` de `applicationData` sin valor por defecto. Si el cliente los omitía del body (en vez de enviarlos explícitamente como `null`), llegaban como `undefined` a `db.execute`, y mysql2 lanza `Bind parameters must not contain undefined` — el endpoint `POST /applications` devolvía 500 en un caso de uso perfectamente válido (crear una postulación sin nota ni oferta asociada todavía).
+
+**Decisión:** añadir `= null` como valor por defecto en la desestructuración de ambos campos, igual que ya se hizo desde el principio en los modelos nuevos (`company.js`, `jobOffer.js`, `interview.js`) para evitar este mismo problema.
+
+**Archivos afectados:** `models/application.js`.
+
+---
+
+**Problema 2:** `database/seed.sql` insertaba en `interview_types` usando columnas `name`/`description`, que no existen en el esquema real (`name_interview_types` ENUM en inglés + `description_interview_types`). Además, los valores que insertaba eran texto libre en español ("Estructurada", "Panel", "Dinámica de grupo"...), incompatibles con el ENUM. Ese `INSERT` nunca pudo haber funcionado, y la tabla estaba vacía en la BD real — cualquier prueba con `interview_type_id` fallaba por falta de datos de catálogo.
+
+**Decisión:** corregir el `INSERT` para usar los nombres de columna reales y mapear cada categoría en español al valor de ENUM más cercano, conservando la descripción original en español en `description_interview_types` (y añadiendo una aclaración entre paréntesis cuando el nombre en español se pierde al mapear, p. ej. "Panel" y "Dinámica de grupo" mapean ambos a `group_dynamics`, y "caso" no tiene equivalente exacto en el ENUM así que se mapeó a `technique` con nota aclaratoria). Se ejecutó el `INSERT` corregido contra la BD real: `interview_types` pasó de 0 a 14 filas.
+
+**Archivos afectados:** `database/seed.sql`, BD real (poblada manualmente con el `INSERT` corregido).
 
 ---

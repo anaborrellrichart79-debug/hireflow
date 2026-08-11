@@ -4,6 +4,15 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.5.1] - Agosto 2026 — Corrección de bugs detectados en 0.5.0
+
+## Corregido
+- `createApplication` (`models/application.js`) ya no falla con "Bind parameters must not contain undefined" al omitir `job_offer_id` o `notes` del body — ahora tienen `null` por defecto, igual que en los modelos de Companies/Job Offers/Interviews
+- `database/seed.sql`: corregido el `INSERT` de `interview_types`, que usaba columnas (`name`/`description`) que no existen en el esquema real y valores incompatibles con el ENUM `name_interview_types`. Se mapearon las 14 categorías originales en español al valor de ENUM más cercano, conservando la descripción en español (ver `docs/decisions.md`, entrada 006)
+- Ejecutado el `INSERT` corregido contra la BD real: `interview_types` pasó de 0 a 14 filas
+
+---
+
 # [0.5.0] - Agosto 2026 — CRUD Interviews
 
 ## Añadido
@@ -15,7 +24,7 @@ Formato basado en Keep a Changelog.
 - `DELETE /interviews/:id` — eliminar entrevista propia
 - Aplica el mismo patrón de filtrado por propiedad en SQL que Applications (ver `docs/decisions.md`, entrada 005), ya que `interviews` no tiene `user_id` propio — hereda el dueño de su `application`
 
-## Hallazgo (sin corregir en este cambio)
+## Hallazgo (corregido en 0.5.1)
 - `interview_types` está vacía en la BD real: `database/seed.sql` usa columnas `name`/`description` que no existen en la tabla (el esquema real usa `name_interview_types`/`description_interview_types`). No bloquea Interviews porque `interview_type_id` es opcional.
 
 ---
@@ -185,6 +194,4 @@ Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 # Próxima versión (0.6.0)
 Objetivos:
 - Middleware de errores centralizado
-- Corregir bug: `createApplication` (`models/application.js`) falla con "Bind parameters must not contain undefined" si se omiten `job_offer_id` o `notes` en el body en vez de enviarlos como `null` explícito (los modelos nuevos de Companies/Job Offers/Interviews ya usan valores por defecto para evitar este problema)
-- Corregir `database/seed.sql` (columnas de `interview_types` no coinciden con el esquema real)
 - Validaciones de entrada

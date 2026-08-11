@@ -69,6 +69,7 @@ Estado
 ✔ Tests
 ✔ Fix de seguridad IDOR aplicado y verificado (agosto 2026, ver `docs/decisions.md` entrada 001)
 ✔ Comportamiento de `applied_date` corregido (no se autorellena al crear, solo al pasar a `applied`)
+✔ Fix: `createApplication` ya no falla si se omiten `job_offer_id`/`notes` del body (ver `docs/decisions.md` entrada 006)
 ---
 ## Interviews
 Estado
@@ -82,7 +83,7 @@ Estado
 
 Decisión de arquitectura: `interviews` no tiene `user_id` propio, hereda el dueño de su `application`; filtrado por propiedad vía JOIN en la propia query SQL, mismo patrón que Applications (ver `docs/decisions.md`, entrada 005).
 
-Hallazgo pendiente (no bloqueante): `interview_types` está vacía en la BD real, `seed.sql` usa nombres de columna incorrectos.
+✔ Fix: `database/seed.sql` corregido y ejecutado contra la BD real — `interview_types` pasó de 0 a 14 filas con los nombres de columna y valores de ENUM correctos (ver `docs/decisions.md`, entrada 006)
 ---
 ## Calendar
 Estado
@@ -156,8 +157,9 @@ Implementar:
 ✔ CRUD Companies — completo
 ✔ CRUD Job Offers — completo
 ✔ CRUD Interviews — completo
+✔ Fix bug `createApplication` (bind parameters undefined) — completo
+✔ Fix `database/seed.sql` de `interview_types` — completo
 ⬜ Middleware de errores centralizado — siguiente paso
-⬜ Bug menor: `createApplication` falla si se omiten `job_offer_id`/`notes` en vez de enviarlos como `null`
 ---
 # Objetivo MVP
 Un usuario podrá:
