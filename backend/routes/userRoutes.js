@@ -2,18 +2,19 @@
 
 import express from "express";
 import { getUsers, createNewUser, loginUser, getProfile, updateProfile, deleteProfile } from "../controllers/userControllers.js";
-import { verifyToken} from "../middleware/authMiddleware.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = express.Router();
 
-router.get("/", verifyToken, getUsers);
-router.post("/", createNewUser);
-router.post("/login", loginUser);
+router.get("/", verifyToken, asyncHandler(getUsers));
+router.post("/", asyncHandler(createNewUser));
+router.post("/login", asyncHandler(loginUser));
 
 // Importante: estas rutas van ANTES de cualquier /users/:id que se añada en el futuro,
 // para que Express no intente interpretar "me" como un :id.
-router.get("/me", verifyToken, getProfile);
-router.put("/me", verifyToken, updateProfile);
-router.delete("/me", verifyToken, deleteProfile);
+router.get("/me", verifyToken, asyncHandler(getProfile));
+router.put("/me", verifyToken, asyncHandler(updateProfile));
+router.delete("/me", verifyToken, asyncHandler(deleteProfile));
 
 export default router;

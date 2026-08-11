@@ -21,6 +21,17 @@ JWT
 Middleware
 Tests Postman
 ---
+## Manejo de errores
+Estado
+🟢 Completado
+✔ `middleware/asyncHandler.js` — envuelve controllers async, reenvía errores a `next()`
+✔ `middleware/errorMiddleware.js` — `notFound` (404 rutas no definidas) + `errorHandler` centralizado
+✔ Los 5 controllers ya no repiten `try/catch` genérico; solo lo mantienen donde el mensaje debe ser específico del recurso
+✔ Corregida fuga de información: los 500 no controlados ya no exponen `error.message` ni el objeto de error del driver de MySQL al cliente
+✔ Tests manuales verificados (ruta inexistente, JSON malformado, regresión completa de los 5 recursos)
+
+Decisión de arquitectura: ver `docs/decisions.md`, entrada 007.
+---
 ## Users
 Estado
 🟢 CRUD Completo
@@ -159,7 +170,8 @@ Implementar:
 ✔ CRUD Interviews — completo
 ✔ Fix bug `createApplication` (bind parameters undefined) — completo
 ✔ Fix `database/seed.sql` de `interview_types` — completo
-⬜ Middleware de errores centralizado — siguiente paso
+✔ Middleware de errores centralizado — completo
+⬜ Validaciones de entrada — siguiente paso
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -174,7 +186,7 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-██████████████░░░░░░ 70%
+███████████████░░░░░ 75%
 Frontend
 ░░░░░░░░░░░░░░░░░░ 0% (diseño cerrado)
 Base de datos
@@ -182,4 +194,4 @@ Base de datos
 Documentación
 ████████████████░░ 90%
 Proyecto completo
-█████████░░░░░░░░░░░ 44%
+██████████░░░░░░░░░░ 46%

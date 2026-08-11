@@ -6,44 +6,33 @@ import {
     deleteCompany
 } from "../models/company.js";
 
+const DUP_EMAIL_MESSAGE = "El email de la empresa ya está registrado";
+
 export const createNewCompany = async (req, res) => {
     try {
         const company = await createCompany(req.body);
         res.status(201).json(company);
     } catch (error) {
-        console.log("Error al crear empresa", error);
-
         if (error.code === "ER_DUP_ENTRY") {
-            return res.status(400).json({
-                message: "El email de la empresa ya está registrado"
-            });
+            return res.status(400).json({ message: DUP_EMAIL_MESSAGE });
         }
-
-        res.status(500).json({ message: error.message });
+        throw error;
     }
 };
 
 export const getCompanies = async (req, res) => {
-    try {
-        const companies = await getAllCompanies();
-        res.status(200).json(companies);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener las empresas" });
-    }
+    const companies = await getAllCompanies();
+    res.status(200).json(companies);
 };
 
 export const getCompany = async (req, res) => {
-    try {
-        const company = await getCompanyById(req.params.id);
+    const company = await getCompanyById(req.params.id);
 
-        if (!company) {
-            return res.status(404).json({ message: "Empresa no encontrada" });
-        }
-
-        res.status(200).json(company);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener la empresa" });
+    if (!company) {
+        return res.status(404).json({ message: "Empresa no encontrada" });
     }
+
+    res.status(200).json(company);
 };
 
 export const updateExistingCompany = async (req, res) => {
@@ -60,28 +49,19 @@ export const updateExistingCompany = async (req, res) => {
 
         res.status(200).json({ message: "Empresa actualizada correctamente" });
     } catch (error) {
-        console.log("Error al actualizar empresa", error);
-
         if (error.code === "ER_DUP_ENTRY") {
-            return res.status(400).json({
-                message: "El email de la empresa ya está registrado"
-            });
+            return res.status(400).json({ message: DUP_EMAIL_MESSAGE });
         }
-
-        res.status(500).json({ message: "Error al actualizar la empresa" });
+        throw error;
     }
 };
 
 export const removeCompany = async (req, res) => {
-    try {
-        const result = await deleteCompany(req.params.id);
+    const result = await deleteCompany(req.params.id);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Empresa no encontrada" });
-        }
-
-        res.status(200).json({ message: "Empresa eliminada correctamente" });
-    } catch (error) {
-        res.status(500).json({ message: "Error al eliminar la empresa" });
+    if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Empresa no encontrada" });
     }
+
+    res.status(200).json({ message: "Empresa eliminada correctamente" });
 };

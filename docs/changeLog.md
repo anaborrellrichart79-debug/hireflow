@@ -4,6 +4,24 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [0.6.0] - Agosto 2026 — Middleware de errores centralizado
+
+## Añadido
+- `middleware/asyncHandler.js` — envuelve controllers async y reenvía cualquier error a `next()`, sin try/catch repetido
+- `middleware/errorMiddleware.js` — `notFound` (404 para rutas no definidas) + `errorHandler` (handler final de errores de Express)
+- Todas las rutas (`userRoutes.js`, `applicationRoutes.js`, `companyRoutes.js`, `jobOfferRoutes.js`, `interviewRoutes.js`) envuelven ahora sus handlers con `asyncHandler`
+- `server.js` registra `notFound` + `errorHandler` después de todas las rutas
+
+## Cambiado
+- Los 5 controllers eliminan el `try/catch` repetido en cada función; solo se mantiene `try/catch` local donde el mensaje de error debe ser específico del recurso (email duplicado, FK inválida con nombre de campo), relanzando el error en cualquier otro caso
+
+## Seguridad
+- Corregida una fuga de información: `createNewApplication` devolvía `error.message` y el objeto `error` completo del driver de MySQL al cliente en cualquier fallo inesperado; `createNewCompany`/`createNewJobOffer`/`createNewInterview` tenían el mismo problema en su rama de error genérica. Ahora cualquier error no controlado explícitamente (`status` ausente o ≥ 500) responde siempre `{"message":"Error interno del servidor"}`, sin exponer detalles internos — el detalle completo solo se registra server-side vía `console.error`
+
+Detalle completo de la decisión y alternativas consideradas en `docs/decisions.md`, entrada 007.
+
+---
+
 # [0.5.1] - Agosto 2026 — Corrección de bugs detectados en 0.5.0
 
 ## Corregido
@@ -191,7 +209,6 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (0.6.0)
+# Próxima versión (0.7.0)
 Objetivos:
-- Middleware de errores centralizado
 - Validaciones de entrada

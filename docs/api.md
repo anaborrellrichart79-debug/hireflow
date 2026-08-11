@@ -18,6 +18,15 @@ Duración del token: 1 hora (`expiresIn: "1h"` en la generación del JWT). Pasad
 
 ---
 
+# Errores
+
+Todas las respuestas de error tienen la forma `{"message": "..."}`. Manejo centralizado (`middleware/errorMiddleware.js`, ver `docs/decisions.md`, entrada 007):
+- Cualquier ruta no definida devuelve `404 {"message":"Ruta no encontrada: <método> <ruta>"}`.
+- Los errores esperados (validación, duplicados, IDOR bloqueado, FK inválida) devuelven el mensaje específico documentado en cada endpoint, con status < 500.
+- Cualquier error no controlado explícitamente devuelve siempre `500 {"message":"Error interno del servidor"}` — nunca se expone el mensaje interno del error ni detalles del driver de MySQL al cliente; el detalle completo se registra solo en el log del servidor.
+
+---
+
 # AUTH / USERS
 
 ## Registro

@@ -6,6 +6,8 @@ import {
     deleteInterview
 } from "../models/interview.js";
 
+const INVALID_INTERVIEW_TYPE_MESSAGE = "El tipo de entrevista indicado (interview_type_id) no existe";
+
 export const createNewInterview = async (req, res) => {
     try {
         const interview = await createInterview(req.body, req.user.id);
@@ -16,39 +18,26 @@ export const createNewInterview = async (req, res) => {
 
         res.status(201).json(interview);
     } catch (error) {
-        console.log("Error al crear entrevista", error);
-
         if (error.code === "ER_NO_REFERENCED_ROW_2") {
-            return res.status(400).json({
-                message: "El tipo de entrevista indicado (interview_type_id) no existe"
-            });
+            return res.status(400).json({ message: INVALID_INTERVIEW_TYPE_MESSAGE });
         }
-
-        res.status(500).json({ message: error.message });
+        throw error;
     }
 };
 
 export const getUserInterviews = async (req, res) => {
-    try {
-        const interviews = await getInterviewsByUser(req.user.id);
-        res.status(200).json(interviews);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener las entrevistas" });
-    }
+    const interviews = await getInterviewsByUser(req.user.id);
+    res.status(200).json(interviews);
 };
 
 export const getInterview = async (req, res) => {
-    try {
-        const interview = await getInterviewById(req.params.id, req.user.id);
+    const interview = await getInterviewById(req.params.id, req.user.id);
 
-        if (!interview) {
-            return res.status(404).json({ message: "Entrevista no encontrada" });
-        }
-
-        res.status(200).json(interview);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener la entrevista" });
+    if (!interview) {
+        return res.status(404).json({ message: "Entrevista no encontrada" });
     }
+
+    res.status(200).json(interview);
 };
 
 export const updateExistingInterview = async (req, res) => {
@@ -65,28 +54,19 @@ export const updateExistingInterview = async (req, res) => {
 
         res.status(200).json({ message: "Entrevista actualizada correctamente" });
     } catch (error) {
-        console.log("Error al actualizar entrevista", error);
-
         if (error.code === "ER_NO_REFERENCED_ROW_2") {
-            return res.status(400).json({
-                message: "El tipo de entrevista indicado (interview_type_id) no existe"
-            });
+            return res.status(400).json({ message: INVALID_INTERVIEW_TYPE_MESSAGE });
         }
-
-        res.status(500).json({ message: "Error al actualizar la entrevista" });
+        throw error;
     }
 };
 
 export const removeInterview = async (req, res) => {
-    try {
-        const result = await deleteInterview(req.params.id, req.user.id);
+    const result = await deleteInterview(req.params.id, req.user.id);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Entrevista no encontrada" });
-        }
-
-        res.status(200).json({ message: "Entrevista eliminada correctamente" });
-    } catch (error) {
-        res.status(500).json({ message: "Error al eliminar la entrevista" });
+    if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Entrevista no encontrada" });
     }
+
+    res.status(200).json({ message: "Entrevista eliminada correctamente" });
 };
