@@ -31,7 +31,9 @@ const initLangSwitcher = () => {
 
     select.innerHTML = "";
     SUPPORTED_LANGS.forEach((lang) => {
-        select.append(el("option", { value: lang, text: getLangName(lang) }));
+        // Solo las 2 iniciales en el option (botón más pequeño); el nombre
+        // completo queda como title para quien pase el ratón por encima.
+        select.append(el("option", { value: lang, title: getLangName(lang), text: lang.toUpperCase() }));
     });
     select.value = getLang();
 
