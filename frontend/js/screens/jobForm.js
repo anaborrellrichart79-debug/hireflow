@@ -55,12 +55,12 @@ export const render = async (container, params) => {
         }))
     ]);
 
-    const newCompanyName = el("input", { type: "text", placeholder: t("jobForm.newCompanyNamePlaceholder") });
-    const newCompanyEmail = el("input", { type: "email", placeholder: t("jobForm.newCompanyEmailPlaceholder") });
+    const newCompanyName = el("input", { type: "text", placeholder: t("jobForm.newCompanyNamePlaceholder"), autocomplete: "organization" });
+    const newCompanyEmail = el("input", { type: "email", placeholder: t("jobForm.newCompanyEmailPlaceholder"), autocomplete: "email" });
 
-    const titleInput = el("input", { type: "text", name: "title", value: job.title || "", placeholder: t("jobForm.titleLabel") });
+    const titleInput = el("input", { type: "text", name: "title", value: job.title || "", placeholder: t("jobForm.titleLabel"), autocomplete: "organization-title" });
     const descriptionInput = el("textarea", { name: "description", rows: "3", text: job.description || "" });
-    const locationInput = el("input", { type: "text", name: "location", value: job.location || "", placeholder: t("jobForm.locationLabel") });
+    const locationInput = el("input", { type: "text", name: "location", value: job.location || "", placeholder: t("jobForm.locationLabel"), autocomplete: "address-level2" });
     const skillsInput = el("input", { type: "text", name: "skills_required", value: job.skills_required || "", placeholder: t("jobForm.skillsPlaceholder") });
 
     let employmentType = job.employment_type || "";

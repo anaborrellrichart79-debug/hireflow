@@ -33,3 +33,23 @@ export const errorBanner = (message) =>
 
 export const primaryButton = (text, onClick) =>
     el("button", { class: "primary-button", type: "button", onClick, text });
+
+// Modal reutilizable sobre el elemento <dialog> nativo: da backdrop, foco
+// atrapado y cierre con Escape gratis, sin depender de ninguna librería.
+// contentNodes puede incluir su propio botón de cierre (llamando a dialog.close()),
+// pero también se añade uno de cierre accesible en la esquina por si no lo trae.
+export const openDialog = (contentNodes, { labelledBy } = {}) => {
+    const dialog = el("dialog", { class: "hf-dialog" }, [
+        el("div", { class: "hf-dialog-content" }, contentNodes)
+    ]);
+
+    if (labelledBy) {
+        dialog.setAttribute("aria-labelledby", labelledBy);
+    }
+
+    dialog.addEventListener("close", () => dialog.remove());
+    document.body.append(dialog);
+    dialog.showModal();
+
+    return dialog;
+};

@@ -8,8 +8,8 @@ export const login = async (email, password) => {
     return getCurrentUser();
 };
 
-export const register = async ({ name, email, password, role }) => {
-    await apiFetch("/users", { method: "POST", body: { name, email, password, role } });
+export const register = async ({ name, email, password, role, termsAccepted }) => {
+    await apiFetch("/users", { method: "POST", body: { name, email, password, role, termsAccepted } });
     return login(email, password);
 };
 

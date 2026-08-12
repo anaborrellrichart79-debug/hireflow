@@ -52,6 +52,7 @@ Estado
 ✔ Actualizar perfil propio (PUT /users/me)
 ✔ Eliminar cuenta propia (DELETE /users/me)
 ✔ Obtener todos (GET /users)
+✔ Registro exige aceptar la Política de Privacidad (`terms_accepted_at`, ver `docs/decisions.md`, entrada 017)
 ✔ Tests manuales verificados (Postman)
 
 Decisión de arquitectura: se usa `/users/me` en vez de `/users/:id` para evitar por diseño el mismo tipo de vulnerabilidad IDOR detectada y corregida en Applications (ver `docs/decisions.md`, entrada 002).
@@ -76,7 +77,8 @@ Estado
 ✔ Obtener por ID
 ✔ Actualizar (solo `recruiter`)
 ✔ Eliminar (solo `recruiter`)
-✔ Tests manuales verificados (curl: permisos por rol, FK company_id inválida, 404)
+✔ Fix de seguridad: actualizar/eliminar ahora exige además ser el `created_by_user` de la oferta — antes cualquier recruiter podía tocar la oferta de otro (ver `docs/decisions.md`, entrada 017)
+✔ Tests manuales verificados (curl: permisos por rol, FK company_id inválida, 404, propiedad entre dos recruiters distintos)
 
 Decisión de arquitectura: mismo modelo de permisos que Companies, ver `docs/decisions.md`, entrada 004.
 ---
@@ -92,6 +94,7 @@ Estado
 ✔ Fix de seguridad IDOR aplicado y verificado (agosto 2026, ver `docs/decisions.md` entrada 001)
 ✔ Comportamiento de `applied_date` corregido (no se autorellena al crear, solo al pasar a `applied`)
 ✔ Fix: `createApplication` ya no falla si se omiten `job_offer_id`/`notes` del body (ver `docs/decisions.md` entrada 006)
+✔ Consentimiento + firma obligatorios al postularse (`consent_share_contact`, `signature_name`), vista de la empresa (`GET /applications/recruiter`, email/teléfono solo si hubo consentimiento), cambio de estado por la empresa (`PUT /applications/:id/status`) con aviso in-app al candidato (`status_seen_by_candidate`, `PUT /applications/mark-seen`) — ver `docs/decisions.md`, entrada 017
 ---
 ## Interviews
 Estado
@@ -101,7 +104,8 @@ Estado
 ✔ Obtener por ID (propia)
 ✔ Actualizar (propia)
 ✔ Eliminar (propia)
-✔ Tests manuales verificados (curl: IDOR bloqueado con dos candidatos distintos en las 4 operaciones)
+✔ La empresa también puede crear/ver/eliminar entrevistas, sobre postulaciones recibidas en sus propias ofertas (propiedad vía JOIN hasta `job_offers.created_by_user`, no vía `applications.user_id` que ahí es el candidato) — ver `docs/decisions.md`, entrada 017
+✔ Tests manuales verificados (curl: IDOR bloqueado con dos candidatos distintos en las 4 operaciones; Playwright: la empresa agenda una entrevista y aparece en su calendario y en el del candidato)
 
 Decisión de arquitectura: `interviews` no tiene `user_id` propio, hereda el dueño de su `application`; filtrado por propiedad vía JOIN en la propia query SQL, mismo patrón que Applications (ver `docs/decisions.md`, entrada 005).
 
@@ -140,7 +144,10 @@ Estado general
 🟢 Implementado (vanilla JS, sin framework, servido como estático desde el propio backend — ver `docs/decisions.md`, entrada 011). Este checklist reemplaza al anterior (Landing/Login/Dashboard/...), que no coincidía con las pantallas reales de `FRONTEND_DESIGN.md`.
 ---
 ## Login / Registro
-🟢 (no estaba en `FRONTEND_DESIGN.md`, añadido por ser necesario para autenticación)
+🟢 (no estaba en `FRONTEND_DESIGN.md`, añadido por ser necesario para autenticación). Registro exige aceptar la Política de Privacidad (checkbox + modal con el texto completo en es/en, ver `docs/decisions.md`, entrada 017); campos con `autocomplete`.
+---
+## Postulantes (empresa)
+🟢 Pantalla nueva (`/applicants`, solo recruiter): quién se ha postulado a las ofertas propias, con perfil de contacto (visible solo con consentimiento del candidato), cambio de estado y botón para agendar entrevista. Ver `docs/decisions.md`, entrada 017.
 ---
 ## 1. Home (resumen + accesos rápidos)
 🟢 Evolucionada respecto al mockup original (que la preveía como estado vacío puro) por petición del usuario tras probar la app: ahora incluye resumen (postulaciones/entrevistas o ofertas publicadas, según rol) y accesos rápidos a las demás pantallas. Ver `docs/decisions.md`, entrada 013.
@@ -155,7 +162,7 @@ Estado general
 🟢
 ---
 ## 4. Calendario semanal
-🟢
+🟢 La empresa puede agendar entrevistas ("Añadir entrevista") sobre sus postulantes; el candidato sigue viéndolo en modo solo lectura. Ver `docs/decisions.md`, entrada 017.
 ---
 ## 5/6. Postulaciones (estado / notas, con toggle)
 🟢
@@ -226,8 +233,11 @@ Implementar:
 ✔ Home con resumen + accesos rápidos (pedido tras pruebas manuales del usuario) — completo
 ✔ Asistente IA por chat libre (sin categorías, entiende lenguaje libre por reglas, pide aclaraciones) — completo
 ✔ Mascota animada global con bocadillo de frases — completo
+✔ Iconos SVG en el chat del Asistente IA (nueva conversación, adjuntar, enviar) — completo
+✔ Responsive (tablet/móvil/móvil pequeño) — completo
+✔ Flujo de contratación: postulantes visibles para la empresa, consentimiento + firma al postularse, entrevistas agendadas por la empresa, aviso in-app de cambio de estado, Política de Privacidad — completo
 
-**Backend y frontend cerrados, app multilingüe, con asistente conversacional y mascota.** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las primeras pruebas manuales del usuario. Pendiente intencionalmente: CRUD de `user_profiles`, traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: CRUD de `user_profiles`, traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), traducir la Política de Privacidad a fr/it (hoy solo es/en, ver entrada 017), alojar la Política de Privacidad en una URL pública (necesario para publicar en Google Play, ver `docs/googlePlayDataSafety.md`), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -237,14 +247,14 @@ Un usuario podrá:
 ✔ Buscar ofertas
 ✔ Guardarlas
 ✔ Cambiar su estado
-🟡 Gestionar entrevistas (se pueden ver en el Calendario semanal; todavía no hay pantalla para crear/editar una entrevista directamente desde el frontend)
+✔ Gestionar entrevistas (la empresa las crea/cancela desde el Calendario semanal sobre sus postulantes; el candidato las ve en modo lectura)
 🟡 Ver estadísticas (resumen básico en Home desde v1.1.1: nº de postulaciones/ofertas y desglose por estado; no es un dashboard completo)
 ---
 # Estado global
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI conversacional, errores, validaciones)
 Frontend
-███████████████████░ 95% (8 pantallas + login implementadas, probadas y en 4 idiomas, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada; queda pendiente CRUD de user_profiles/CV extendido y crear entrevistas desde el frontend)
+████████████████████ 98% (9 pantallas + login implementadas, probadas, responsive y en 4 idiomas -- Política de Privacidad solo es/en --, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada, flujo de contratación completo con Postulantes/consentimiento/entrevistas; queda pendiente CRUD de user_profiles/CV extendido)
 Base de datos
 ██████████████░░░ 75%
 Documentación

@@ -16,6 +16,7 @@ const candidateLinks = () => [
 const recruiterLinks = () => [
     ["/", t("nav.home")],
     ["/jobs", t("nav.jobsRecruiter")],
+    ["/applicants", t("nav.applicants")],
     ["/calendar", t("nav.calendar")],
     ["/ai", t("nav.ai")]
 ];

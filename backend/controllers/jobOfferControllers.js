@@ -41,7 +41,7 @@ export const getJobOffer = async (req, res) => {
 
 export const updateExistingJobOffer = async (req, res) => {
     try {
-        const result = await updateJobOffer(req.params.id, req.body);
+        const result = await updateJobOffer(req.params.id, req.user.id, req.body);
 
         if (!result) {
             return res.status(400).json({ message: "Ningún campo válido para actualizar" });
@@ -61,7 +61,7 @@ export const updateExistingJobOffer = async (req, res) => {
 };
 
 export const removeJobOffer = async (req, res) => {
-    const result = await deleteJobOffer(req.params.id);
+    const result = await deleteJobOffer(req.params.id, req.user.id);
 
     if (result.affectedRows === 0) {
         return res.status(404).json({ message: "Oferta no encontrada" });

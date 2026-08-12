@@ -1,10 +1,55 @@
-import { el, primaryButton, errorBanner } from "../components/ui.js";
+import { el, primaryButton, errorBanner, openDialog } from "../components/ui.js";
 import { cardGrid } from "../components/cardGrid.js";
 import { apiFetch } from "../api.js";
 import { getCurrentUser } from "../auth.js";
 import { navigate } from "../router.js";
 import { t } from "../i18n.js";
 import { jobOptionLabel } from "../jobOptions.js";
+
+// Antes de crear la postulación se pide consentimiento explícito para
+// compartir nombre/email/teléfono con la empresa (nunca datos bancarios ni
+// sensibles) y una "firma" ligera -- el candidato escribe su nombre completo
+// para confirmar. No es una firma digital criptográfica/legal, es una
+// confirmación de consentimiento en UX, documentado en decisions.md, entrada 017.
+const openApplyConsentDialog = (candidateName, onConfirm) => {
+    const errorSlot = el("div", {});
+    const consentCheckbox = el("input", { type: "checkbox" });
+    const signatureInput = el("input", { type: "text", autocomplete: "name", value: candidateName || "", placeholder: t("jobs.signaturePlaceholder") });
+
+    const cancelButton = el("button", { type: "button", class: "secondary-button", text: t("jobs.consentCancel") });
+    const confirmButton = el("button", { type: "button", class: "primary-button", text: t("jobs.consentSubmit") });
+
+    const dialog = openDialog([
+        el("h2", { id: "consent-dialog-title", text: t("jobs.consentTitle") }),
+        errorSlot,
+        el("p", { text: t("jobs.consentIntro") }),
+        el("label", { class: "checkbox-label" }, [consentCheckbox, ` ${t("jobs.consentCheckboxLabel")}`]),
+        el("label", { text: t("jobs.signatureLabel") }),
+        signatureInput,
+        el("div", { class: "hf-dialog-actions" }, [cancelButton, confirmButton])
+    ], { labelledBy: "consent-dialog-title" });
+
+    cancelButton.addEventListener("click", () => dialog.close());
+
+    confirmButton.addEventListener("click", async () => {
+        errorSlot.innerHTML = "";
+        if (!consentCheckbox.checked) {
+            errorSlot.append(errorBanner(t("jobs.consentRequired")));
+            return;
+        }
+        if (!signatureInput.value.trim()) {
+            errorSlot.append(errorBanner(t("jobs.signatureRequired")));
+            return;
+        }
+        try {
+            await onConfirm(signatureInput.value.trim());
+            dialog.close();
+        } catch (error) {
+            const detail = error.errors?.map((e) => e.message).join(" · ");
+            errorSlot.append(errorBanner(detail || error.message));
+        }
+    });
+};
 
 const renderCandidateCard = (job, appliedJobOfferIds, onApply) => {
     const alreadyApplied = appliedJobOfferIds.has(job.id);
@@ -59,9 +104,16 @@ export const render = async (container) => {
 
             const applications = await apiFetch("/applications");
             const appliedJobOfferIds = new Set(applications.map((a) => a.job_offer_id).filter(Boolean));
-            const onApply = async (jobOfferId) => {
-                await apiFetch("/applications", { method: "POST", body: { job_offer_id: jobOfferId } });
-                draw();
+            const onApply = (jobOfferId) => {
+                // El JWT solo trae id/email/role (ver api.js getCurrentUser), no el
+                // nombre -- el candidato escribe su firma desde cero, no se prerrellena.
+                openApplyConsentDialog(null, async (signature) => {
+                    await apiFetch("/applications", {
+                        method: "POST",
+                        body: { job_offer_id: jobOfferId, consent: true, signature }
+                    });
+                    draw();
+                });
             };
             listSlot.append(cardGrid(jobs, (job) => renderCandidateCard(job, appliedJobOfferIds, onApply), t("jobs.emptyCandidate")));
         } catch (error) {

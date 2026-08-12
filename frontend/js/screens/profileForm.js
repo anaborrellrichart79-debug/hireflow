@@ -19,10 +19,10 @@ export const render = async (container) => {
     const errorSlot = el("div", {});
     const successSlot = el("div", {});
 
-    const nameInput = el("input", { type: "text", name: "name", value: profile.name || "" });
-    const sectorInput = el("input", { type: "text", name: "sector", value: profile.sector || "" });
-    const phoneInput = el("input", { type: "text", name: "phone", value: profile.phone || "" });
-    const locationInput = el("input", { type: "text", name: "location", value: profile.location || "" });
+    const nameInput = el("input", { type: "text", name: "name", value: profile.name || "", autocomplete: "name" });
+    const sectorInput = el("input", { type: "text", name: "sector", value: profile.sector || "", autocomplete: "organization-title" });
+    const phoneInput = el("input", { type: "tel", name: "phone", value: profile.phone || "", autocomplete: "tel" });
+    const locationInput = el("input", { type: "text", name: "location", value: profile.location || "", autocomplete: "address-level2" });
     const visibleInput = el("input", { type: "checkbox", name: "profile_visible", checked: profile.profile_visible ? "true" : undefined });
 
     const submit = async (event) => {

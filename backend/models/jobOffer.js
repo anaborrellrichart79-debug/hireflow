@@ -63,7 +63,7 @@ const UPDATABLE_FIELDS = [
     "employment_type", "skills_required", "source", "external_url"
 ];
 
-export const updateJobOffer = async (id, jobOfferData) => {
+export const updateJobOffer = async (id, userId, jobOfferData) => {
     const fieldsToUpdate = UPDATABLE_FIELDS.filter(
         (field) => jobOfferData[field] !== undefined
     );
@@ -76,17 +76,17 @@ export const updateJobOffer = async (id, jobOfferData) => {
     const values = fieldsToUpdate.map((field) => jobOfferData[field]);
 
     const [result] = await db.execute(
-        `UPDATE job_offers SET ${setClause} WHERE id = ?`,
-        [...values, id]
+        `UPDATE job_offers SET ${setClause} WHERE id = ? AND created_by_user = ?`,
+        [...values, id, userId]
     );
 
     return result;
 };
 
-export const deleteJobOffer = async (id) => {
+export const deleteJobOffer = async (id, userId) => {
     const [result] = await db.execute(
-        `DELETE FROM job_offers WHERE id = ?`,
-        [id]
+        `DELETE FROM job_offers WHERE id = ? AND created_by_user = ?`,
+        [id, userId]
     );
     return result;
 };

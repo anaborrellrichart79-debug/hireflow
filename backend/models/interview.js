@@ -42,6 +42,74 @@ export const createInterview = async (interviewData, userId) => {
     };
 };
 
+// Variante para recruiters: la propiedad de una entrevista, cuando la crea
+// la empresa, se comprueba vía el JOIN hasta job_offers.created_by_user en
+// vez de applications.user_id (ese es el candidato, no la empresa) --
+// mismo patrón que application.js's updateApplicationStatusByRecruiter.
+export const createInterviewForRecruiter = async (interviewData, recruiterId) => {
+    const {
+        application_id,
+        interview_type_id = null,
+        scheduled_date,
+        location = null,
+        notes = null
+    } = interviewData;
+
+    const [result] = await db.execute(
+        `
+        INSERT INTO interviews (application_id, interview_type_id, scheduled_date, location, notes)
+        SELECT ?, ?, ?, ?, ?
+        FROM applications a
+        JOIN job_offers j ON a.job_offer_id = j.id
+        WHERE a.id = ? AND j.created_by_user = ?
+        `,
+        [application_id, interview_type_id, scheduled_date, location, notes, application_id, recruiterId]
+    );
+
+    if (result.affectedRows === 0) {
+        return null;
+    }
+
+    return {
+        id: result.insertId,
+        application_id,
+        interview_type_id,
+        scheduled_date,
+        location,
+        notes
+    };
+};
+
+export const getInterviewsForRecruiter = async (recruiterId) => {
+    const [rows] = await db.execute(
+        `
+        SELECT i.*, a.job_offer_id, j.title AS job_title, u.name AS candidate_name
+        FROM interviews i
+        JOIN applications a ON i.application_id = a.id
+        JOIN job_offers j ON a.job_offer_id = j.id
+        JOIN users u ON a.user_id = u.id
+        WHERE j.created_by_user = ?
+        ORDER BY i.scheduled_date ASC
+        `,
+        [recruiterId]
+    );
+    return rows;
+};
+
+export const deleteInterviewForRecruiter = async (id, recruiterId) => {
+    const [result] = await db.execute(
+        `
+        DELETE i FROM interviews i
+        JOIN applications a ON i.application_id = a.id
+        JOIN job_offers j ON a.job_offer_id = j.id
+        WHERE i.id = ? AND j.created_by_user = ?
+        `,
+        [id, recruiterId]
+    );
+
+    return result;
+};
+
 export const getInterviewsByUser = async (userId) => {
     const [rows] = await db.execute(
         `

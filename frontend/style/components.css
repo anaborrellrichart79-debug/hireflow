@@ -408,3 +408,39 @@
     .ai-sidebar { width: 100%; }
     .chat-message { max-width: 100%; }
 }
+
+/* --- Modal (política de privacidad, consentimiento al postularse...) --- */
+.hf-dialog {
+    border: none;
+    border-radius: var(--hf-radius);
+    padding: 0;
+    max-width: 560px;
+    width: 90vw;
+    max-height: 85vh;
+}
+
+.hf-dialog::backdrop {
+    background: rgba(42, 42, 42, 0.5);
+}
+
+.hf-dialog-content {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: 85vh;
+}
+
+.hf-dialog-content h2 { margin-top: 0; }
+.hf-dialog-content h3 { margin-bottom: 4px; }
+.hf-dialog-content p { line-height: 1.5; }
+
+.hf-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+@media (max-width: 480px) {
+    .hf-dialog { width: 94vw; }
+    .hf-dialog-content { padding: 16px; }
+}

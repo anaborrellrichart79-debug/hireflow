@@ -3,14 +3,23 @@ import {
     getInterviewsByUser,
     getInterviewById,
     updateInterview,
-    deleteInterview
+    deleteInterview,
+    createInterviewForRecruiter,
+    getInterviewsForRecruiter,
+    deleteInterviewForRecruiter
 } from "../models/interview.js";
 
 const INVALID_INTERVIEW_TYPE_MESSAGE = "El tipo de entrevista indicado (interview_type_id) no existe";
 
+// Quién puede agendar una entrevista y sobre qué postulación depende del rol:
+// el candidato solo sobre las suyas (createInterview, ownership vía user_id),
+// la empresa solo sobre postulaciones recibidas en sus propias ofertas
+// (createInterviewForRecruiter, ownership vía job_offers.created_by_user).
 export const createNewInterview = async (req, res) => {
     try {
-        const interview = await createInterview(req.body, req.user.id);
+        const interview = req.user.role === "recruiter"
+            ? await createInterviewForRecruiter(req.body, req.user.id)
+            : await createInterview(req.body, req.user.id);
 
         if (!interview) {
             return res.status(404).json({ message: "Postulación no encontrada" });
@@ -26,7 +35,9 @@ export const createNewInterview = async (req, res) => {
 };
 
 export const getUserInterviews = async (req, res) => {
-    const interviews = await getInterviewsByUser(req.user.id);
+    const interviews = req.user.role === "recruiter"
+        ? await getInterviewsForRecruiter(req.user.id)
+        : await getInterviewsByUser(req.user.id);
     res.status(200).json(interviews);
 };
 
@@ -62,7 +73,9 @@ export const updateExistingInterview = async (req, res) => {
 };
 
 export const removeInterview = async (req, res) => {
-    const result = await deleteInterview(req.params.id, req.user.id);
+    const result = req.user.role === "recruiter"
+        ? await deleteInterviewForRecruiter(req.params.id, req.user.id)
+        : await deleteInterview(req.params.id, req.user.id);
 
     if (result.affectedRows === 0) {
         return res.status(404).json({ message: "Entrevista no encontrada" });

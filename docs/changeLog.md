@@ -4,6 +4,27 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.3.0] - Agosto 2026 — Flujo de contratación completo: postulantes, consentimiento, entrevistas y política de privacidad
+
+## Añadido
+- Pantalla `/applicants` ("Postulantes", solo recruiter): quién se ha postulado a cada oferta propia, con perfil de contacto (email/teléfono) visible solo si el candidato dio su consentimiento al postularse, cambio de estado (avisa al candidato) y botón para agendar entrevista
+- Modal de consentimiento + firma al postularse (`jobs.js`): checkbox obligatorio para compartir nombre/email/teléfono con la empresa, con aviso explícito de que nunca se piden datos bancarios ni sensibles, y campo de firma (nombre completo)
+- La empresa puede agendar entrevistas directamente desde `/calendar` (botón "Añadir entrevista", solo recruiter) sobre cualquier postulación recibida en sus ofertas; el candidato las ve en su calendario como antes
+- Aviso in-app de cambio de estado: tarjeta "Actualizaciones sin ver" en Home del candidato y etiqueta "¡Actualizado por la empresa!" en Mis postulaciones, hasta que el candidato abre esa pantalla
+- Checkbox obligatorio de aceptación de la Política de Privacidad en el registro, con el texto completo (es/en) en un modal — ver `docs/decisions.md`, entrada 017, para el detalle legal y sus limitaciones
+- `docs/googlePlayDataSafety.md`: borrador de las respuestas para la sección "Data Safety" de Google Play Console (no es una pantalla de la app — la rellena el publisher, no los usuarios)
+- `autocomplete` en los campos de login/registro, perfil y formulario de oferta
+
+## Corregido
+- **Seguridad:** `PUT/DELETE /jobs/:id` no comprobaba que la oferta perteneciera al recruiter autenticado — cualquier empresa podía editar o borrar la oferta de otra. Ahora exige `created_by_user` además del rol.
+- Mensajes de éxito que desaparecían en el mismo instante en que se mostraban (`calendar.js`, `applicants.js`) por refrescar la lista antes de mostrarlos
+- Enlace a la política de privacidad anidado dentro del `<label>` del checkbox, lo que podía marcar la casilla sin querer en vez de abrir el diálogo
+- `backend/database/shema.sql` estaba duplicado de arriba a abajo (habría roto una instalación limpia)
+
+Detalle completo en `docs/decisions.md`, entrada 017.
+
+---
+
 # [1.2.2] - Agosto 2026 — Responsive: tablet, móvil y móvil pequeño
 
 ## Corregido

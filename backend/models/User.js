@@ -21,9 +21,11 @@ export const createUser = async (userData) => {
     //encriptar la contraseña
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // guardar en DB
+    // guardar en DB -- terms_accepted_at queda registrado con la hora exacta
+    // de aceptación (createUserValidators exige que termsAccepted sea true
+    // antes de llegar aquí, así que en este punto siempre se acaba de aceptar)
     const [result] = await db.execute(
-    "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
+    "INSERT INTO users (name, email, password_hash, role, terms_accepted_at) VALUES (?, ?, ?, ?, NOW())",
     [name, email, passwordHash, role]
 );
 

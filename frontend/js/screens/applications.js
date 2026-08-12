@@ -11,9 +11,17 @@ const statusCard = (app, jobTitle, onStatusChange) => {
         el("option", { value: status, selected: status === app.status ? "true" : undefined, text: statusLabel(status) })
     ));
 
+    // wasUnseen se calcula ANTES de llamar a mark-seen (ver render()), así
+    // que aquí sigue reflejando si la empresa cambió el estado desde la
+    // última vez que el candidato abrió esta pantalla -- es el aviso en sí.
+    const updateBadge = app.wasUnseen && app.status_updated_by === "recruiter"
+        ? el("span", { class: "status-badge", text: t("applications.recentlyUpdated") })
+        : null;
+
     return el("div", { class: "card-content" }, [
         el("h3", { text: jobTitle }),
         el("span", { class: "status-badge", text: statusLabel(app.status) }),
+        updateBadge,
         select
     ]);
 };
@@ -50,6 +58,14 @@ export const render = async (container) => {
 
         try {
             const applications = await apiFetch("/applications");
+            applications.forEach((app) => { app.wasUnseen = !app.status_seen_by_candidate; });
+
+            // Efecto secundario intencional: abrir esta pantalla es la señal de
+            // que el candidato ha visto los cambios de estado pendientes (ver
+            // home.js, que muestra el contador mientras no se llame a esto).
+            // No se espera ni bloquea el render -- si falla, simplemente el
+            // aviso seguirá apareciendo en Home la próxima vez.
+            apiFetch("/applications/mark-seen", { method: "PUT" }).catch(() => {});
 
             const jobTitles = {};
             await Promise.all(

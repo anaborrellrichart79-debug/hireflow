@@ -15,6 +15,7 @@ const CANDIDATE_LINKS = () => [
 
 const RECRUITER_LINKS = () => [
     ["/jobs", t("nav.jobsRecruiter")],
+    ["/applicants", t("nav.applicants")],
     ["/calendar", t("nav.calendar")],
     ["/ai", t("nav.ai")]
 ];
@@ -59,10 +60,22 @@ const buildCandidateSummary = async () => {
         .filter((i) => new Date(i.scheduled_date.replace(" ", "T")) >= now)
         .sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date))[0];
 
-    const stats = el("div", { class: "stat-row" }, [
+    // status_seen_by_candidate se pone a 0 cuando la empresa cambia el estado
+    // (ver applicationControllers.js updateApplicationStatusAsRecruiter) y
+    // vuelve a 1 al abrir "Mis postulaciones" (applications.js llama a
+    // PUT /applications/mark-seen) -- así el candidato ve aquí que hay
+    // novedades sin tener que revisar postulación por postulación.
+    const unseenCount = applications.filter((app) => !app.status_seen_by_candidate).length;
+
+    const statCards = [
         statCard(applications.length, t("home.summaryTotalApplications")),
         statCard(nextInterview ? formatDateTime(nextInterview.scheduled_date) : t("home.summaryNoInterview"), t("home.summaryNextInterview"))
-    ]);
+    ];
+    if (unseenCount > 0) {
+        statCards.push(statCard(unseenCount, t("home.summaryUnseenUpdates")));
+    }
+
+    const stats = el("div", { class: "stat-row" }, statCards);
 
     const badges = el("div", { class: "status-badge-row" },
         Object.entries(byStatus).map(([status, count]) =>

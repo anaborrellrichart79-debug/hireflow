@@ -4,7 +4,8 @@ export const createUserValidators = [
     body("name").trim().notEmpty().withMessage("name es obligatorio").isLength({ max: 100 }).withMessage("name no puede superar 100 caracteres"),
     body("email").trim().notEmpty().withMessage("email es obligatorio").isEmail().withMessage("email no es válido").isLength({ max: 150 }),
     body("password").notEmpty().withMessage("password es obligatorio").isLength({ min: 6 }).withMessage("password debe tener al menos 6 caracteres"),
-    body("role").optional().isIn(["candidate", "recruiter"]).withMessage("role debe ser candidate o recruiter")
+    body("role").optional().isIn(["candidate", "recruiter"]).withMessage("role debe ser candidate o recruiter"),
+    body("termsAccepted").custom((value) => value === true).withMessage("Debes aceptar la política de privacidad para registrarte")
 ];
 
 export const loginValidators = [
