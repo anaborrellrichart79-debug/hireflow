@@ -2,21 +2,22 @@ import { el } from "./ui.js";
 import { getCurrentUser } from "../api.js";
 import { isAuthenticated, logout } from "../auth.js";
 import { navigate } from "../router.js";
+import { t, onLangChange } from "../i18n.js";
 
-const CANDIDATE_LINKS = [
-    ["/", "Inicio"],
-    ["/jobs", "Ofertas"],
-    ["/applications", "Mis postulaciones"],
-    ["/calendar", "Calendario"],
-    ["/profile", "Mi perfil"],
-    ["/ai", "Asistente IA"]
+const candidateLinks = () => [
+    ["/", t("nav.home")],
+    ["/jobs", t("nav.jobsCandidate")],
+    ["/applications", t("nav.applications")],
+    ["/calendar", t("nav.calendar")],
+    ["/profile", t("nav.profile")],
+    ["/ai", t("nav.ai")]
 ];
 
-const RECRUITER_LINKS = [
-    ["/", "Inicio"],
-    ["/jobs", "Mis ofertas"],
-    ["/calendar", "Calendario"],
-    ["/ai", "Asistente IA"]
+const recruiterLinks = () => [
+    ["/", t("nav.home")],
+    ["/jobs", t("nav.jobsRecruiter")],
+    ["/calendar", t("nav.calendar")],
+    ["/ai", t("nav.ai")]
 ];
 
 export const initHeader = () => {
@@ -30,12 +31,12 @@ export const initHeader = () => {
         drawer.innerHTML = "";
 
         if (!isAuthenticated()) {
-            drawer.append(el("p", { class: "drawer-hint", text: "Inicia sesión para ver el menú" }));
+            drawer.append(el("p", { class: "drawer-hint", text: t("nav.drawerHint") }));
             return;
         }
 
         const user = getCurrentUser();
-        const links = user.role === "recruiter" ? RECRUITER_LINKS : CANDIDATE_LINKS;
+        const links = user.role === "recruiter" ? recruiterLinks() : candidateLinks();
 
         const list = el("nav", { class: "drawer-nav" }, links.map(([path, label]) =>
             el("a", {
@@ -51,7 +52,7 @@ export const initHeader = () => {
             el("button", {
                 class: "drawer-logout",
                 type: "button",
-                text: "Cerrar sesión",
+                text: t("nav.logout"),
                 onClick: () => {
                     logout();
                     closeDrawer();
@@ -75,4 +76,13 @@ export const initHeader = () => {
     });
 
     window.addEventListener("hashchange", closeDrawer);
+
+    // Si el drawer está abierto cuando se cambia de idioma, se redibuja al
+    // instante; si está cerrado, ya se generará traducido la próxima vez
+    // que se abra (renderDrawer se llama siempre al hacer click en burger).
+    onLangChange(() => {
+        if (drawer.classList.contains("open")) {
+            renderDrawer();
+        }
+    });
 };

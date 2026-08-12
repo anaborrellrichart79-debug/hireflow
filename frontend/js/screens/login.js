@@ -1,6 +1,7 @@
 import { el, errorBanner } from "../components/ui.js";
 import { login, register } from "../auth.js";
 import { navigate } from "../router.js";
+import { t } from "../i18n.js";
 
 export const render = (container) => {
     let mode = "login";
@@ -10,15 +11,15 @@ export const render = (container) => {
 
         const errorSlot = el("div", { class: "form-error-slot" });
 
-        const emailInput = el("input", { type: "email", name: "email", placeholder: "Email", required: "true" });
-        const passwordInput = el("input", { type: "password", name: "password", placeholder: "Contraseña", required: "true" });
+        const emailInput = el("input", { type: "email", name: "email", placeholder: t("auth.emailPlaceholder"), required: "true" });
+        const passwordInput = el("input", { type: "password", name: "password", placeholder: t("auth.passwordPlaceholder"), required: "true" });
 
         const extraFields = mode === "register"
             ? [
-                el("input", { type: "text", name: "name", placeholder: "Nombre", required: "true" }),
+                el("input", { type: "text", name: "name", placeholder: t("auth.namePlaceholder"), required: "true" }),
                 el("select", { name: "role" }, [
-                    el("option", { value: "candidate", text: "Busco empleo (candidate)" }),
-                    el("option", { value: "recruiter", text: "Publico ofertas (recruiter)" })
+                    el("option", { value: "candidate", text: t("auth.roleCandidate") }),
+                    el("option", { value: "recruiter", text: t("auth.roleRecruiter") })
                 ])
             ]
             : [];
@@ -49,19 +50,19 @@ export const render = (container) => {
         };
 
         const form = el("form", { class: "auth-form", onSubmit: submit }, [
-            el("h2", { text: mode === "login" ? "Iniciar sesión" : "Crear cuenta" }),
+            el("h2", { text: mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle") }),
             errorSlot,
             ...extraFields,
             emailInput,
             passwordInput,
-            el("button", { type: "submit", class: "primary-button", text: mode === "login" ? "Entrar" : "Registrarme" })
+            el("button", { type: "submit", class: "primary-button", text: mode === "login" ? t("auth.loginButton") : t("auth.registerButton") })
         ]);
 
         const toggle = el("p", { class: "auth-toggle" }, [
-            mode === "login" ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? ",
+            mode === "login" ? t("auth.noAccount") : t("auth.hasAccount"),
             el("a", {
                 href: "#",
-                text: mode === "login" ? "Regístrate" : "Inicia sesión",
+                text: mode === "login" ? t("auth.registerLink") : t("auth.loginLink"),
                 onClick: (event) => {
                     event.preventDefault();
                     mode = mode === "login" ? "register" : "login";

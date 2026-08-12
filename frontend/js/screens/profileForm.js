@@ -1,8 +1,9 @@
 import { el, errorBanner } from "../components/ui.js";
 import { apiFetch } from "../api.js";
+import { t } from "../i18n.js";
 
 export const render = async (container) => {
-    container.append(el("p", { text: "Cargando..." }));
+    container.append(el("p", { text: t("common.loading") }));
 
     let profile;
     try {
@@ -39,7 +40,7 @@ export const render = async (container) => {
                     profile_visible: visibleInput.checked
                 }
             });
-            successSlot.append(el("p", { class: "success-text", text: "Perfil actualizado correctamente" }));
+            successSlot.append(el("p", { class: "success-text", text: t("profile.successMessage") }));
         } catch (error) {
             const detail = error.errors?.map((e) => e.message).join(" · ");
             errorSlot.append(errorBanner(detail || error.message));
@@ -47,20 +48,20 @@ export const render = async (container) => {
     };
 
     const form = el("form", { class: "hireflow-form", onSubmit: submit }, [
-        el("h2", { text: "Mi perfil" }),
-        el("p", { class: "form-note", text: "El CV extendido (habilidades, experiencia) todavía no está disponible: falta implementar el backend de perfil de candidato." }),
+        el("h2", { text: t("profile.title") }),
+        el("p", { class: "form-note", text: t("profile.cvNote") }),
         errorSlot,
         successSlot,
-        el("label", { text: "Nombre" }),
+        el("label", { text: t("profile.nameLabel") }),
         nameInput,
-        el("label", { text: "Sector" }),
+        el("label", { text: t("profile.sectorLabel") }),
         sectorInput,
-        el("label", { text: "Teléfono" }),
+        el("label", { text: t("profile.phoneLabel") }),
         phoneInput,
-        el("label", { text: "Ubicación" }),
+        el("label", { text: t("profile.locationLabel") }),
         locationInput,
-        el("label", { class: "checkbox-label" }, [visibleInput, " Perfil visible"]),
-        el("button", { type: "submit", class: "primary-button", text: "Guardar" })
+        el("label", { class: "checkbox-label" }, [visibleInput, ` ${t("profile.visibleLabel")}`]),
+        el("button", { type: "submit", class: "primary-button", text: t("common.save") })
     ]);
 
     container.append(form);

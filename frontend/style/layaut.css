@@ -29,6 +29,23 @@
     height: 28px;
 }
 
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.lang-switcher {
+    font-family: "Lato", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 8px;
+    border-radius: 999px;
+    border: 1px solid #ebad64;
+    background: #fdf6ea;
+    cursor: pointer;
+}
+
 .burger {
     background: none;
     border: none;

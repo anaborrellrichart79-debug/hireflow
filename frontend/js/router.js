@@ -1,4 +1,5 @@
 import { isAuthenticated } from "./auth.js";
+import { t } from "./i18n.js";
 
 const routes = [];
 let mainContainer = null;
@@ -70,7 +71,7 @@ const runRoute = async () => {
     try {
         await route.render(mainContainer, params);
     } catch (error) {
-        mainContainer.innerHTML = `<p class="error-text">Error al cargar la pantalla: ${error.message}</p>`;
+        mainContainer.innerHTML = `<p class="error-text">${t("common.loadError")} ${error.message}</p>`;
     }
 };
 
@@ -80,3 +81,7 @@ export const initRouter = (container, { onRouteChange } = {}) => {
     window.addEventListener("hashchange", runRoute);
     runRoute();
 };
+
+// Vuelve a ejecutar la pantalla actual sin cambiar de ruta -- usado tras
+// cambiar de idioma, para que la pantalla visible se redibuje traducida.
+export const refresh = () => runRoute();

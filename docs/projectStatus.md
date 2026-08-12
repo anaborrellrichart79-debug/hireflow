@@ -160,11 +160,16 @@ Estado general
 ## 8. Asistente IA
 🟡 Versión funcional (formularios por función), sin el chat de conversación libre del mockup — pendiente a propósito
 ---
+## Internacionalización (i18n)
+🟢 Español (por defecto), inglés, francés e italiano. Selector de idioma fijo en la topbar, persistido en `localStorage`, redibuja la pantalla actual al cambiar sin perder la navegación. Solo interfaz — los mensajes que devuelve la API se quedan en español (decisión consultada con el usuario). Las opciones de tipo de contrato/jornada/salario del formulario de ofertas guardan un código estable independiente del idioma, para que el mismo valor se muestre traducido sin importar en qué idioma se creó la oferta.
+
+Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
+---
 # Testing
 Backend
 🟢 Postman
 Frontend
-🟢 Playwright (Chromium headless): flujo completo de candidate y recruiter probado end-to-end contra el servidor real — registro, login, CRUD de ofertas, postularse, cambiar estado, guardar nota, calendario, consulta real a `POST /ai/cv-review`. Sin errores de consola tras corregir los bugs encontrados (ver `docs/decisions.md`, entrada 011)
+🟢 Playwright (Chromium headless): flujo completo de candidate y recruiter probado end-to-end contra el servidor real — registro, login, CRUD de ofertas, postularse, cambiar estado, guardar nota, calendario, consulta real a `POST /ai/cv-review`. Sin errores de consola tras corregir los bugs encontrados (ver `docs/decisions.md`, entrada 011). Internacionalización probada en los 4 idiomas, incluida persistencia tras recargar y traducción correcta de valores guardados en distinto idioma al de creación (ver entrada 012)
 ---
 # Documentación
 README
@@ -206,8 +211,9 @@ Implementar:
 ✔ Módulo AI (basado en catálogo) — completo
 ✔ `docs/FRONTEND_DESIGN.md` creado a partir de capturas de Canva — completo
 ✔ Frontend implementado (vanilla JS) y probado en navegador — completo
+✔ Internacionalización del frontend (es/en/fr/it) — completo
 
-**Backend y frontend cerrados.** Se completa todo lo previsto para el MVP: backend (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores, validaciones) + frontend funcional sobre las 8 pantallas del diseño. Pendiente intencionalmente: el Asistente IA como chat de conversación libre (queda como formularios funcionales), CRUD de `user_profiles`, y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe.** Se completa todo lo previsto para el MVP: backend (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores, validaciones) + frontend funcional sobre las 8 pantallas del diseño, en 4 idiomas. Pendiente intencionalmente: el Asistente IA como chat de conversación libre (queda como formularios funcionales), CRUD de `user_profiles`, traducir los mensajes de la API, y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -224,10 +230,10 @@ Un usuario podrá:
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, errores, validaciones)
 Frontend
-█████████████████░░░ 85% (8 pantallas + login implementadas y probadas; queda pendiente el chat libre del Asistente IA, CRUD de user_profiles/CV extendido, y crear entrevistas desde el frontend)
+██████████████████░░ 90% (8 pantallas + login implementadas, probadas y en 4 idiomas; queda pendiente el chat libre del Asistente IA, CRUD de user_profiles/CV extendido, y crear entrevistas desde el frontend)
 Base de datos
 ██████████████░░░ 75%
 Documentación
 █████████████░░░░░░░ 65% (Frontend Design creado; siguen sin existir AI Instructions, Architecture, Roadmap y Sprint Plan — ver tabla de arriba)
 Proyecto completo
-█████████████████░░░ 87% (backend y frontend funcionales para el MVP; quedan pulidos menores y documentación de proceso pendiente)
+██████████████████░░ 89% (backend y frontend funcionales y multilingües para el MVP; quedan pulidos menores y documentación de proceso pendiente)

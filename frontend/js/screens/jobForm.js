@@ -1,27 +1,21 @@
 import { el, errorBanner } from "../components/ui.js";
 import { apiFetch } from "../api.js";
 import { navigate } from "../router.js";
+import { t } from "../i18n.js";
+import { EMPLOYMENT_TYPE_CODES, SALARY_CODES, jobOptionLabel } from "../jobOptions.js";
 
-const CONTRACT_TYPES = ["Indefinido", "Corta duración", "Por horas"];
-const SCHEDULES = ["Completa", "Media Jornada", "A convenir"];
-const SALARY_RANGES = ["Mínimo interprofesional", "1600€ brutos", "1900€ brutos", "2200€ brutos", "Según experiencia"];
-
-// job_offers.employment_type y .salary son columnas de texto simples (no
-// tablas de valores múltiples), así que aunque el mockup las dibuja como
-// checkboxes, aquí se implementan como selección única (tipo pill/radio)
-// para que encajen con el modelo de datos real.
-const pillSingleSelect = (options, selected, onChange) => {
+const pillSingleSelect = (codes, selected, onChange) => {
     const wrapper = el("div", { class: "pill-group" });
 
-    const buttons = options.map((option) =>
+    const buttons = codes.map((code) =>
         el("button", {
             type: "button",
-            class: option === selected ? "pill active" : "pill",
-            text: option,
+            class: code === selected ? "pill active" : "pill",
+            text: jobOptionLabel(code),
             onClick: () => {
-                onChange(option);
+                onChange(code);
                 [...wrapper.children].forEach((btn) => btn.classList.remove("active"));
-                buttons.find((b) => b.textContent === option).classList.add("active");
+                buttons[codes.indexOf(code)].classList.add("active");
             }
         })
     );
@@ -32,7 +26,7 @@ const pillSingleSelect = (options, selected, onChange) => {
 
 export const render = async (container, params) => {
     const isEdit = Boolean(params?.id);
-    container.append(el("p", { text: "Cargando..." }));
+    container.append(el("p", { text: t("common.loading") }));
 
     let job = { title: "", company_id: "", description: "", location: "", employment_type: "", salary: "", skills_required: "" };
     let companies = [];
@@ -53,7 +47,7 @@ export const render = async (container, params) => {
     const errorSlot = el("div", {});
 
     const companySelect = el("select", { name: "company_id" }, [
-        el("option", { value: "", text: "-- Selecciona una empresa --" }),
+        el("option", { value: "", text: t("jobForm.selectCompanyPlaceholder") }),
         ...companies.map((c) => el("option", {
             value: c.id,
             selected: String(c.id) === String(job.company_id) ? "true" : undefined,
@@ -61,13 +55,13 @@ export const render = async (container, params) => {
         }))
     ]);
 
-    const newCompanyName = el("input", { type: "text", placeholder: "Nombre de la nueva empresa" });
-    const newCompanyEmail = el("input", { type: "email", placeholder: "Email de contacto de la empresa" });
+    const newCompanyName = el("input", { type: "text", placeholder: t("jobForm.newCompanyNamePlaceholder") });
+    const newCompanyEmail = el("input", { type: "email", placeholder: t("jobForm.newCompanyEmailPlaceholder") });
 
-    const titleInput = el("input", { type: "text", name: "title", value: job.title || "", placeholder: "Título de la oferta" });
+    const titleInput = el("input", { type: "text", name: "title", value: job.title || "", placeholder: t("jobForm.titleLabel") });
     const descriptionInput = el("textarea", { name: "description", rows: "3", text: job.description || "" });
-    const locationInput = el("input", { type: "text", name: "location", value: job.location || "", placeholder: "Ubicación" });
-    const skillsInput = el("input", { type: "text", name: "skills_required", value: job.skills_required || "", placeholder: "Skills separadas por comas" });
+    const locationInput = el("input", { type: "text", name: "location", value: job.location || "", placeholder: t("jobForm.locationLabel") });
+    const skillsInput = el("input", { type: "text", name: "skills_required", value: job.skills_required || "", placeholder: t("jobForm.skillsPlaceholder") });
 
     let employmentType = job.employment_type || "";
     let salary = job.salary || "";
@@ -112,26 +106,26 @@ export const render = async (container, params) => {
     };
 
     const form = el("form", { class: "hireflow-form", onSubmit: submit }, [
-        el("h2", { text: isEdit ? "Editar oferta laboral" : "Crear oferta laboral" }),
+        el("h2", { text: isEdit ? t("jobForm.editTitle") : t("jobForm.createTitle") }),
         errorSlot,
-        el("label", { text: "Empresa" }),
+        el("label", { text: t("jobForm.companyLabel") }),
         companySelect,
-        el("p", { class: "form-note", text: "¿No está en la lista? Crea una nueva:" }),
+        el("p", { class: "form-note", text: t("jobForm.newCompanyHint") }),
         newCompanyName,
         newCompanyEmail,
-        el("label", { text: "Título de la oferta" }),
+        el("label", { text: t("jobForm.titleLabel") }),
         titleInput,
-        el("label", { text: "Descripción" }),
+        el("label", { text: t("jobForm.descriptionLabel") }),
         descriptionInput,
-        el("label", { text: "Ubicación" }),
+        el("label", { text: t("jobForm.locationLabel") }),
         locationInput,
-        el("label", { text: "Tipo de contrato / jornada" }),
-        pillSingleSelect(CONTRACT_TYPES.concat(SCHEDULES), employmentType, (value) => { employmentType = value; }),
-        el("label", { text: "Salario" }),
-        pillSingleSelect(SALARY_RANGES, salary, (value) => { salary = value; }),
-        el("label", { text: "Skills requeridas" }),
+        el("label", { text: t("jobForm.contractScheduleLabel") }),
+        pillSingleSelect(EMPLOYMENT_TYPE_CODES, employmentType, (value) => { employmentType = value; }),
+        el("label", { text: t("jobForm.salaryLabel") }),
+        pillSingleSelect(SALARY_CODES, salary, (value) => { salary = value; }),
+        el("label", { text: t("jobForm.skillsLabel") }),
         skillsInput,
-        el("button", { type: "submit", class: "primary-button", text: isEdit ? "Guardar cambios" : "Crear oferta" })
+        el("button", { type: "submit", class: "primary-button", text: isEdit ? t("jobForm.submitEdit") : t("jobForm.submitCreate") })
     ]);
 
     container.append(form);

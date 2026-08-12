@@ -13,6 +13,8 @@ Los textos de las capturas de Canva son orientativos. La maquetación (estructur
 
 HireFlow tiene **una sola interfaz para ambos roles** (candidate / company). No se duplican pantallas: cada componente adapta su contenido según `req.user.role`. Esto evita duplicación de código en frontend y backend, siguiendo la filosofía de legibilidad, mantenimiento y consistencia ya aplicada en el backend (ver `docs/decisions.md`).
 
+**Internacionalización (no estaba en el mockup de Canva, añadida por petición del usuario):** toda la interfaz existe en español (por defecto), inglés, francés e italiano, con un selector de idioma fijo en la topbar. Los mensajes que devuelve la API se quedan siempre en español. Detalle completo en `docs/decisions.md`, entrada 012.
+
 ---
 
 # Paleta y estilo visual (observado en las capturas)

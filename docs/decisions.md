@@ -268,3 +268,29 @@ Ningún endpoint validaba el `body` antes de llegar al modelo. Los únicos "guar
 **Archivos afectados:** `frontend/js/*.js` (nuevo, ~12 archivos), `frontend/style/components.css` (nuevo), `frontend/style/main.css` y `frontend/style/layaut.css` (corregidos), `frontend/assets/icons/burger-menu.svg` (color corregido), `frontend/index.html` (drawer de navegación + carga de `app.js`), `backend/server.js` (`express.static` para servir el frontend).
 
 ---
+
+## 012 — Internacionalización del frontend: español por defecto, selector es/en/fr/it
+**Fecha:** Agosto 2026
+
+**Problema:**
+Toda la interfaz estaba escrita con texto fijo en español, mezclado directamente en el código de cada pantalla. El usuario pidió que la app fuera multilingüe, con español por defecto y el usuario pudiendo elegir su idioma.
+
+**Alcance acordado con el usuario:**
+- Idiomas: español (por defecto), inglés, francés, italiano.
+- Solo el frontend. Los mensajes que devuelve literalmente la API (errores de validación, confirmaciones como "Empresa creada correctamente") se quedan siempre en español — traducirlos habría implicado tocar los 5 controllers y los validadores del backend ya cerrado y probado, por una ganancia menor (son mensajes de error/confirmación, no la experiencia principal de uso).
+
+**Diseño:**
+- `frontend/js/i18n.js`: diccionario plano por idioma (`"namespace.clave": "texto"`), función `t(key)` con fallback a español y luego a la propia clave si falta una traducción; idioma persistido en `localStorage` (`hireflow_lang`), por defecto `"es"` si no hay ninguno guardado.
+- `router.js` exporta `refresh()` (vuelve a ejecutar la pantalla actual sin cambiar de ruta) para que, al cambiar de idioma, la pantalla visible se redibuje traducida sin perder la posición de navegación.
+- Selector de idioma (`<select id="lang-switcher">`) fijo en la topbar, siempre visible (incluso sin sesión iniciada, a diferencia del menú de navegación) — `app.js` lo inicializa y llama a `refresh()` en cada cambio; `header.js` además redibuja el drawer al instante si está abierto.
+- `document.documentElement.lang` se mantiene sincronizado con el idioma activo (antes estaba fijo en `"en"` aunque el contenido por defecto era español — corregido de paso).
+
+**Problema encontrado durante el diseño — pills de "tipo de contrato/jornada" y "salario":** estas opciones se enviaban al backend usando directamente el texto visible de la pill como valor (`employment_type`/`salary`, columnas de texto libre en `job_offers`). Traducir solo la etiqueta habría hecho que cada idioma guardara un valor distinto para el mismo concepto (p. ej. "Indefinido" en español, "Permanent" en inglés), y las cards de otras pantallas no habrían podido traducirlo de vuelta al mostrarlo.
+
+**Decisión:** se creó `frontend/js/jobOptions.js` con una lista cerrada de códigos estables en inglés (`full_time`, `permanent`, `1600`, etc. — coincide con el criterio ya usado en los datos de ejemplo del proyecto, p. ej. `full_time`), independientes del idioma. El pill muestra la etiqueta traducida pero guarda siempre el código; al mostrar una oferta en cualquier pantalla, el código se traduce de vuelta a la etiqueta del idioma activo. Si una oferta antigua tiene un valor que no coincide con ningún código conocido (texto libre de antes de este cambio), se muestra tal cual en vez de romper. Mismo criterio aplicado a los 5 valores de `status` de Applications (ya eran códigos estables en inglés del ENUM del backend, solo hacía falta traducir su visualización).
+
+**Verificación:** probado con Playwright — idioma por defecto español en una sesión nueva sin `localStorage` previo; cambio a inglés con recarga completa de la pantalla de login; registro y navegación completa en inglés; cambio a francés con el drawer abierto (confirmado el redibujado inmediato); cambio a italiano y comprobación de que persiste tras recargar la página; y el caso más delicado: una oferta creada en español con la pill "Completa" se mostró correctamente como "Full-time" al cambiar a inglés, confirmando que el valor guardado es estable y solo la visualización cambia. Sin errores de consola.
+
+**Archivos afectados:** `frontend/js/i18n.js` (nuevo), `frontend/js/jobOptions.js` (nuevo), `frontend/js/router.js` (`refresh()`), `frontend/js/app.js` (selector de idioma), `frontend/js/components/header.js`, y las 8 pantallas (`login.js`, `home.js`, `jobs.js`, `jobForm.js`, `applications.js`, `profileForm.js`, `calendar.js`, `ai.js`), `frontend/index.html` (`<select id="lang-switcher">`), `frontend/style/layaut.css` (estilos del selector).
+
+---

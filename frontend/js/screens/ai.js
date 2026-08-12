@@ -1,29 +1,30 @@
 import { el, errorBanner } from "../components/ui.js";
 import { apiFetch } from "../api.js";
+import { t } from "../i18n.js";
 
 // Nota: esta pantalla es una versión funcional simple (formularios por
 // función), no el chat de conversación libre con "import" de documentos
 // que describe FRONTEND_DESIGN.md. Esa parte queda pendiente a propósito
 // -- los 4 endpoints de IA son consultas sobre catálogo, no un LLM con el
 // que se pueda conversar libremente (ver docs/decisions.md, entrada 010).
-const FUNCTIONS = {
+const getFunctions = () => ({
     "cv-review": {
-        label: "Revisión de CV",
-        fields: [{ name: "industry", label: "Industria (ej. startups)", required: true }, { name: "company_type", label: "Tipo de empresa (opcional)" }]
+        label: t("ai.fnCvReview"),
+        fields: [{ name: "industry", label: t("ai.fieldIndustry"), required: true }, { name: "company_type", label: t("ai.fieldCompanyType") }]
     },
     "interview-questions": {
-        label: "Preguntas de entrevista",
-        fields: [{ name: "category", label: "Categoría (opcional): personal/technical/behavioral/stress/culture_fit" }, { name: "difficulty", label: "Dificultad (opcional): basic/intermediate/advanced" }]
+        label: t("ai.fnInterviewQuestions"),
+        fields: [{ name: "category", label: t("ai.fieldCategory") }, { name: "difficulty", label: t("ai.fieldDifficulty") }]
     },
     "interview-feedback": {
-        label: "Consejos de mejora",
-        fields: [{ name: "skills", label: "Skills, separadas por comas", required: true }]
+        label: t("ai.fnInterviewFeedback"),
+        fields: [{ name: "skills", label: t("ai.fieldSkills"), required: true }]
     },
     "job-match": {
-        label: "Match con una oferta",
-        fields: [{ name: "job_offer_id", label: "ID de la oferta", required: true }, { name: "skills", label: "Tus skills (texto libre)", required: true }]
+        label: t("ai.fnJobMatch"),
+        fields: [{ name: "job_offer_id", label: t("ai.fieldJobOfferId"), required: true }, { name: "skills", label: t("ai.fieldCandidateSkills"), required: true }]
     }
-};
+});
 
 const buildBody = (functionKey, formData) => {
     if (functionKey === "interview-feedback") {
@@ -40,16 +41,17 @@ const buildBody = (functionKey, formData) => {
 };
 
 export const render = (container) => {
+    const FUNCTIONS = getFunctions();
     let currentFunction = "cv-review";
 
     const sidebar = el("div", { class: "ai-sidebar" }, [
         el("div", { class: "ai-sidebar-box" }, [
-            el("strong", { text: "Qué puede hacer" }),
-            el("p", { text: "Consulta recomendaciones de CV, preguntas de entrevista, consejos de mejora de skills y compatibilidad con una oferta. Basado en catálogo, no es un chat libre." })
+            el("strong", { text: t("ai.whatCanDoTitle") }),
+            el("p", { text: t("ai.whatCanDoDesc") })
         ])
     ]);
 
-    const resultPanel = el("div", { class: "ai-result", text: "Elige una función y pulsa Preguntar." });
+    const resultPanel = el("div", { class: "ai-result", text: t("ai.chooseFunction") });
 
     const tabs = el("div", { class: "ai-tabs" }, Object.entries(FUNCTIONS).map(([key, def]) =>
         el("button", {
@@ -94,7 +96,7 @@ export const render = (container) => {
             }
         };
 
-        formSlot.append(el("button", { class: "primary-button", type: "button", text: "Preguntar", onClick: submit }));
+        formSlot.append(el("button", { class: "primary-button", type: "button", text: t("ai.askButton"), onClick: submit }));
         tabs.querySelectorAll("button").forEach((btn) => {
             if (btn.textContent === def.label) btn.classList.add("active");
         });

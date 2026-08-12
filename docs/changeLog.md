@@ -4,6 +4,22 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.1.0] - Agosto 2026 — Internacionalización del frontend (es/en/fr/it)
+
+## Añadido
+- `frontend/js/i18n.js` — diccionario de traducciones para español (por defecto), inglés, francés e italiano; función `t(key)` con fallback a español; idioma persistido en `localStorage`
+- Selector de idioma fijo en la topbar, visible con o sin sesión iniciada
+- `router.js` exporta `refresh()` para redibujar la pantalla actual (sin cambiar de ruta) al cambiar de idioma
+- `frontend/js/jobOptions.js` — códigos estables (independientes del idioma) para las pills de tipo de contrato/jornada y salario del formulario de ofertas, con traducción solo de la etiqueta mostrada
+- Traducidas las 8 pantallas + login/registro + menú de navegación
+
+## Corregido
+- `document.documentElement.lang` estaba fijo en `"en"` aunque el contenido por defecto era español
+
+Detalle completo, incluido el problema de las pills con valor guardado dependiente del idioma y cómo se resolvió, en `docs/decisions.md`, entrada 012.
+
+---
+
 # [1.0.0] - Agosto 2026 — Implementación del frontend (vanilla JS)
 
 ## Añadido
@@ -294,11 +310,11 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (1.1.0)
+# Próxima versión (1.2.0)
 Objetivos:
 - CRUD de `user_profiles` (CV extendido del candidate)
 - Decidir el alcance real del Asistente IA: se queda como consultas de catálogo, o se amplía a un LLM real con conversación libre (ver `docs/decisions.md`, entrada 011)
 - Cambio de contraseña (`PUT /users/me/password`), rol `admin`
 - Ampliar el contenido de las tablas catálogo de AI
 - Revisar el color de los iconos SVG restantes (`adjuntar`, `archivo`, `añadir`, `enviar`) si se conectan a alguna pantalla — comparten el mismo problema de color pálido corregido en `burger-menu.svg`
-- Pendiente para más adelante: CRUD de `user_profiles`, cambio de contraseña, rol `admin`, ampliar contenido de las tablas catálogo de AI
+- Ampliar `frontend/js/i18n.js` a más idiomas si hace falta, o traducir también los mensajes que devuelve la API (fuera de alcance por decisión, ver `docs/decisions.md` entrada 012)

@@ -1,19 +1,28 @@
 import { el, errorBanner } from "../components/ui.js";
 import { cardGrid } from "../components/cardGrid.js";
 import { apiFetch } from "../api.js";
+import { t } from "../i18n.js";
 
 const STATUS_OPTIONS = ["wishlist", "applied", "interview", "offer", "rejected"];
+const STATUS_LABEL_KEYS = {
+    wishlist: "applications.statusWishlist",
+    applied: "applications.statusApplied",
+    interview: "applications.statusInterview",
+    offer: "applications.statusOffer",
+    rejected: "applications.statusRejected"
+};
+const statusLabel = (status) => t(STATUS_LABEL_KEYS[status] || status);
 
 const statusCard = (app, jobTitle, onStatusChange) => {
     const select = el("select", {
         onChange: (event) => onStatusChange(app.id, event.target.value)
     }, STATUS_OPTIONS.map((status) =>
-        el("option", { value: status, selected: status === app.status ? "true" : undefined, text: status })
+        el("option", { value: status, selected: status === app.status ? "true" : undefined, text: statusLabel(status) })
     ));
 
     return el("div", { class: "card-content" }, [
         el("h3", { text: jobTitle }),
-        el("span", { class: "status-badge", text: app.status }),
+        el("span", { class: "status-badge", text: statusLabel(app.status) }),
         select
     ]);
 };
@@ -27,7 +36,7 @@ const notesCard = (app, jobTitle, onNotesSave) => {
         el("button", {
             class: "secondary-button",
             type: "button",
-            text: "Guardar nota",
+            text: t("applications.saveNote"),
             onClick: () => onNotesSave(app.id, textarea.value)
         })
     ]);
@@ -37,8 +46,8 @@ export const render = async (container) => {
     let mode = "estado";
 
     const toggle = el("div", { class: "toggle-group" }, [
-        el("button", { class: "secondary-button", type: "button", text: "Ver estado", onClick: () => { mode = "estado"; draw(); } }),
-        el("button", { class: "secondary-button", type: "button", text: "Ver notas", onClick: () => { mode = "notas"; draw(); } })
+        el("button", { class: "secondary-button", type: "button", text: t("applications.viewStatus"), onClick: () => { mode = "estado"; draw(); } }),
+        el("button", { class: "secondary-button", type: "button", text: t("applications.viewNotes"), onClick: () => { mode = "notas"; draw(); } })
     ]);
 
     const listSlot = el("div", { class: "list-slot" });
@@ -46,7 +55,7 @@ export const render = async (container) => {
 
     const draw = async () => {
         listSlot.innerHTML = "";
-        listSlot.append(el("p", { text: "Cargando..." }));
+        listSlot.append(el("p", { text: t("common.loading") }));
 
         try {
             const applications = await apiFetch("/applications");
@@ -58,7 +67,7 @@ export const render = async (container) => {
                         const job = await apiFetch(`/jobs/${jobOfferId}`);
                         jobTitles[jobOfferId] = job.title;
                     } catch {
-                        jobTitles[jobOfferId] = "Oferta eliminada";
+                        jobTitles[jobOfferId] = t("applications.jobDeleted");
                     }
                 })
             );
@@ -78,10 +87,10 @@ export const render = async (container) => {
             };
 
             const renderCard = mode === "estado"
-                ? (app) => statusCard(app, jobTitles[app.job_offer_id] || "Sin oferta asociada", onStatusChange)
-                : (app) => notesCard(app, jobTitles[app.job_offer_id] || "Sin oferta asociada", onNotesSave);
+                ? (app) => statusCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onStatusChange)
+                : (app) => notesCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onNotesSave);
 
-            listSlot.append(cardGrid(applications, renderCard, "Todavía no tienes postulaciones. Ve a Ofertas para crear una."));
+            listSlot.append(cardGrid(applications, renderCard, t("applications.emptyMessage")));
         } catch (error) {
             listSlot.innerHTML = "";
             listSlot.append(errorBanner(error.message));
