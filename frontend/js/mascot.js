@@ -20,17 +20,29 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const getAnchors = () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const narrow = w < 600;
+    // En móvil el contenido es de una sola columna a todo lo ancho (a
+    // diferencia de las columnas centradas de escritorio/tablet), así que
+    // hasta las anclas laterales a media altura pueden caer sobre texto.
+    const singleColumn = w < 600;
+    // Entre 600 y 1000px (tablet) el contenido centrado (max-width 480-900px
+    // según pantalla) sigue ocupando casi todo el ancho del viewport, así que
+    // el ancla junto al header choca con el texto introductorio de casi
+    // todas las pantallas (p. ej. el resumen de Home) -- solo hay margen de
+    // sobra a los lados del contenido a partir de escritorio.
+    const wideEnoughForTopAnchors = w >= 1000;
 
     const anchors = [
-        { x: w - SIZE - EDGE_MARGIN, y: HEADER_HEIGHT },
         { x: w - SIZE - EDGE_MARGIN, y: h - SIZE - BOTTOM_MARGIN },
         { x: EDGE_MARGIN, y: h - SIZE - BOTTOM_MARGIN }
     ];
 
-    if (!narrow) {
+    if (!singleColumn) {
         anchors.push({ x: w - SIZE - EDGE_MARGIN, y: h / 2 });
         anchors.push({ x: EDGE_MARGIN, y: h / 2 });
+    }
+
+    if (wideEnoughForTopAnchors) {
+        anchors.push({ x: w - SIZE - EDGE_MARGIN, y: HEADER_HEIGHT });
         anchors.push({ x: EDGE_MARGIN, y: HEADER_HEIGHT });
     }
 

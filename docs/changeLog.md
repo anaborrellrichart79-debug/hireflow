@@ -4,6 +4,18 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.2.2] - Agosto 2026 — Responsive: tablet, móvil y móvil pequeño
+
+## Corregido
+- Desbordamiento horizontal en (casi) todas las pantallas por debajo de ~480px de ancho, causado por la topbar (logo a tamaño fijo + icono de usuario + selector de idioma + botón de menú no cabían juntos) — logo con tamaño fluido (`clamp`), topbar más compacta en móvil, `overflow-x: hidden` como red de seguridad
+- Variable CSS `--hf-beige-dark` usada pero nunca definida, dejaba sin efecto el `hover` de los botones de icono del asistente IA
+- La mascota global (entrada 014) tapaba el texto introductorio de pantallas como Home en tablet/móvil, donde el contenido centrado ocupa casi todo el ancho — ya no usa las anclas junto al header por debajo de 1000px de ancho de viewport
+- Etiqueta de estado y selector muy pegados en las tarjetas de "Mis postulaciones" en pantallas estrechas
+
+Detalle completo, incluidos dos falsos positivos descartados (artefactos de temporización de las pruebas, no bugs reales), en `docs/decisions.md`, entrada 016.
+
+---
+
 # [1.2.1] - Agosto 2026 — Iconos SVG en el chat del asistente IA
 
 ## Añadido

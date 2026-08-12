@@ -173,6 +173,9 @@ Estado general
 
 Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
 ---
+## Responsive
+🟢 Probado en tablet (768px), móvil (390px) y móvil pequeño (320px), en ambos roles: sin desbordamiento horizontal en ninguna pantalla, topbar adaptada (logo con tamaño fluido, iconos/selector más compactos por debajo de 480px), mascota global sin tapar contenido en ningún ancho. Ver `docs/decisions.md`, entrada 016.
+---
 # Testing
 Backend
 🟢 Postman

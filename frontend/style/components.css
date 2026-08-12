@@ -4,6 +4,7 @@
     --hf-orange-dark: #d98f3f;
     --hf-cream: #fff9e4;
     --hf-beige: #e4d4bb;
+    --hf-beige-dark: #d0bb8e;
     --hf-text: #2a2a2a;
     --hf-error: #c0392b;
     --hf-radius: 18px;
@@ -177,13 +178,14 @@
 .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .status-badge {
-    display: inline-block;
+    display: block;
+    width: fit-content;
     background: #fff;
     border: 1px solid var(--hf-orange);
     border-radius: 999px;
     padding: 4px 10px;
     font-size: 12px;
-    margin-bottom: 8px;
+    margin: 0 0 8px;
 }
 
 .list-slot { max-width: 720px; margin: 0 auto; }
@@ -374,11 +376,11 @@
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease;
 }
-.chat-icon-button:hover { background: var(--hf-orange); transform: scale(1.05); }
+.chat-icon-button:hover { background: var(--hf-beige-dark); transform: scale(1.05); }
 .chat-icon-button img { width: 20px; height: 20px; display: block; }
 
-.chat-send-icon { background: var(--hf-orange); }
-.chat-send-icon:hover { background: var(--hf-orange-dark); }
+.chat-send-icon { background: var(--hf-beige); }
+.chat-send-icon:hover { background: var(--hf-beige-dark); }
 
 .chat-file-input { display: none; }
 

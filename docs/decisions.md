@@ -381,3 +381,28 @@ El usuario pidió sustituir los controles de texto del chat del asistente (entra
 **Archivos afectados:** `frontend/js/screens/ai.js` (botones de icono, input de archivo oculto, chip de adjunto), `frontend/style/components.css` (`.chat-icon-button`, `.chat-send-icon`, `.chat-file-input`, `.chat-file-chip`), `frontend/assets/icons/añadir.svg`/`adjuntar.svg`/`archivo.svg`/`enviar.svg` (colores corregidos), `frontend/js/i18n.js` (+`ai.attachTitle`, `ai.attachedFileLabel`, `ai.attachedFileNote`, `ai.removeFileTitle` en los 4 idiomas).
 
 ---
+
+## 016 — Responsive: tablet, móvil y móvil pequeño
+**Fecha:** Agosto 2026
+
+**Problema:**
+El usuario pidió revisar el responsive de toda la app para que se vea bien en tablet, móvil y móvil pequeño. Se auditaron las 8 pantallas + login/registro con Playwright en 3 anchos de referencia (tablet 768px, móvil 390px, móvil pequeño 320px), en ambos roles.
+
+**Bug principal encontrado — desbordamiento horizontal en (casi) todas las pantallas:** el causante era uno solo, la topbar. `.logo-title` tenía `font-size: 28px` fijo y el wordmark "HIREFLOW" en negrita no cabía junto al icono de usuario (48px), el selector de idioma y el botón de menú por debajo de ~480px de ancho — el navegador dejaba que la topbar se saliera del viewport, y como es la única franja fija de la interfaz, ese desbordamiento aparecía en cualquier pantalla (confirmado con `document.documentElement.scrollWidth > clientWidth`, verdadero en las 12 pantallas probadas a 320px y a 390px, falso en las 12 a 768px). El contenido de cada pantalla (formularios, tarjetas, calendario, chat) ya se adaptaba bien por sí solo gracias a los `max-width` centrados y los breakpoints existentes (`480px` en `card-grid`, `640px` en `week-calendar` y `ai-panel`) — no fue necesario tocarlos.
+
+**Solución:**
+- `.logo-title`: `font-size: clamp(16px, 6vw, 28px)` (se reduce de forma fluida en vez de con saltos bruscos) + `flex: 1; min-width: 0; overflow: hidden;` para que ocupe el espacio sobrante entre el icono de usuario y el bloque derecho sin empujarlos fuera; `white-space: nowrap` para que nunca parta el wordmark en dos líneas (rompería la altura fija de 80px de la topbar).
+- Breakpoint nuevo a `480px` en `layaut.css`: reduce el padding de la topbar, el tamaño del icono de usuario, el gap y el tamaño del selector de idioma/botón de menú — con eso hay margen de sobra hasta los 320px probados.
+- `html, body { overflow-x: hidden; }` en `main.css` como red de seguridad general (no todo desbordamiento horizontal viene de contenido en flujo normal — un elemento `position: fixed` mal calculado también puede ensanchar el documento).
+
+**Otros hallazgos y su resolución:**
+- Variable CSS `--hf-beige-dark` usada en los botones de icono del asistente IA (entrada 015) pero nunca definida en `:root` — el `hover` de esos botones no hacía nada visible. Añadida al bloque de paleta (`#d0bb8e`, mismo patrón que `--hf-orange-dark`).
+- La mascota (entrada 014) se posiciona en "anclas" fijas del viewport para evitar el contenido centrado de cada pantalla; a partir de 600px de ancho usaba también las dos anclas junto al header, pero en móvil y tablet el contenido centrado ocupa casi todo el ancho disponible (a diferencia de escritorio, donde sobra margen a los lados), así que esas anclas quedaban encima del texto introductorio de pantallas como Home. Se subió el umbral que habilita las anclas junto al header de 600px a 1000px — por debajo de eso la mascota solo usa las anclas inferiores (y, a partir de 600px, también las laterales a media altura, que sí quedan libres porque el contenido alto no suele llegar hasta ahí).
+- `.status-badge` (etiqueta de estado en las tarjetas de "Mis postulaciones") pasó de `inline-block` a `display: block` — compartía línea con el `<select>` de cambiar estado, quedando los dos muy pegados en pantallas estrechas (`Interesa [Interesa ▾]`); ahora cada uno va en su propia línea, con más aire también en tablet/escritorio.
+- Dos "bugs" que resultaron ser artefactos de temporización de las propias pruebas, no fallos reales: el drawer de navegación (transición de 0.2s) y el cierre del drawer al navegar (mismo mecanismo) parecían "cortados" en capturas `fullPage` de Playwright tomadas antes de que la transición CSS terminara — confirmado repitiendo la comprobación con una espera adicional y con `boundingBox()`, que mostró la posición final correcta.
+
+**Verificación:** Playwright, 3 anchos (768/390/320px) × 2 roles, flujo completo (registro, login, Home, Ofertas, crear oferta, Postulaciones incl. notas, Calendario, Perfil, Asistente IA incl. envío de mensaje) — sin desbordamiento horizontal en ninguna combinación tras el fix (antes: desbordamiento en las 12 pantallas de 320px y 390px), cero errores de consola.
+
+**Archivos afectados:** `frontend/style/layaut.css` (topbar responsive), `frontend/style/main.css` (`overflow-x: hidden`), `frontend/style/components.css` (`--hf-beige-dark`, `.status-badge`), `frontend/js/mascot.js` (umbral de anclas junto al header).
+
+---
