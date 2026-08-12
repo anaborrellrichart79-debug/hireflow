@@ -294,3 +294,29 @@ Toda la interfaz estaba escrita con texto fijo en español, mezclado directament
 **Archivos afectados:** `frontend/js/i18n.js` (nuevo), `frontend/js/jobOptions.js` (nuevo), `frontend/js/router.js` (`refresh()`), `frontend/js/app.js` (selector de idioma), `frontend/js/components/header.js`, y las 8 pantallas (`login.js`, `home.js`, `jobs.js`, `jobForm.js`, `applications.js`, `profileForm.js`, `calendar.js`, `ai.js`), `frontend/index.html` (`<select id="lang-switcher">`), `frontend/style/layaut.css` (estilos del selector).
 
 ---
+
+## 013 — Home: resumen + accesos rápidos, en vez de solo texto de bienvenida
+**Fecha:** Agosto 2026
+
+**Problema:**
+Probando la app manualmente, el usuario señaló que la pantalla de Home (un simple texto de bienvenida bajo el header, fiel al mockup original — ver `FRONTEND_DESIGN.md`, pantalla 1) se veía "muy vacía".
+
+**Alternativas consideradas:**
+- (a) Accesos rápidos: tarjetas grandes que llevan directo a Ofertas / Mis postulaciones / Calendario / Mi perfil / Asistente IA (según rol), reutilizando `card-grid`/`gradient-container` ya existentes.
+- (b) Resumen tipo dashboard: contador de postulaciones (candidate) u ofertas publicadas (recruiter), desglose por estado, próxima entrevista.
+- (c) Combinar (a) y (b).
+
+**Decisión:** (c), elegida por el usuario tras presentarle las tres opciones.
+
+**Diseño:**
+- Candidate: dos tarjetas de estadística (total de postulaciones, próxima entrevista con fecha/hora localizada según el idioma activo — `toLocaleString(getLang())`, o "Ninguna programada" si no hay), más una fila de badges con el desglose por estado (reutilizando `applicationStatus.js`, extraído de `applications.js` a un módulo compartido para no duplicar el mapeo de estados).
+- Recruiter: una única tarjeta con el número de ofertas propias (`created_by_user === user.id`, mismo filtrado client-side que ya usaba `jobs.js`, porque el backend no filtra `GET /jobs` por creador). No se muestra ningún dato de candidatos/aplicantes por oferta — no existe ningún endpoint que lo permita consultar (ver pendiente ya registrado en `FRONTEND_DESIGN.md`), y mostrar un "0" fijo o inventado habría sido engañoso.
+- Los accesos rápidos son `<button>` reales (no `<div>` con `onClick`) dentro de las cards, para que sean accesibles/tabulables.
+
+**Motivo:** el usuario pidió explícitamente combinar ambas ideas tras vérselas planteadas; esto se aparta del mockup original (que preveía Home como estado vacío puro), decisión que le correspondía a él tomar porque cambia el diseño ya aprobado.
+
+**Verificación:** probado con Playwright con datos reales — candidate con 1 postulación y 1 entrevista agendada (vía API directa, no hay pantalla de creación de entrevistas en el frontend todavía), recruiter con 1 oferta publicada, comprobado en español e inglés (fecha localizada correctamente: "15/9, 10:00" en español vs "09/15, 10:00 AM" en inglés), y clic en una card de acceso rápido navegando a la pantalla correcta. Sin errores de consola.
+
+**Archivos afectados:** `frontend/js/applicationStatus.js` (nuevo, extraído de `applications.js`), `frontend/js/screens/home.js` (reescrito), `frontend/js/screens/applications.js` (usa el módulo compartido), `frontend/js/i18n.js` (nuevas claves `home.*`), `frontend/style/components.css` (estilos de `.stat-card`, `.quick-link-card`, etc.).
+
+---

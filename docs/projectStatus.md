@@ -139,8 +139,8 @@ Estado general
 ## Login / Registro
 🟢 (no estaba en `FRONTEND_DESIGN.md`, añadido por ser necesario para autenticación)
 ---
-## 1. Home / Empty State
-🟢
+## 1. Home (resumen + accesos rápidos)
+🟢 Evolucionada respecto al mockup original (que la preveía como estado vacío puro) por petición del usuario tras probar la app: ahora incluye resumen (postulaciones/entrevistas o ofertas publicadas, según rol) y accesos rápidos a las demás pantallas. Ver `docs/decisions.md`, entrada 013.
 ---
 ## 2. Formulario (perfil candidate)
 🟢 — CV extendido (skills/experiencia) pendiente de `user_profiles`
@@ -212,6 +212,7 @@ Implementar:
 ✔ `docs/FRONTEND_DESIGN.md` creado a partir de capturas de Canva — completo
 ✔ Frontend implementado (vanilla JS) y probado en navegador — completo
 ✔ Internacionalización del frontend (es/en/fr/it) — completo
+✔ Home con resumen + accesos rápidos (pedido tras pruebas manuales del usuario) — completo
 
 **Backend y frontend cerrados, app multilingüe.** Se completa todo lo previsto para el MVP: backend (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores, validaciones) + frontend funcional sobre las 8 pantallas del diseño, en 4 idiomas. Pendiente intencionalmente: el Asistente IA como chat de conversación libre (queda como formularios funcionales), CRUD de `user_profiles`, traducir los mensajes de la API, y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
@@ -224,13 +225,13 @@ Un usuario podrá:
 ✔ Guardarlas
 ✔ Cambiar su estado
 🟡 Gestionar entrevistas (se pueden ver en el Calendario semanal; todavía no hay pantalla para crear/editar una entrevista directamente desde el frontend)
-⬜ Ver estadísticas
+🟡 Ver estadísticas (resumen básico en Home desde v1.1.1: nº de postulaciones/ofertas y desglose por estado; no es un dashboard completo)
 ---
 # Estado global
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, errores, validaciones)
 Frontend
-██████████████████░░ 90% (8 pantallas + login implementadas, probadas y en 4 idiomas; queda pendiente el chat libre del Asistente IA, CRUD de user_profiles/CV extendido, y crear entrevistas desde el frontend)
+██████████████████░░ 92% (8 pantallas + login implementadas, probadas y en 4 idiomas, Home con resumen y accesos rápidos; queda pendiente el chat libre del Asistente IA, CRUD de user_profiles/CV extendido, y crear entrevistas desde el frontend)
 Base de datos
 ██████████████░░░ 75%
 Documentación

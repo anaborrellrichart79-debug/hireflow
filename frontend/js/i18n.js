@@ -45,6 +45,11 @@ const dictionaries = {
 
         "home.welcomeRecruiter": "Bienvenido. Usa el menú para gestionar tus ofertas, ver tu calendario de entrevistas o pedir ayuda al asistente.",
         "home.welcomeCandidate": "Bienvenido. Usa el menú para buscar ofertas, revisar tus postulaciones o pedir ayuda al asistente.",
+        "home.quickLinksTitle": "Accesos rápidos",
+        "home.summaryTotalApplications": "Postulaciones",
+        "home.summaryNextInterview": "Próxima entrevista",
+        "home.summaryNoInterview": "Ninguna programada",
+        "home.summaryJobsPublished": "Ofertas publicadas",
 
         "jobs.newOfferButton": "+ Nueva oferta",
         "jobs.applyButton": "Postularme",
@@ -161,6 +166,11 @@ const dictionaries = {
 
         "home.welcomeRecruiter": "Welcome. Use the menu to manage your job offers, check your interview calendar or ask the assistant for help.",
         "home.welcomeCandidate": "Welcome. Use the menu to browse jobs, check your applications or ask the assistant for help.",
+        "home.quickLinksTitle": "Quick access",
+        "home.summaryTotalApplications": "Applications",
+        "home.summaryNextInterview": "Next interview",
+        "home.summaryNoInterview": "None scheduled",
+        "home.summaryJobsPublished": "Published offers",
 
         "jobs.newOfferButton": "+ New offer",
         "jobs.applyButton": "Apply",
@@ -277,6 +287,11 @@ const dictionaries = {
 
         "home.welcomeRecruiter": "Bienvenue. Utilisez le menu pour gérer vos offres, consulter votre calendrier d'entretiens ou demander de l'aide à l'assistant.",
         "home.welcomeCandidate": "Bienvenue. Utilisez le menu pour parcourir les offres, consulter vos candidatures ou demander de l'aide à l'assistant.",
+        "home.quickLinksTitle": "Accès rapides",
+        "home.summaryTotalApplications": "Candidatures",
+        "home.summaryNextInterview": "Prochain entretien",
+        "home.summaryNoInterview": "Aucun prévu",
+        "home.summaryJobsPublished": "Offres publiées",
 
         "jobs.newOfferButton": "+ Nouvelle offre",
         "jobs.applyButton": "Postuler",
@@ -393,6 +408,11 @@ const dictionaries = {
 
         "home.welcomeRecruiter": "Benvenuto. Usa il menu per gestire le tue offerte, controllare il calendario dei colloqui o chiedere aiuto all'assistente.",
         "home.welcomeCandidate": "Benvenuto. Usa il menu per cercare offerte, controllare le tue candidature o chiedere aiuto all'assistente.",
+        "home.quickLinksTitle": "Accessi rapidi",
+        "home.summaryTotalApplications": "Candidature",
+        "home.summaryNextInterview": "Prossimo colloquio",
+        "home.summaryNoInterview": "Nessuno programmato",
+        "home.summaryJobsPublished": "Offerte pubblicate",
 
         "jobs.newOfferButton": "+ Nuova offerta",
         "jobs.applyButton": "Candidati",

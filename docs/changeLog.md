@@ -4,6 +4,16 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.1.1] - Agosto 2026 — Home: resumen + accesos rápidos
+
+## Añadido
+- Pantalla Home rediseñada: ya no es solo un texto de bienvenida — ahora incluye un resumen (postulaciones y próxima entrevista para candidate; ofertas publicadas para recruiter, con desglose por estado en el caso del candidate) y una cuadrícula de accesos rápidos a las demás pantallas, según rol
+- `frontend/js/applicationStatus.js` — mapeo de estados de postulación a etiqueta traducida, extraído de `applications.js` para reutilizarlo también en Home
+
+Cambio pedido por el usuario tras probar la app manualmente ("la pantalla de inicio se ve muy vacía"). Detalle y alternativas consideradas en `docs/decisions.md`, entrada 013.
+
+---
+
 # [1.1.0] - Agosto 2026 — Internacionalización del frontend (es/en/fr/it)
 
 ## Añadido

@@ -2,16 +2,7 @@ import { el, errorBanner } from "../components/ui.js";
 import { cardGrid } from "../components/cardGrid.js";
 import { apiFetch } from "../api.js";
 import { t } from "../i18n.js";
-
-const STATUS_OPTIONS = ["wishlist", "applied", "interview", "offer", "rejected"];
-const STATUS_LABEL_KEYS = {
-    wishlist: "applications.statusWishlist",
-    applied: "applications.statusApplied",
-    interview: "applications.statusInterview",
-    offer: "applications.statusOffer",
-    rejected: "applications.statusRejected"
-};
-const statusLabel = (status) => t(STATUS_LABEL_KEYS[status] || status);
+import { STATUS_OPTIONS, statusLabel } from "../applicationStatus.js";
 
 const statusCard = (app, jobTitle, onStatusChange) => {
     const select = el("select", {

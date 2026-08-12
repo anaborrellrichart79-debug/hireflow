@@ -88,6 +88,54 @@
 .empty-state { text-align: center; padding: 40px 16px; }
 .empty-state-text { color: #777; font-size: 16px; }
 
+/* --- Home: bienvenida, resumen y accesos rápidos --- */
+.home-welcome {
+    max-width: 720px;
+    margin: 0 auto 20px;
+    text-align: center;
+    color: #555;
+}
+
+.section-title {
+    max-width: 720px;
+    margin: 24px auto 12px;
+    font-size: 16px;
+}
+
+.home-summary { max-width: 720px; margin: 0 auto; }
+
+.stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+
+.stat-card {
+    flex: 1;
+    min-width: 140px;
+    background: var(--hf-beige);
+    border-radius: var(--hf-radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-value { font-size: 20px; font-weight: 900; }
+.stat-label { font-size: 12px; color: #666; }
+
+.status-badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.quick-link-card {
+    border: none;
+    background: var(--hf-beige);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    border-radius: var(--hf-radius);
+    padding: 16px;
+}
+
+.quick-link-card:hover { background: #d8c4a0; }
+
 .error-banner {
     background: #fbe2de;
     color: var(--hf-error);
