@@ -134,37 +134,37 @@ Estado
 ---
 # Frontend
 Estado general
-🔴 Sin comenzar (diseño ya cerrado en `FRONTEND_DESIGN.md`)
+🟢 Implementado (vanilla JS, sin framework, servido como estático desde el propio backend — ver `docs/decisions.md`, entrada 011). Este checklist reemplaza al anterior (Landing/Login/Dashboard/...), que no coincidía con las pantallas reales de `FRONTEND_DESIGN.md`.
 ---
-## Landing
-⬜
+## Login / Registro
+🟢 (no estaba en `FRONTEND_DESIGN.md`, añadido por ser necesario para autenticación)
 ---
-## Login
-⬜
+## 1. Home / Empty State
+🟢
 ---
-## Dashboard
-⬜
+## 2. Formulario (perfil candidate)
+🟢 — CV extendido (skills/experiencia) pendiente de `user_profiles`
 ---
-## Applications
-⬜
+## 2. Formulario (oferta company)
+🟢 — adaptado a selector de empresa real + pills de selección única (ver decisión 011)
 ---
-## Jobs
-⬜
+## 3/7. Listado de ofertas (candidate: postularse / company: gestionar)
+🟢
 ---
-## Companies
-⬜
+## 4. Calendario semanal
+🟢
 ---
-## Calendar
-⬜
+## 5/6. Postulaciones (estado / notas, con toggle)
+🟢
 ---
-## Perfil
-⬜
+## 8. Asistente IA
+🟡 Versión funcional (formularios por función), sin el chat de conversación libre del mockup — pendiente a propósito
 ---
 # Testing
 Backend
 🟢 Postman
 Frontend
-🔴 Pendiente
+🟢 Playwright (Chromium headless): flujo completo de candidate y recruiter probado end-to-end contra el servidor real — registro, login, CRUD de ofertas, postularse, cambiar estado, guardar nota, calendario, consulta real a `POST /ai/cv-review`. Sin errores de consola tras corregir los bugs encontrados (ver `docs/decisions.md`, entrada 011)
 ---
 # Documentación
 README
@@ -204,8 +204,10 @@ Implementar:
 ✔ Validaciones de entrada — completo
 ✔ CRUD Calendar — completo
 ✔ Módulo AI (basado en catálogo) — completo
+✔ `docs/FRONTEND_DESIGN.md` creado a partir de capturas de Canva — completo
+✔ Frontend implementado (vanilla JS) y probado en navegador — completo
 
-**Backend cerrado.** Con esto se completa todo lo previsto para el backend del MVP (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores y validaciones). Siguiente paso: frontend (ver nota en Documentación sobre `FRONTEND_DESIGN.md`, que no existe todavía y habrá que crear o rehacer).
+**Backend y frontend cerrados.** Se completa todo lo previsto para el MVP: backend (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores, validaciones) + frontend funcional sobre las 8 pantallas del diseño. Pendiente intencionalmente: el Asistente IA como chat de conversación libre (queda como formularios funcionales), CRUD de `user_profiles`, y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -215,17 +217,17 @@ Un usuario podrá:
 ✔ Buscar ofertas
 ✔ Guardarlas
 ✔ Cambiar su estado
-⬜ Gestionar entrevistas
+🟡 Gestionar entrevistas (se pueden ver en el Calendario semanal; todavía no hay pantalla para crear/editar una entrevista directamente desde el frontend)
 ⬜ Ver estadísticas
 ---
 # Estado global
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, errores, validaciones)
 Frontend
-░░░░░░░░░░░░░░░░░░ 0% (diseño ya cerrado en `FRONTEND_DESIGN.md`, agosto 2026 — implementación sin empezar)
+█████████████████░░░ 85% (8 pantallas + login implementadas y probadas; queda pendiente el chat libre del Asistente IA, CRUD de user_profiles/CV extendido, y crear entrevistas desde el frontend)
 Base de datos
 ██████████████░░░ 75%
 Documentación
 █████████████░░░░░░░ 65% (Frontend Design creado; siguen sin existir AI Instructions, Architecture, Roadmap y Sprint Plan — ver tabla de arriba)
 Proyecto completo
-█████████████░░░░░░░ 63% (backend cerrado, diseño de frontend cerrado; queda pendiente la implementación del frontend)
+█████████████████░░░ 87% (backend y frontend funcionales para el MVP; quedan pulidos menores y documentación de proceso pendiente)

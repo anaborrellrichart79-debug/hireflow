@@ -4,6 +4,31 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.0.0] - Agosto 2026 — Implementación del frontend (vanilla JS)
+
+## Añadido
+- Frontend completo en vanilla JS (sin framework ni build step), servido como estático desde el propio `backend/server.js` (`express.static`) — mismo origen que `/api/*`, sin necesidad de configurar CORS
+- Módulos base: `api.js` (fetch + JWT desde `localStorage`), `auth.js`, `router.js` (hash router con parámetros de ruta), `components/ui.js`, `components/cardGrid.js`, `components/header.js` (menú dinámico según rol)
+- Pantalla de Login/Registro (no estaba en `FRONTEND_DESIGN.md`, necesaria para autenticación)
+- Las 8 pantallas de `FRONTEND_DESIGN.md`: Home/Empty State, Formulario (perfil candidate / oferta company), listado de ofertas (candidate + company, con crear/editar/eliminar/postularse), postulaciones con toggle estado/notas, Calendario semanal de entrevistas, Asistente IA (panel de 4 funciones sobre los endpoints de IA existentes)
+- `frontend/style/components.css` con los estilos de todos los componentes nuevos, sobre la paleta ya definida en `docs/FRONTEND_DESIGN.md`
+
+## Corregido (bugs detectados probando en navegador con Playwright)
+- `header.js` importaba `getCurrentUser` de un módulo que no lo exportaba — rompía la carga completa de la app
+- Los iconos SVG del header se renderizaban a 0×0 píxeles (sin `width`/`height` ni en el SVG ni en CSS) — completamente invisibles
+- `burger-menu.svg` usaba un color de relleno casi invisible sobre fondo blanco — corregido a negro
+- El formulario de login no centraba verticalmente su contenido (`flex-direction` faltante) — el enlace "Regístrate" flotaba al lado del formulario en vez de debajo
+
+## Adaptado respecto al mockup (documentado en `docs/decisions.md`, entrada 011)
+- Selector de empresa existente + creación rápida en vez de campos de texto libre (`job_offers.company_id` es una FK real)
+- Pills de tipo de contrato/jornada/salario como selección única, no checkboxes (columnas de texto simples en la BD)
+- Campo "Urgencia" solo visual, no se persiste (no existe columna en `job_offers`)
+- Asistente IA como formularios estructurados por función, no chat libre — queda pendiente a propósito, tal como pidió el usuario
+
+Detalle completo, alternativas consideradas y verificación en `docs/decisions.md`, entrada 011.
+
+---
+
 # [0.9.1] - Agosto 2026 — Documentación de diseño de frontend
 
 ## Añadido
@@ -269,7 +294,11 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (1.0.0)
+# Próxima versión (1.1.0)
 Objetivos:
-- Frontend (backend del MVP completo)
+- CRUD de `user_profiles` (CV extendido del candidate)
+- Decidir el alcance real del Asistente IA: se queda como consultas de catálogo, o se amplía a un LLM real con conversación libre (ver `docs/decisions.md`, entrada 011)
+- Cambio de contraseña (`PUT /users/me/password`), rol `admin`
+- Ampliar el contenido de las tablas catálogo de AI
+- Revisar el color de los iconos SVG restantes (`adjuntar`, `archivo`, `añadir`, `enviar`) si se conectan a alguna pantalla — comparten el mismo problema de color pálido corregido en `burger-menu.svg`
 - Pendiente para más adelante: CRUD de `user_profiles`, cambio de contraseña, rol `admin`, ampliar contenido de las tablas catálogo de AI

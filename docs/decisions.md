@@ -224,3 +224,47 @@ Ningún endpoint validaba el `body` antes de llegar al modelo. Los únicos "guar
 **Archivos afectados:** `models/ai.js` (nuevo), `controllers/aiControllers.js` (nuevo), `validators/aiValidators.js` (nuevo), `routes/aiRoutes.js` (nuevo), `server.js`, `database/seed.sql` (poblada correctamente en la BD real: `ai_resume_guides` 0→7 filas, `ai_skill_improvement` 0→12 filas).
 
 ---
+
+## 011 — Implementación del frontend: vanilla JS servido desde el propio Express, sin framework
+**Fecha:** Agosto 2026
+
+**Problema:**
+`docs/FRONTEND_DESIGN.md` ya documentaba las 8 pantallas, pero faltaba decidir cómo construirlas: el proyecto ya tenía un scaffold empezado (`frontend/index.html` + CSS plano, sin ningún framework ni build tool) con el `Header` parcialmente hecho. Había que decidir si continuar en ese mismo estilo o introducir React/Vue + un bundler, y cómo conectar el frontend con la API sin toparse con CORS (el backend no tenía `cors` configurado).
+
+**Alternativas consideradas:**
+- (a) Introducir un framework (React/Vue) con su propio dev server (Vite, etc.), y añadir el paquete `cors` en el backend para permitir peticiones cross-origin entre ambos servidores.
+- (b) Continuar en vanilla JS (como ya estaba empezado el `Header`), con un router propio muy simple basado en el hash de la URL, y servir el frontend como archivos estáticos desde el mismo servidor Express que ya sirve `/api/*` — mismo origen, sin necesidad de CORS.
+
+**Decisión:** (b).
+
+**Motivo:**
+- Seguir el estilo ya iniciado en el repo (`index.html`/`layaut.css`/`main.css` ya existían, sin ninguna dependencia de frontend) en vez de descartarlo por un framework nuevo.
+- Evita añadir `cors` y toda la superficie de configuración que conlleva (orígenes permitidos, credenciales, preflight) — al servir el frontend desde `app.use(express.static(...))` en el propio `server.js`, el navegador nunca trata las peticiones a `/api/*` como cross-origin.
+- El routing de pantallas es 100% client-side (hash, `#/jobs`, `#/applications`, etc.), así que no hace falta ningún fallback especial en el servidor para rutas desconocidas — Express solo necesita servir `index.html` en `/` y los assets estáticos; el hash nunca llega al servidor.
+
+**Arquitectura resultante (`frontend/js/`):**
+- `api.js` — wrapper de `fetch` a `/api/*`, añade el JWT desde `localStorage`, decodifica el payload del token en cliente para saber `id`/`email`/`role` sin llamar a `GET /users/me`.
+- `auth.js` — `login`/`register`/`logout`/`isAuthenticated`.
+- `router.js` — router hash propio con soporte de parámetros de ruta (`/jobs/edit/:id`), guarda de autenticación (redirige a `/login` si la ruta no es pública y no hay sesión).
+- `components/` — `ui.js` (helper `el()` para crear elementos sin plantillas de string, evita problemas de escapado con datos de la API), `header.js` (menú hamburguesa dinámico según rol), `cardGrid.js`.
+- `screens/` — una función `render(container, params)` por pantalla.
+
+**Pantalla de Login/Registro añadida (no estaba en `FRONTEND_DESIGN.md`):** las 8 pantallas del diseño asumen sesión iniciada; hacía falta una pantalla de entrada. Se añadió con el mismo lenguaje visual (tarjeta con degradado, botón píldora) pero es una adición de esta implementación, no parte del diseño aprobado en Canva.
+
+**Adaptaciones respecto al diseño original (mockup orientativo, ver nota en `FRONTEND_DESIGN.md`):**
+- El Formulario de oferta laboral (pantalla 2) sustituye los campos de texto libre "Nombre de la empresa"/"Información de la empresa" por un selector de empresa existente (`GET /companies`) + creación rápida inline — porque `job_offers.company_id` es una FK real, no texto libre.
+- Los grupos de pills de "Tipo de contrato"/"Tipo de jornada"/"Salario" se implementan como selección única (tipo radio), no checkboxes multi-selección — porque `employment_type` y `salary` son columnas de texto simples en `job_offers`, no relaciones de valores múltiples.
+- El campo "Urgencia" (escala 1-5) se mantiene en el formulario por fidelidad visual al mockup, pero no se envía al backend — `job_offers` no tiene ninguna columna para persistirlo (ver pendientes ya anotados en `FRONTEND_DESIGN.md`).
+- La pantalla 8 (Asistente IA) se implementa como un panel de 4 pestañas con formularios estructurados (uno por función), no como el chat de conversación libre con "import" de documentos que describe el mockup — porque los 4 endpoints de IA son consultas de catálogo (entrada 010), no un LLM con el que se pueda conversar. Esta parte queda **pendiente a propósito**, tal como pidió el usuario.
+
+**Bugs encontrados y corregidos durante las pruebas en navegador (Playwright + Chromium headless, ver más abajo):**
+1. `components/header.js` importaba `getCurrentUser` desde `auth.js`, pero esa función solo se exportaba desde `api.js` (auth.js la importaba pero no la reexportaba) — error de módulo ES que rompía la carga completa de la app. Corregido importando desde `api.js` directamente en `header.js`, y añadiendo `export { getCurrentUser }` en `auth.js` para que `home.js`/`jobs.js` (que ya la importaban desde `auth.js`) también funcionaran sin tocarlos.
+2. Los iconos SVG de `assets/icons/` (`usuario.svg`, `burger-menu.svg`) no tienen `width`/`height` en la raíz del `<svg>`; usados dentro de `<img>` sin tamaño CSS explícito, el navegador los renderizaba a **0×0 píxeles** (confirmado con `boundingBox()` de Playwright) — completamente invisibles, no un problema de color. Corregido dando tamaño explícito en `layaut.css` (`.user-icon img`, `.burger img`).
+3. `burger-menu.svg` además usaba un color de relleno casi invisible sobre fondo blanco (`#fcdf96`, crema pálido) — no coincide con el icono negro sólido de las capturas de Canva originales. Corregido el color del SVG a negro. (El resto de iconos del mismo lote — `adjuntar`, `archivo`, `añadir`, `enviar` — comparten colores igual de pálidos pero no están conectados a ninguna pantalla todavía, así que no se han tocado; quedan pendientes si se usan en el futuro.)
+4. `main.css`: la regla `.main-container > .auth-screen` (y `.empty-state`) tenía `display:flex` sin `flex-direction:column`, así que el formulario de login y el enlace "¿No tienes cuenta?" se centraban **en fila** en vez de apilados — visible como el enlace flotando a la derecha del formulario. Corregido añadiendo `flex-direction: column`.
+
+**Verificación:** flujo completo probado con Playwright (Chromium headless, sin sesión gráfica disponible en este entorno) contra el servidor real: registro y login de un `candidate` y un `recruiter`, creación de empresa+oferta inline, edición de oferta, postulación a una oferta, cambio de `status`, guardado de nota, navegación por las 8 pantallas de cada rol, y una consulta real a `POST /ai/cv-review` con resultado mostrado en pantalla — sin errores de consola. Un primer intento de probar el submit del formulario de oferta pareció fallar (el formulario no navegaba tras crear la oferta), pero se confirmó que era un selector ambiguo del propio script de prueba (`text=Crear oferta` coincidía también con el `<h2>` "Crear oferta laboral"), no un bug de la aplicación — con un selector preciso (`button[type="submit"]`) la creación funciona correctamente.
+
+**Archivos afectados:** `frontend/js/*.js` (nuevo, ~12 archivos), `frontend/style/components.css` (nuevo), `frontend/style/main.css` y `frontend/style/layaut.css` (corregidos), `frontend/assets/icons/burger-menu.svg` (color corregido), `frontend/index.html` (drawer de navegación + carga de `app.js`), `backend/server.js` (`express.static` para servir el frontend).
+
+---

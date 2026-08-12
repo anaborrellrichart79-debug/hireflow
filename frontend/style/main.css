@@ -6,8 +6,16 @@ body {
 /*Fondo principal*/
 .main-container {
     min-height: calc(100vh - 80px);
-    background: linear-gradient(to right, #ebad64, #ffffff, #fff9e4);
+    background: #ffffff;
+    padding: 24px 16px 48px;
+    box-sizing: border-box;
+}
+
+.main-container > .empty-state,
+.main-container > .auth-screen {
+    min-height: calc(100vh - 128px);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
