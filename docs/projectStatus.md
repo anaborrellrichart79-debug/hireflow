@@ -161,7 +161,7 @@ Estado general
 🟢
 ---
 ## 8. Asistente IA
-🟢 Chat libre (sin pestañas de categoría): interpreta la pregunta por palabras clave, pide aclaración si le falta información, rechaza temas ajenos a HireFlow. Chips de sugerencia no vinculantes. Ver `docs/decisions.md`, entrada 014.
+🟢 Chat libre (sin pestañas de categoría): interpreta la pregunta por palabras clave, pide aclaración si le falta información, rechaza temas ajenos a HireFlow. Chips de sugerencia no vinculantes. Botones de icono con `title`/`alt` (nueva conversación, adjuntar archivo, enviar) usando los SVG de `frontend/assets/icons/`; adjuntar un archivo solo referencia su nombre en el mensaje (no se lee el contenido). Ver `docs/decisions.md`, entradas 014 y 015.
 ---
 ## Mascota animada global
 🟢 Visible en todas las pantallas (montada una vez en `#mascot-root`, fuera del área que gestiona el router). Se mueve entre posiciones ancladas al viewport, da volteretas, se esconde parcialmente y muestra un bocadillo con frases de ayuda/humor (por rol, en los 4 idiomas). Clic → navega al Asistente IA.

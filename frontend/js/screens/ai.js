@@ -11,6 +11,19 @@ import { t } from "../i18n.js";
 // todos los mensajes del usuario en la conversación (no solo el último),
 // para que el clasificador tenga más contexto según avanza la charla.
 
+// Botón de solo icono, siempre con title (tooltip al pasar el ratón) y
+// alt en la imagen, para que se entienda su función sin depender del texto.
+const iconButton = (iconFile, titleText, onClick, extraClass = "") =>
+    el("button", {
+        type: "button",
+        class: `chat-icon-button ${extraClass}`.trim(),
+        title: titleText,
+        "aria-label": titleText,
+        onClick
+    }, [
+        el("img", { src: `assets/icons/${iconFile}`, alt: titleText })
+    ]);
+
 const renderGuides = (guides) =>
     el("div", { class: "chat-answer" }, [
         el("strong", { text: t("ai.labelGuides") }),
@@ -87,6 +100,12 @@ export const render = (container) => {
     // si no, el siguiente mensaje seguiría arrastrando palabras clave de la
     // conversación ya cerrada y el clasificador nunca podría cambiar de tema.
     let pendingContext = [];
+    // El archivo adjunto no se sube ni se lee -- no hay ningún endpoint que
+    // procese su contenido (el asistente es un clasificador por palabras
+    // clave, no un LLM que pueda leer documentos). Solo se referencia su
+    // nombre en el mensaje enviado, y se avisa de esto en la UI para no
+    // dar a entender que el contenido se analiza.
+    let attachedFile = null;
 
     const transcript = el("div", { class: "chat-transcript" }, [
         el("p", { class: "chat-greeting", text: t("ai.chatGreeting") })
@@ -107,19 +126,52 @@ export const render = (container) => {
         el("button", { type: "button", class: "pill", text: t("ai.suggestion3"), onClick: () => { input.value = t("ai.suggestion3"); input.focus(); } })
     ]);
 
+    const fileChipSlot = el("div", {});
+
+    const renderFileChip = () => {
+        fileChipSlot.innerHTML = "";
+        if (!attachedFile) return;
+
+        fileChipSlot.append(el("div", { class: "chat-file-chip", title: t("ai.attachedFileNote") }, [
+            el("img", { src: "assets/icons/archivo.svg", alt: t("ai.attachedFileLabel") }),
+            el("span", { text: `${t("ai.attachedFileLabel")} ${attachedFile.name}` }),
+            iconButton("añadir.svg", t("ai.removeFileTitle"), () => {
+                attachedFile = null;
+                fileInput.value = "";
+                renderFileChip();
+            }, "chat-file-remove")
+        ]));
+    };
+
+    const fileInput = el("input", { type: "file", accept: ".pdf,.doc,.docx,.txt", class: "chat-file-input" });
+    fileInput.addEventListener("change", () => {
+        attachedFile = fileInput.files[0] || null;
+        renderFileChip();
+    });
+
     const resetConversation = () => {
         pendingContext = [];
+        attachedFile = null;
+        fileInput.value = "";
+        renderFileChip();
         transcript.innerHTML = "";
         transcript.append(el("p", { class: "chat-greeting", text: t("ai.chatGreeting") }));
     };
 
     const send = async () => {
-        const text = input.value.trim();
+        let text = input.value.trim();
         if (!text) return;
+
+        if (attachedFile) {
+            text += ` [${t("ai.attachedFileLabel")} ${attachedFile.name}]`;
+        }
 
         pendingContext.push(text);
         transcript.append(chatBubble("user", text));
         input.value = "";
+        attachedFile = null;
+        fileInput.value = "";
+        renderFileChip();
         transcript.scrollTop = transcript.scrollHeight;
 
         const pending = el("p", { class: "chat-pending", text: t("common.loading") });
@@ -153,16 +205,13 @@ export const render = (container) => {
     });
 
     const inputRow = el("div", { class: "chat-input-row" }, [
+        iconButton("adjuntar.svg", t("ai.attachTitle"), () => fileInput.click()),
+        fileInput,
         input,
-        el("button", { class: "primary-button chat-send", type: "button", text: t("ai.sendButton"), onClick: send })
+        iconButton("enviar.svg", t("ai.sendButton"), send, "chat-send-icon")
     ]);
 
-    const newConvoButton = el("button", {
-        class: "secondary-button",
-        type: "button",
-        text: t("ai.newConversation"),
-        onClick: resetConversation
-    });
+    const newConvoButton = iconButton("añadir.svg", t("ai.newConversation"), resetConversation);
 
     container.append(el("div", { class: "ai-panel" }, [
         sidebar,
@@ -170,6 +219,7 @@ export const render = (container) => {
             newConvoButton,
             transcript,
             chips,
+            fileChipSlot,
             inputRow
         ])
     ]));

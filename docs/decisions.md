@@ -357,3 +357,27 @@ Alternativas: (a) medir en tiempo real la posición de cada botón/texto de la p
 **Archivos afectados:** `backend/models/aiAssistant.js` (nuevo), `backend/controllers/aiControllers.js` (+`askAssistant`), `backend/validators/aiValidators.js` (+`askValidators`), `backend/routes/aiRoutes.js` (+`POST /ai/ask`), `backend/database/seed.sql` (typos corregidos + contenido nuevo), BD real (poblada igual); `frontend/js/screens/ai.js` (reescrito como chat), `frontend/js/mascot.js` (nuevo), `frontend/style/mascot.css` (nuevo), `frontend/index.html` (`#mascot-root`), `frontend/js/app.js` (`initMascot()`), `frontend/js/i18n.js` (claves `ai.*` renovadas + `mascot.*` nuevas).
 
 ---
+
+## 015 — Iconos SVG en el chat del asistente IA (nueva conversación, adjuntar, enviar)
+**Fecha:** Agosto 2026
+
+**Problema:**
+El usuario pidió sustituir los controles de texto del chat del asistente (entrada 014) por los iconos SVG ya preparados en `frontend/assets/icons/` (`añadir.svg`, `adjuntar.svg`, `archivo.svg`, `enviar.svg`), dejando a mi criterio en qué botón usar cada uno ("mira a ver como quedan mejor"), con el requisito explícito de que cada imagen lleve `title` y `alt` para que su función se entienda al pasar el ratón por encima (los botones pasan a ser solo icono, sin texto visible).
+
+**Mapeo de icono → función (decidido por la forma real de cada SVG, no por el nombre de archivo):**
+- `añadir.svg` (signo "+") → botón "Nueva conversación": un "+" se lee de forma habitual en apps de chat (WhatsApp, Telegram) como "empezar de cero". El mismo icono, rotado 45° por CSS, se reutiliza como botón "quitar archivo adjunto" (una "+" girada es una "×").
+- `adjuntar.svg` (clip) → botón que abre el selector de archivo (`<input type="file">` oculto), en la fila de escritura.
+- `archivo.svg` (carpeta) → icono decorativo dentro de la "chip" que aparece cuando hay un archivo adjunto, junto al nombre del fichero.
+- `enviar.svg` (bandeja de salida + flecha) → botón de enviar mensaje, sustituye al antiguo botón de texto "Enviar".
+
+**Decisión — el archivo adjunto no se sube ni se procesa:** el asistente sigue siendo el clasificador por palabras clave de la entrada 014 (sin LLM), que no puede leer el contenido de un documento. Adjuntar un archivo solo añade su nombre entre corchetes al mensaje enviado a `/ai/ask` (p. ej. `revisa mi cv [Archivo adjunto: cv.pdf]`); el `title` de la chip lo deja explícito (`ai.attachedFileNote`) para no sugerir una capacidad que no existe.
+
+**Corrección previa necesaria:** los 4 SVG usaban colores de relleno muy pálidos (`#fcdf96`, `#fccc96`, `#fcb896`) heredados del mismo lote de exportación de Illustrator que ya había dado el mismo problema en `burger-menu.svg` (corregido en una entrada anterior) — casi invisibles sobre el fondo crema/blanco de la app. Se sustituyeron por tonos del propio paleto (`#d98f3f`, `#f3a55c`, `#e8935a`) antes de integrarlos.
+
+**Accesibilidad:** cada botón de icono lleva `title` + `aria-label` (tooltip nativo del navegador) y cada `<img>` lleva `alt`, usando las claves de i18n ya traducidas a los 4 idiomas (`ai.newConversation`, `ai.attachTitle`, `ai.sendButton`, `ai.attachedFileLabel`, `ai.attachedFileNote`, `ai.removeFileTitle`).
+
+**Verificación:** probado con Playwright — los 3 botones de icono existen, tienen `title`/`alt` no vacíos, y los `<img>` miden 20×20px reales (no 0×0, el bug de SVG-sin-tamaño ya conocido de esta sesión); flujo completo adjuntar → ver chip con nombre correcto → quitar → volver a adjuntar → enviar (el mensaje del usuario incluye la referencia al archivo); botón "Nueva conversación" limpia el historial; cambio de idioma a inglés traduce el `title` del botón de enviar ("Send"); cero errores de consola en todo el flujo.
+
+**Archivos afectados:** `frontend/js/screens/ai.js` (botones de icono, input de archivo oculto, chip de adjunto), `frontend/style/components.css` (`.chat-icon-button`, `.chat-send-icon`, `.chat-file-input`, `.chat-file-chip`), `frontend/assets/icons/añadir.svg`/`adjuntar.svg`/`archivo.svg`/`enviar.svg` (colores corregidos), `frontend/js/i18n.js` (+`ai.attachTitle`, `ai.attachedFileLabel`, `ai.attachedFileNote`, `ai.removeFileTitle` en los 4 idiomas).
+
+---

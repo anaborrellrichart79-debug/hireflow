@@ -4,6 +4,19 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.2.1] - Agosto 2026 — Iconos SVG en el chat del asistente IA
+
+## Añadido
+- Botones de icono (con `title`/`alt` en los 4 idiomas) en la pantalla `/ai`, sustituyendo texto por los SVG ya preparados en `frontend/assets/icons/`: `añadir.svg` (nueva conversación / quitar adjunto), `adjuntar.svg` (abrir selector de archivo), `archivo.svg` (icono de la chip de adjunto), `enviar.svg` (enviar mensaje)
+- Adjuntar un archivo muestra una "chip" con su nombre; al enviar, el nombre se añade entre corchetes al mensaje (el contenido del archivo no se lee ni se sube — el asistente sigue sin LLM)
+
+## Corregido
+- Colores de relleno casi invisibles (`#fcdf96`/`#fccc96`/`#fcb896`) en los 4 SVG recién integrados, mismo patrón ya corregido antes en `burger-menu.svg`
+
+Detalle completo en `docs/decisions.md`, entrada 015.
+
+---
+
 # [1.2.0] - Agosto 2026 — Asistente IA por chat libre + mascota animada global
 
 ## Añadido
