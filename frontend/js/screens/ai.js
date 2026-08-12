@@ -2,47 +2,95 @@ import { el, errorBanner } from "../components/ui.js";
 import { apiFetch } from "../api.js";
 import { t } from "../i18n.js";
 
-// Nota: esta pantalla es una versión funcional simple (formularios por
-// función), no el chat de conversación libre con "import" de documentos
-// que describe FRONTEND_DESIGN.md. Esa parte queda pendiente a propósito
-// -- los 4 endpoints de IA son consultas sobre catálogo, no un LLM con el
-// que se pueda conversar libremente (ver docs/decisions.md, entrada 010).
-const getFunctions = () => ({
-    "cv-review": {
-        label: t("ai.fnCvReview"),
-        fields: [{ name: "industry", label: t("ai.fieldIndustry"), required: true }, { name: "company_type", label: t("ai.fieldCompanyType") }]
-    },
-    "interview-questions": {
-        label: t("ai.fnInterviewQuestions"),
-        fields: [{ name: "category", label: t("ai.fieldCategory") }, { name: "difficulty", label: t("ai.fieldDifficulty") }]
-    },
-    "interview-feedback": {
-        label: t("ai.fnInterviewFeedback"),
-        fields: [{ name: "skills", label: t("ai.fieldSkills"), required: true }]
-    },
-    "job-match": {
-        label: t("ai.fnJobMatch"),
-        fields: [{ name: "job_offer_id", label: t("ai.fieldJobOfferId"), required: true }, { name: "skills", label: t("ai.fieldCandidateSkills"), required: true }]
-    }
-});
+// Chat libre sin categorías/pestañas: el usuario escribe lo que quiera y el
+// backend (POST /ai/ask) clasifica la intención por palabras clave, pide
+// aclaraciones si le falta información, o rechaza el tema si no tiene nada
+// que ver con HireFlow. Ver docs/decisions.md, entrada 014.
+//
+// Sin estado en el servidor: en cada envío se manda el texto acumulado de
+// todos los mensajes del usuario en la conversación (no solo el último),
+// para que el clasificador tenga más contexto según avanza la charla.
 
-const buildBody = (functionKey, formData) => {
-    if (functionKey === "interview-feedback") {
-        return { skills: formData.skills.split(",").map((s) => s.trim()).filter(Boolean) };
+const renderGuides = (guides) =>
+    el("div", { class: "chat-answer" }, [
+        el("strong", { text: t("ai.labelGuides") }),
+        ...guides.map((guide) => el("div", { class: "chat-card" }, [
+            el("p", { class: "chat-meta", text: guide.company_type }),
+            el("p", { text: guide.recomendations })
+        ]))
+    ]);
+
+const renderQuestions = (questions) =>
+    el("div", { class: "chat-answer" }, [
+        el("strong", { text: t("ai.labelQuestions") }),
+        ...questions.map((q) => el("div", { class: "chat-card" }, [
+            el("p", { text: q.question }),
+            el("span", { class: "chat-meta", text: `${q.category} · ${q.difficulty}` })
+        ]))
+    ]);
+
+const renderSkillTips = (suggestions) =>
+    el("div", { class: "chat-answer" }, [
+        el("strong", { text: t("ai.labelSkillTips") }),
+        ...suggestions.map((s) => el("div", { class: "chat-card" }, [
+            el("strong", { text: s.skill_name }),
+            el("p", { text: s.description }),
+            el("p", { text: s.improvement_methods }),
+            el("p", { class: "chat-meta", text: s.resources })
+        ]))
+    ]);
+
+const renderJobMatch = (data) => {
+    const parts = [
+        el("p", { text: `${data.job_title} — ${t("ai.labelMatchScore")} ${data.score ?? "?"}%` })
+    ];
+
+    if (data.matched_skills?.length) {
+        parts.push(el("p", { text: `${t("ai.labelMatchedSkills")} ${data.matched_skills.join(", ")}` }));
     }
-    if (functionKey === "job-match") {
-        return { job_offer_id: Number(formData.job_offer_id), skills: formData.skills };
+
+    if (data.missing_skills?.length) {
+        parts.push(el("p", { text: `${t("ai.labelMissingSkills")} ${data.missing_skills.join(", ")}` }));
     }
-    const body = {};
-    Object.entries(formData).forEach(([key, value]) => {
-        if (value) body[key] = value;
-    });
-    return body;
+
+    if (data.improvement_suggestions?.length) {
+        parts.push(renderSkillTips(data.improvement_suggestions));
+    }
+
+    return el("div", { class: "chat-answer" }, parts);
 };
 
+const renderAnswer = (data) => {
+    if (data.type === "off_topic" || data.type === "clarify") {
+        return el("p", { text: data.message });
+    }
+
+    switch (data.intent) {
+        case "cv_review": return renderGuides(data.guides);
+        case "interview_questions": return renderQuestions(data.questions);
+        case "interview_feedback": return renderSkillTips(data.suggestions);
+        case "job_match": return renderJobMatch(data);
+        default: return el("pre", { class: "ai-result-json", text: JSON.stringify(data, null, 2) });
+    }
+};
+
+const chatBubble = (role, content) =>
+    el("div", { class: `chat-message chat-${role}` }, [
+        el("span", { class: "chat-role", text: role === "user" ? t("ai.you") : t("ai.assistantName") }),
+        typeof content === "string" ? el("p", { text: content }) : content
+    ]);
+
 export const render = (container) => {
-    const FUNCTIONS = getFunctions();
-    let currentFunction = "cv-review";
+    // Contexto acumulado SOLO mientras el backend está pidiendo una
+    // aclaración (misma pregunta sin resolver todavía). En cuanto llega una
+    // respuesta ("answer") o se descarta el tema ("off_topic"), se reinicia:
+    // si no, el siguiente mensaje seguiría arrastrando palabras clave de la
+    // conversación ya cerrada y el clasificador nunca podría cambiar de tema.
+    let pendingContext = [];
+
+    const transcript = el("div", { class: "chat-transcript" }, [
+        el("p", { class: "chat-greeting", text: t("ai.chatGreeting") })
+    ]);
 
     const sidebar = el("div", { class: "ai-sidebar" }, [
         el("div", { class: "ai-sidebar-box" }, [
@@ -51,61 +99,78 @@ export const render = (container) => {
         ])
     ]);
 
-    const resultPanel = el("div", { class: "ai-result", text: t("ai.chooseFunction") });
+    const input = el("input", { type: "text", placeholder: t("ai.chatPlaceholder") });
 
-    const tabs = el("div", { class: "ai-tabs" }, Object.entries(FUNCTIONS).map(([key, def]) =>
-        el("button", {
-            type: "button",
-            class: key === currentFunction ? "pill active" : "pill",
-            text: def.label,
-            onClick: () => { currentFunction = key; drawForm(); }
-        })
-    ));
+    const chips = el("div", { class: "chat-chips" }, [
+        el("button", { type: "button", class: "pill", text: t("ai.suggestion1"), onClick: () => { input.value = t("ai.suggestion1"); input.focus(); } }),
+        el("button", { type: "button", class: "pill", text: t("ai.suggestion2"), onClick: () => { input.value = t("ai.suggestion2"); input.focus(); } }),
+        el("button", { type: "button", class: "pill", text: t("ai.suggestion3"), onClick: () => { input.value = t("ai.suggestion3"); input.focus(); } })
+    ]);
 
-    const formSlot = el("div", { class: "ai-form-slot" });
-
-    const drawForm = () => {
-        [...tabs.children].forEach((btn) => btn.classList.remove("active"));
-        formSlot.innerHTML = "";
-
-        const def = FUNCTIONS[currentFunction];
-        const inputs = {};
-
-        def.fields.forEach((field) => {
-            const input = el("input", { type: "text", placeholder: field.label, name: field.name });
-            inputs[field.name] = input;
-            formSlot.append(input);
-        });
-
-        const errorSlot = el("div", {});
-        formSlot.append(errorSlot);
-
-        const submit = async () => {
-            errorSlot.innerHTML = "";
-            const formData = {};
-            Object.entries(inputs).forEach(([name, input]) => { formData[name] = input.value; });
-
-            try {
-                const data = await apiFetch(`/ai/${currentFunction}`, { method: "POST", body: buildBody(currentFunction, formData) });
-                resultPanel.innerHTML = "";
-                resultPanel.append(el("pre", { class: "ai-result-json", text: JSON.stringify(data, null, 2) }));
-            } catch (error) {
-                const detail = error.errors?.map((e) => e.message).join(" · ");
-                errorSlot.innerHTML = "";
-                errorSlot.append(errorBanner(detail || error.message));
-            }
-        };
-
-        formSlot.append(el("button", { class: "primary-button", type: "button", text: t("ai.askButton"), onClick: submit }));
-        tabs.querySelectorAll("button").forEach((btn) => {
-            if (btn.textContent === def.label) btn.classList.add("active");
-        });
+    const resetConversation = () => {
+        pendingContext = [];
+        transcript.innerHTML = "";
+        transcript.append(el("p", { class: "chat-greeting", text: t("ai.chatGreeting") }));
     };
 
-    drawForm();
+    const send = async () => {
+        const text = input.value.trim();
+        if (!text) return;
+
+        pendingContext.push(text);
+        transcript.append(chatBubble("user", text));
+        input.value = "";
+        transcript.scrollTop = transcript.scrollHeight;
+
+        const pending = el("p", { class: "chat-pending", text: t("common.loading") });
+        transcript.append(pending);
+
+        try {
+            const data = await apiFetch("/ai/ask", { method: "POST", body: { message: pendingContext.join(" . ") } });
+            pending.remove();
+            transcript.append(chatBubble("assistant", renderAnswer(data)));
+
+            // "clarify" es la única situación en la que la siguiente
+            // respuesta del usuario debe seguir sumándose al contexto ya
+            // enviado -- cualquier otro resultado cierra el tema.
+            if (data.type !== "clarify") {
+                pendingContext = [];
+            }
+        } catch (error) {
+            pending.remove();
+            transcript.append(errorBanner(error.errors?.map((e) => e.message).join(" · ") || error.message));
+            pendingContext = [];
+        }
+
+        transcript.scrollTop = transcript.scrollHeight;
+    };
+
+    input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            send();
+        }
+    });
+
+    const inputRow = el("div", { class: "chat-input-row" }, [
+        input,
+        el("button", { class: "primary-button chat-send", type: "button", text: t("ai.sendButton"), onClick: send })
+    ]);
+
+    const newConvoButton = el("button", {
+        class: "secondary-button",
+        type: "button",
+        text: t("ai.newConversation"),
+        onClick: resetConversation
+    });
 
     container.append(el("div", { class: "ai-panel" }, [
         sidebar,
-        el("div", { class: "ai-main" }, [tabs, resultPanel, formSlot])
+        el("div", { class: "ai-main" }, [
+            newConvoButton,
+            transcript,
+            chips,
+            inputRow
+        ])
     ]));
 };

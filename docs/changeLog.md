@@ -4,6 +4,28 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [1.2.0] - Agosto 2026 — Asistente IA por chat libre + mascota animada global
+
+## Añadido
+### Asistente IA
+- `POST /ai/ask` — endpoint conversacional: clasifica la intención de un mensaje libre por palabras clave (`cv_review`, `interview_questions`, `interview_feedback`, `job_match`), pide una aclaración si falta información (industria, skill, oferta) en vez de fallar, y rechaza explícitamente cualquier tema no relacionado con HireFlow ("off_topic")
+- `backend/models/aiAssistant.js` — clasificador de intención y extractores de industria/categoría/dificultad/skills/oferta por palabras clave (sin LLM, decisión consultada con el usuario)
+- Pantalla `/ai` rediseñada como chat libre (sin pestañas de categoría): historial de mensajes, input de texto + Enter/botón enviar, 3 chips de pregunta de ejemplo no vinculantes, botón "Nueva conversación"
+- Catálogo ampliado: `ai_resume_guides` 7→12 filas (+5 industrias), `ai_skill_improvement` 12→20 filas (+8 habilidades)
+
+### Mascota animada global
+- `frontend/js/mascot.js` + `frontend/style/mascot.css` — mascota (imagen ya preparada por el usuario en `frontend/assets/mascota-soporte.svg`) visible en todas las pantallas: se mueve entre posiciones ancladas al viewport, da volteretas, se esconde parcialmente y muestra un bocadillo con frases de ayuda/humor (por rol, en los 4 idiomas)
+- Clic en la mascota navega al Asistente IA
+
+## Corregido
+- 3 typos de datos preexistentes en `ai_resume_guides.industry` (espacio inicial, coma final, ortografía) que hacían fallar el match exacto de `cv_review`
+- Bug de contexto conversacional: el frontend reenviaba todo el historial acumulado en cada turno, así que una vez resuelto un tema, los mensajes siguientes seguían "arrastrándolo" y el clasificador no podía cambiar de tema — ahora el contexto solo se acumula mientras hay una aclaración pendiente
+- Bug de posicionamiento del bocadillo de la mascota: se abría siempre hacia el mismo lado/borde y podía salirse de la pantalla cerca de las esquinas — ahora se orienta según la posición actual de la mascota
+
+Detalle completo, alternativas consideradas y limitaciones conocidas (sin LLM real, sin multi-idioma en las respuestas del asistente, sin colisión real contra el DOM en la mascota) en `docs/decisions.md`, entrada 014.
+
+---
+
 # [1.1.1] - Agosto 2026 — Home: resumen + accesos rápidos
 
 ## Añadido
@@ -320,11 +342,11 @@ Estado actual:
 Auth ✔ Login ✔ JWT
 Applications ✔ Create ✔ Read ✔ Read by ID ✔ Update ✔ Delete
 
-# Próxima versión (1.2.0)
+# Próxima versión (1.3.0)
 Objetivos:
 - CRUD de `user_profiles` (CV extendido del candidate)
-- Decidir el alcance real del Asistente IA: se queda como consultas de catálogo, o se amplía a un LLM real con conversación libre (ver `docs/decisions.md`, entrada 011)
 - Cambio de contraseña (`PUT /users/me/password`), rol `admin`
-- Ampliar el contenido de las tablas catálogo de AI
+- Seguir ampliando el contenido de las tablas catálogo de AI
 - Revisar el color de los iconos SVG restantes (`adjuntar`, `archivo`, `añadir`, `enviar`) si se conectan a alguna pantalla — comparten el mismo problema de color pálido corregido en `burger-menu.svg`
+- Si en algún momento se decide dar el salto a un LLM real para el Asistente IA (ver `docs/decisions.md`, entrada 014), habría que reconsiderar el idioma de las respuestas del asistente (hoy solo en español)
 - Ampliar `frontend/js/i18n.js` a más idiomas si hace falta, o traducir también los mensajes que devuelve la API (fuera de alcance por decisión, ver `docs/decisions.md` entrada 012)

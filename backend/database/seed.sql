@@ -76,6 +76,13 @@ INSERT INTO ai_interview_questions (question, category, difficulty) VALUES
 ('Imagina que para cumplir un objetivo de ventas tenemos que sacrificar uno de nuestros valores de atención al cliente. ¿Qué posición tomarías en la reunión de equipo?','culture_fit','advanced'),
 ('¿Qué huella o cambio positivo te gustaría dejar en esta empresa más allá de tus tareas técnicas?','culture_fit','advanced');
 
+-- Nota (agosto 2026, ver docs/decisions.md entrada 014): las 3 filas
+-- originales de industry tenían typos de datos (' creative_design' con
+-- espacio inicial, 'customer_service,' con coma final, 'public_acaddemic'
+-- mal escrito) que hacían fallar el match exacto usado por
+-- models/ai.js::findResumeGuides. Corregidos aquí y en la BD real.
+-- Se añaden también 5 industrias nuevas (healthcare, non_profit,
+-- logistics, engineering, sales) para ampliar el catálogo.
 INSERT into ai_resume_guides (industry, company_type, recomendations) VALUES
 ('none','none','La mayoría de empresas grandes usan un software (ATS) que escanea palabras clave. Independientemente del sector, asegúrate de que los títulos de tus puestos coincidan con los de la oferta de trabajo.'),
 ('none','none','¿Díme en qué sector profesional te mueves tú para poder darte consejos más específicos?'),
@@ -89,24 +96,49 @@ Diseño: Moderno y funcional. Puedes incluir enlaces a tu GitHub, Portfolio o Li
 Enfoque: Prioriza tus habilidades técnicas (Stack) y los proyectos en los que has participado. Menos títulos, más soluciones.
 Palabras clave: "Escalabilidad", "Metodologías Ágiles", "Desarrollo", "Implementación".
 Tip: No te extiendas en descripciones largas; usa bullet points directos.'),
-(' creative_design','publicidad, arquitectura, moda, diseño gráfico','Tu CV es tu primera muestra de trabajo. Aquí el riesgo está permitido.
+('creative_design','publicidad, arquitectura, moda, diseño gráfico','Tu CV es tu primera muestra de trabajo. Aquí el riesgo está permitido.
 Diseño: Debe ser visualmente atractivo y original. La tipografía y la composición deben demostrar tu gusto estético.
 Enfoque: Tu Portfolio es lo más importante. El CV debe ser una extensión de tu estilo personal.
 Palabras clave: "Concepto", "Dirección de arte", "Innovación", "Identidad visual".
 Tip: Asegúrate de que, aunque sea creativo, sea legible para los sistemas automáticos de lectura (ATS).
 '),
-('customer_service,','hostelería, comercio, recepción, atención al cliente','Buscan actitud, disponibilidad y habilidades sociales.
+('customer_service','hostelería, comercio, recepción, atención al cliente','Buscan actitud, disponibilidad y habilidades sociales.
 Diseño: Sencillo y muy fácil de leer de un vistazo.
 Enfoque: Destaca tu experiencia de cara al público, polivalencia y dominio de idiomas.
 Palabras clave: "Resolución de conflictos", "Fidelización", "Trabajo en equipo", "Flexibilidad".
 Tip: Si tienes fotos o cartas de recomendación de clientes o antiguos jefes, menciónalo.'
 ),
-('public_acaddemic','investigación, docencia, administraciones','Lo que importa es la acreditación oficial.
+('public_academic','investigación, docencia, administraciones','Lo que importa es la acreditación oficial.
 Diseño: Estándar (formato CV Europass es muy común aquí).
 Enfoque: Detalla publicaciones, cursos certificados, años de experiencia oficial y oposiciones (si aplica).
 Tip: No resumas tanto; en este sector la extensión suele ser mayor para incluir todos los méritos.
 
-');
+'),
+('healthcare','hospitales, clínicas, farmacéuticas, salud digital','Buscan precisión, empatía y cumplimiento normativo estricto.
+Diseño: Sobrio y claro, sin adornos innecesarios.
+Enfoque: Destaca certificaciones oficiales, protocolos que dominas y experiencia directa con pacientes o normativa sanitaria.
+Palabras clave: "Protocolo", "Certificación", "Atención al paciente", "Cumplimiento normativo".
+Tip: Si tienes colegiación profesional o habilitaciones, ponlas en un lugar muy visible.'),
+('non_profit','ONG, fundaciones, cooperación internacional','Valoran la motivación, el impacto social y la polivalencia.
+Diseño: Cercano pero profesional.
+Enfoque: Cuantifica el impacto de tu trabajo (personas ayudadas, fondos gestionados, proyectos completados), no solo las tareas.
+Palabras clave: "Impacto social", "Gestión de proyectos", "Voluntariado", "Sostenibilidad".
+Tip: Menciona idiomas y disponibilidad para viajar si aplica al puesto.'),
+('logistics','transporte, almacenamiento, cadena de suministro','Buscan eficiencia, resolución de problemas bajo presión y dominio de herramientas de gestión.
+Diseño: Funcional, con foco en cifras y procesos.
+Enfoque: Cuantifica mejoras de tiempo o coste que hayas conseguido (rutas, inventario, plazos de entrega).
+Palabras clave: "Optimización de rutas", "Gestión de inventario", "SLA", "Cadena de suministro".
+Tip: Si manejas software de gestión de almacenes (WMS) o ERP, nómbralo explícitamente.'),
+('engineering','ingeniería, construcción, industria manufacturera','Buscan rigor técnico y capacidad de resolver problemas complejos.
+Diseño: Técnico, con espacio para listar herramientas y normativas dominadas (CAD, ISO, etc.).
+Enfoque: Detalla proyectos concretos con su alcance, tu rol exacto y el resultado medible.
+Palabras clave: "Especificaciones técnicas", "Control de calidad", "Normativa", "Gestión de obra/proyecto".
+Tip: Adjunta o referencia un portfolio técnico si el puesto lo permite (planos, memorias, cálculos).'),
+('sales','ventas, desarrollo de negocio, comercial','Buscan resultados cuantificables y capacidad de persuasión.
+Diseño: Directo, con las cifras de ventas destacadas visualmente.
+Enfoque: Todo en términos de objetivos cumplidos, % de crecimiento, cartera de clientes gestionada.
+Palabras clave: "Cumplimiento de cuota", "Cartera de clientes", "Cierre de ventas", "Negociación".
+Tip: Un CV de ventas sin números concretos es la mayor señal de alarma para un reclutador de este sector.');
 
 INSERT INTO ai_skill_improvement (skill_name, description, improvement_methods, resources) VALUES
 ('comunicación asertiva','Capacidad de expresar ideas,sentimientos y necesidades de manera directa, segura y honesta, respetando al mismno tiempo los derechos de los demás. Es vital para evitar malentendidos y resolver conflictos.', 'Antes de responder, parafrasea lo que el otro dijo para confirmar que entendiste el mensaje real.','Libro: Crucial Conversations. Plataformas: Toastmasters International (para hablar en público).'),
@@ -120,6 +152,14 @@ INSERT INTO ai_skill_improvement (skill_name, description, improvement_methods, 
 ('Mentalidad Ágil (Agile Mindset)','Más que usar un software, es una forma de trabajar basada en la entrega de valor constante, la mejora iterativa y la respuesta rápida al cambio, en lugar de seguir planes rígidos.','Implementar un tablero Kanban personal. Usa columnas de "Por hacer", "En proceso" y "Hecho" para visualizar tu carga de trabajo diaria y evitar el "multitasking".','Certificación: PSM I (Scrum.org). Guía: La Guía de Scrum (ScrumGuides.org).'),
 ('Pensamiento Sistémico (Systems Thinking)','La capacidad de comprender cómo las distintas partes de una organización o un proyecto interactúan entre sí. En lugar de ver tareas aisladas, ves procesos interconectados. Es fundamental para roles de gestión y estrategia.','Mapeo de Procesos. Elige un problema común en tu trabajo anterior y dibuja un diagrama de flujo que muestre todos los departamentos y personas que afectaba.','Libro: La Quinta Disciplina (Peter Senge).'),
 ('Marca Personal y Networking Digital','No es solo "tener LinkedIn", es la habilidad de gestionar tu reputación profesional y construir una red de contactos de valor de manera proactiva y ética.','Curación de Contenido. Comparte una vez a la semana un artículo o reflexión técnica sobre tu sector en redes profesionales. Esto te posiciona como un referente.','Recurso: Personal Branding Masterclass en Udemy.'),
-('Alfabetización Financiera (Business Acumen)','Entender cómo la empresa gana dinero y cómo tus acciones afectan la rentabilidad (el bottom line). Un empleado que entiende el negocio es mucho más valioso que uno que solo ejecuta tareas.','Lectura de Reportes Anuales. Lee el informe de resultados de una empresa pública de tu sector para entender qué métricas les importan (EBITDA, ingresos recurrentes, etc.).','Libro: Padre Rico, Padre Pobre (para bases) o Finance for Managers (HBR).');
+('Alfabetización Financiera (Business Acumen)','Entender cómo la empresa gana dinero y cómo tus acciones afectan la rentabilidad (el bottom line). Un empleado que entiende el negocio es mucho más valioso que uno que solo ejecuta tareas.','Lectura de Reportes Anuales. Lee el informe de resultados de una empresa pública de tu sector para entender qué métricas les importan (EBITDA, ingresos recurrentes, etc.).','Libro: Padre Rico, Padre Pobre (para bases) o Finance for Managers (HBR).'),
+('Negociación','Capacidad de llegar a acuerdos beneficiosos para ambas partes en situaciones de intereses distintos, ya sea con clientes, proveedores o dentro del propio equipo.','Prepara siempre tu "BATNA" (mejor alternativa a un acuerdo negociado) antes de entrar en cualquier negociación, para saber hasta dónde puedes ceder.','Libro: Obtenga el Sí (Fisher y Ury). Curso: Successful Negotiation en Coursera.'),
+('Oratoria y hablar en público','Capacidad de comunicar ideas con claridad y confianza ante una audiencia, ya sea en una reunión, una presentación o una entrevista.','Graba tus presentaciones y revísalas: identifica muletillas, ritmo y contacto visual antes de la siguiente ocasión.','Comunidad: Toastmasters International. Libro: Habla como TED (Carmine Gallo).'),
+('Trabajo en equipo','Capacidad de colaborar eficazmente con personas de perfiles distintos hacia un objetivo común, gestionando roles y desacuerdos de forma constructiva.','En cada reunión de equipo, pregunta explícitamente "¿qué necesitas de mí para que esto salga bien?" a al menos una persona.','Libro: Las cinco disfunciones de un equipo (Patrick Lencioni).'),
+('Gestión de proyectos','Capacidad de planificar, ejecutar y cerrar proyectos dentro de plazo, presupuesto y alcance definidos, coordinando a las personas implicadas.','Practica desglosar cualquier tarea grande en subtareas de menos de un día de duración cada una (WBS - Work Breakdown Structure).','Certificación: PMP o CAPM (PMI). Metodología: PRINCE2 Foundation.'),
+('Atención al detalle','Capacidad de detectar errores, inconsistencias o matices que otros pasan por alto, especialmente relevante en tareas de revisión, calidad o análisis.','Antes de entregar cualquier trabajo, revísalo una vez leyendo de atrás hacia adelante: rompe el patrón de lectura habitual y ayuda a detectar fallos.','Técnica: Checklists de verificación (Atul Gawande, El efecto checklist).'),
+('Resiliencia y manejo del estrés','Capacidad de mantener el rendimiento y el bienestar frente a la presión, los contratiempos o el cambio constante.','Practica la técnica de respiración 4-7-8 (inhalar 4s, retener 7s, exhalar 8s) antes de situaciones de alta presión.','Libro: Mindset: la actitud del éxito (Carol Dweck). App: Headspace.'),
+('Pensamiento creativo','Capacidad de generar ideas o soluciones originales, conectando conceptos que a priori no parecen relacionados.','Técnica SCAMPER: ante un problema, prueba a Sustituir, Combinar, Adaptar, Modificar, Proponer otro uso, Eliminar o Reordenar elementos de la solución actual.','Libro: Piensa como un experto en creatividad (Tina Seelig).'),
+('Ventas y persuasión','Capacidad de influir en la decisión de otra persona presentando argumentos y beneficios de forma convincente y honesta.','Antes de vender una idea o producto, identifica el problema real de la otra persona y adapta tu argumento a resolver ese problema, no a describir características.','Libro: Influencia (Robert Cialdini). Curso: Fundamentals of Sales en LinkedIn Learning.');
 
 

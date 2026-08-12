@@ -23,3 +23,7 @@ export const jobMatchValidators = [
     body("job_offer_id").notEmpty().withMessage("job_offer_id es obligatorio").isInt({ min: 1 }).withMessage("job_offer_id debe ser un entero válido").toInt(),
     body("skills").trim().notEmpty().withMessage("skills es obligatorio").isLength({ max: 2000 })
 ];
+
+export const askValidators = [
+    body("message").trim().notEmpty().withMessage("message es obligatorio").isLength({ max: 1000 }).withMessage("message no puede superar 1000 caracteres")
+];

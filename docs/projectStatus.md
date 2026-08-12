@@ -127,10 +127,13 @@ Estado
 ✔ `POST /ai/interview-questions` — preguntas de `ai_interview_questions` filtradas y aleatorias
 ✔ `POST /ai/interview-feedback` — consejos de `ai_skill_improvement` por skill
 ✔ `POST /ai/job-match` — compara `skills_required` de una oferta contra las skills del candidato (texto libre en el body, no lee `user_profiles` porque ese CRUD no existe aún)
-✔ Fix: `ai_resume_guides` y `ai_skill_improvement` estaban vacías en la BD real (mismo tipo de fallo que `interview_types`), pobladas correctamente (7 y 12 filas)
-✔ Tests manuales verificados (los 4 endpoints, casos válidos + validación + 404)
+✔ Fix: `ai_resume_guides` y `ai_skill_improvement` estaban vacías en la BD real (mismo tipo de fallo que `interview_types`), pobladas correctamente
+✔ `POST /ai/ask` — endpoint conversacional: clasifica la intención de un mensaje libre por palabras clave, pide aclaración si falta info, rechaza fuera de tema (ver `docs/decisions.md`, entrada 014)
+✔ Catálogo ampliado: `ai_resume_guides` 7→12 filas, `ai_skill_improvement` 12→20 filas
+✔ Corregidos 3 typos de datos en `ai_resume_guides.industry` que hacían fallar el match exacto
+✔ Tests manuales verificados (los 5 endpoints, casos válidos + validación + 404 + los 4 tipos de respuesta de `/ai/ask`)
 
-**Importante:** no usa ningún LLM real — son consultas sobre las 3 tablas catálogo ya existentes. Decisión, alternativas y limitaciones conocidas (matching de `job-match` sin detectar negación) en `docs/decisions.md`, entrada 010. Pendiente para más adelante: ampliar el contenido de las 3 tablas ("ahora unas cuantas, luego se amplía tras el frontend", como pidió el usuario).
+**Importante:** no usa ningún LLM real — es un clasificador por palabras clave sobre las 3 tablas catálogo, decisión consultada explícitamente con el usuario (ver `docs/decisions.md`, entradas 010 y 014). Limitaciones conocidas: solo entiende frases esperadas en español, no genera texto libre, no detecta negación en `job-match`.
 ---
 # Frontend
 Estado general
@@ -158,7 +161,12 @@ Estado general
 🟢
 ---
 ## 8. Asistente IA
-🟡 Versión funcional (formularios por función), sin el chat de conversación libre del mockup — pendiente a propósito
+🟢 Chat libre (sin pestañas de categoría): interpreta la pregunta por palabras clave, pide aclaración si le falta información, rechaza temas ajenos a HireFlow. Chips de sugerencia no vinculantes. Ver `docs/decisions.md`, entrada 014.
+---
+## Mascota animada global
+🟢 Visible en todas las pantallas (montada una vez en `#mascot-root`, fuera del área que gestiona el router). Se mueve entre posiciones ancladas al viewport, da volteretas, se esconde parcialmente y muestra un bocadillo con frases de ayuda/humor (por rol, en los 4 idiomas). Clic → navega al Asistente IA.
+
+**Limitación conocida:** no hace colisión real contra los elementos del DOM de cada pantalla (sería necesario remedir contenido dinámico constantemente); se apoya en posiciones fijas alejadas de la columna central de contenido, lo que funciona bien en escritorio/tablet y razonablemente en móvil. Ver `docs/decisions.md`, entrada 014.
 ---
 ## Internacionalización (i18n)
 🟢 Español (por defecto), inglés, francés e italiano. Selector de idioma fijo en la topbar, persistido en `localStorage`, redibuja la pantalla actual al cambiar sin perder la navegación. Solo interfaz — los mensajes que devuelve la API se quedan en español (decisión consultada con el usuario). Las opciones de tipo de contrato/jornada/salario del formulario de ofertas guardan un código estable independiente del idioma, para que el mismo valor se muestre traducido sin importar en qué idioma se creó la oferta.
@@ -169,7 +177,7 @@ Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
 Backend
 🟢 Postman
 Frontend
-🟢 Playwright (Chromium headless): flujo completo de candidate y recruiter probado end-to-end contra el servidor real — registro, login, CRUD de ofertas, postularse, cambiar estado, guardar nota, calendario, consulta real a `POST /ai/cv-review`. Sin errores de consola tras corregir los bugs encontrados (ver `docs/decisions.md`, entrada 011). Internacionalización probada en los 4 idiomas, incluida persistencia tras recargar y traducción correcta de valores guardados en distinto idioma al de creación (ver entrada 012)
+🟢 Playwright (Chromium headless): flujo completo de candidate y recruiter probado end-to-end contra el servidor real — registro, login, CRUD de ofertas, postularse, cambiar estado, guardar nota, calendario, chat del Asistente IA. Sin errores de consola tras corregir los bugs encontrados (ver `docs/decisions.md`, entradas 011 y 014). Internacionalización probada en los 4 idiomas, incluida persistencia tras recargar y traducción correcta de valores guardados en distinto idioma al de creación (ver entrada 012). Asistente IA y mascota probados con los 4 tipos de respuesta, bug de contexto acumulado y bug de orientación del bocadillo detectados y corregidos durante las pruebas (ver entrada 014)
 ---
 # Documentación
 README
@@ -213,8 +221,10 @@ Implementar:
 ✔ Frontend implementado (vanilla JS) y probado en navegador — completo
 ✔ Internacionalización del frontend (es/en/fr/it) — completo
 ✔ Home con resumen + accesos rápidos (pedido tras pruebas manuales del usuario) — completo
+✔ Asistente IA por chat libre (sin categorías, entiende lenguaje libre por reglas, pide aclaraciones) — completo
+✔ Mascota animada global con bocadillo de frases — completo
 
-**Backend y frontend cerrados, app multilingüe.** Se completa todo lo previsto para el MVP: backend (Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, manejo de errores, validaciones) + frontend funcional sobre las 8 pantallas del diseño, en 4 idiomas. Pendiente intencionalmente: el Asistente IA como chat de conversación libre (queda como formularios funcionales), CRUD de `user_profiles`, traducir los mensajes de la API, y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional y mascota.** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las primeras pruebas manuales del usuario. Pendiente intencionalmente: CRUD de `user_profiles`, traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -229,12 +239,12 @@ Un usuario podrá:
 ---
 # Estado global
 Backend
-████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI, errores, validaciones)
+████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI conversacional, errores, validaciones)
 Frontend
-██████████████████░░ 92% (8 pantallas + login implementadas, probadas y en 4 idiomas, Home con resumen y accesos rápidos; queda pendiente el chat libre del Asistente IA, CRUD de user_profiles/CV extendido, y crear entrevistas desde el frontend)
+███████████████████░ 95% (8 pantallas + login implementadas, probadas y en 4 idiomas, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada; queda pendiente CRUD de user_profiles/CV extendido y crear entrevistas desde el frontend)
 Base de datos
 ██████████████░░░ 75%
 Documentación
 █████████████░░░░░░░ 65% (Frontend Design creado; siguen sin existir AI Instructions, Architecture, Roadmap y Sprint Plan — ver tabla de arriba)
 Proyecto completo
-██████████████████░░ 89% (backend y frontend funcionales y multilingües para el MVP; quedan pulidos menores y documentación de proceso pendiente)
+███████████████████░ 92% (backend y frontend funcionales, multilingües y con asistente conversacional para el MVP; quedan pulidos menores y documentación de proceso pendiente)

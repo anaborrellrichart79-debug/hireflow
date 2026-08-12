@@ -293,17 +293,7 @@
     font-size: 12px;
 }
 
-.ai-main { flex: 1; min-width: 0; }
-
-.ai-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-
-.ai-result {
-    background: linear-gradient(to right, var(--hf-orange), var(--hf-cream));
-    border-radius: var(--hf-radius);
-    padding: 16px;
-    min-height: 120px;
-    margin-bottom: 12px;
-}
+.ai-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
 
 .ai-result-json {
     white-space: pre-wrap;
@@ -312,10 +302,67 @@
     margin: 0;
 }
 
-.ai-form-slot { display: flex; flex-direction: column; gap: 8px; }
-.ai-form-slot input { padding: 10px 12px; border-radius: 10px; border: 1px solid #d8c9a8; font-family: inherit; }
+/* --- Chat del Asistente IA --- */
+.chat-transcript {
+    background: linear-gradient(to bottom, var(--hf-orange), var(--hf-cream));
+    border-radius: var(--hf-radius);
+    padding: 16px;
+    min-height: 220px;
+    max-height: 420px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-greeting { color: #6b4a25; font-style: italic; margin: 0; }
+.chat-pending { color: #6b4a25; margin: 0; }
+
+.chat-message {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.chat-message p { margin: 4px 0 0; }
+
+.chat-role {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #999;
+}
+
+.chat-user { align-self: flex-end; background: #fff2dc; }
+.chat-assistant { align-self: flex-start; background: #ffffff; }
+
+.chat-answer { display: flex; flex-direction: column; gap: 8px; }
+
+.chat-card {
+    background: var(--hf-beige);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+.chat-card p { margin: 4px 0 0; font-size: 13px; }
+.chat-meta { font-size: 11px; color: #666; }
+
+.chat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chat-input-row { display: flex; gap: 8px; }
+.chat-input-row input {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d8c9a8;
+    font-family: inherit;
+}
+.chat-send { width: auto; margin: 0; padding: 10px 20px; }
 
 @media (max-width: 640px) {
     .ai-panel { flex-direction: column; }
     .ai-sidebar { width: 100%; }
+    .chat-message { max-width: 100%; }
 }

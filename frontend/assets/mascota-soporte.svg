@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440">
+  <defs>
+    <linearGradient id="bodyGrad" x1="10%" y1="0%" x2="95%" y2="100%">
+      <stop offset="0%" stop-color="#F8D3A0"/>
+      <stop offset="45%" stop-color="#F3A55C"/>
+      <stop offset="100%" stop-color="#DD8148"/>
+    </linearGradient>
+    <linearGradient id="depthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C97A42"/>
+      <stop offset="100%" stop-color="#A85E30"/>
+    </linearGradient>
+    <linearGradient id="shadeOverlay" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.38"/>
+      <stop offset="40%" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#2B1D12" stop-opacity="0.26"/>
+    </linearGradient>
+    <radialGradient id="glossGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="latchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EDDFC4"/>
+      <stop offset="100%" stop-color="#C6AE84"/>
+    </linearGradient>
+    <radialGradient id="armGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#F6C08A"/>
+      <stop offset="100%" stop-color="#D97D46"/>
+    </radialGradient>
+    <radialGradient id="eyeGrad" cx="38%" cy="32%" r="75%">
+      <stop offset="0%" stop-color="#FFFDF6"/>
+      <stop offset="100%" stop-color="#E9D9BB"/>
+    </radialGradient>
+    <linearGradient id="handleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4A3622"/>
+      <stop offset="100%" stop-color="#241708"/>
+    </linearGradient>
+    <linearGradient id="mouthInsideGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4E2A15"/>
+      <stop offset="100%" stop-color="#8A4E28"/>
+    </linearGradient>
+    <radialGradient id="tongueGrad" cx="40%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#F3A55C"/>
+      <stop offset="100%" stop-color="#C96A38"/>
+    </radialGradient>
+    <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+    <clipPath id="bodyClip">
+      <rect x="66" y="138" width="268" height="216" rx="36"/>
+    </clipPath>
+    <clipPath id="mouthClip">
+      <path d="M 148 308 Q 200 366 252 308 Q 200 338 148 308 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- sombra suave bajo el maletin -->
+  <ellipse cx="204" cy="422" rx="132" ry="16" fill="#2B1D12" opacity="0.22" filter="url(#softBlur)"/>
+
+  <!-- bloque de profundidad (canto 3d) -->
+  <rect x="82" y="154" width="268" height="216" rx="36" fill="url(#depthGrad)" stroke="#2B1D12" stroke-width="7"/>
+
+  <!-- pies -->
+  <ellipse cx="140" cy="384" rx="20" ry="13" fill="#241708"/>
+  <ellipse cx="260" cy="384" rx="20" ry="13" fill="#241708"/>
+  <ellipse cx="135" cy="380" rx="7" ry="4" fill="#4A3622" opacity="0.7"/>
+  <ellipse cx="255" cy="380" rx="7" ry="4" fill="#4A3622" opacity="0.7"/>
+
+  <!-- piernas -->
+  <rect x="123" y="330" width="26" height="50" rx="12" fill="#E8935A" stroke="#2B1D12" stroke-width="5"/>
+  <rect x="251" y="330" width="26" height="50" rx="12" fill="#E8935A" stroke="#2B1D12" stroke-width="5"/>
+
+  <!-- asa -->
+  <path d="M 163 108 Q 163 44 200 44 Q 237 44 237 108" fill="none" stroke="url(#handleGrad)" stroke-width="18" stroke-linecap="round"/>
+  <path d="M 168 102 Q 168 54 200 52" fill="none" stroke="#6B4F34" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <rect x="158" y="98" width="22" height="48" rx="9" fill="url(#handleGrad)"/>
+  <rect x="220" y="98" width="22" height="48" rx="9" fill="url(#handleGrad)"/>
+
+  <!-- cuerpo del maletin -->
+  <rect x="66" y="138" width="268" height="216" rx="36" fill="url(#bodyGrad)" stroke="#2B1D12" stroke-width="7"/>
+  <g clip-path="url(#bodyClip)">
+    <rect x="66" y="138" width="268" height="216" fill="url(#shadeOverlay)"/>
+    <ellipse cx="140" cy="180" rx="90" ry="46" fill="url(#glossGrad)"/>
+  </g>
+
+  <!-- costura / linea de la tapa -->
+  <rect x="66" y="214" width="268" height="3" fill="#2B1D12" opacity="0.3"/>
+  <rect x="66" y="217" width="268" height="4" fill="#FBE3C2" opacity="0.35"/>
+
+  <!-- brazos -->
+  <ellipse cx="55" cy="240" rx="20" ry="15" fill="url(#armGrad)" stroke="#2B1D12" stroke-width="6" transform="rotate(-18 55 240)"/>
+  <ellipse cx="345" cy="240" rx="20" ry="15" fill="url(#armGrad)" stroke="#2B1D12" stroke-width="6" transform="rotate(18 345 240)"/>
+
+  <!-- cierre / cerradura -->
+  <rect x="172" y="178" width="56" height="40" rx="11" fill="url(#latchGrad)" stroke="#2B1D12" stroke-width="5"/>
+  <path d="M 178 184 Q 200 180 222 184" fill="none" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <circle cx="200" cy="198" r="6" fill="#241708"/>
+  <circle cx="198" cy="196" r="1.6" fill="#8A7452"/>
+
+  <!-- mejillas -->
+  <ellipse cx="122" cy="305" rx="14" ry="10" fill="#F3A55C" opacity="0.55"/>
+  <ellipse cx="278" cy="305" rx="14" ry="10" fill="#F3A55C" opacity="0.55"/>
+
+  <!-- ojos -->
+  <ellipse cx="152" cy="273" rx="24" ry="28" fill="#2B1D12" opacity="0.22" filter="url(#softBlur)"/>
+  <ellipse cx="254" cy="269" rx="24" ry="28" fill="#2B1D12" opacity="0.22" filter="url(#softBlur)"/>
+  <ellipse cx="150" cy="270" rx="24" ry="28" fill="url(#eyeGrad)" stroke="#2B1D12" stroke-width="5"/>
+  <ellipse cx="252" cy="266" rx="24" ry="28" fill="url(#eyeGrad)" stroke="#2B1D12" stroke-width="5"/>
+  <ellipse cx="150" cy="290" rx="18" ry="9" fill="#B99B6E" opacity="0.35"/>
+  <ellipse cx="252" cy="286" rx="18" ry="9" fill="#B99B6E" opacity="0.35"/>
+  <circle cx="158" cy="278" r="10" fill="#241708"/>
+  <circle cx="242" cy="260" r="10" fill="#241708"/>
+  <circle cx="161" cy="274" r="3" fill="#FFFDF6"/>
+  <circle cx="245" cy="256" r="3" fill="#FFFDF6"/>
+  <path d="M 130 264 Q 150 246 170 264" fill="none" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <path d="M 232 258 Q 252 240 272 258" fill="none" stroke="#FFFDF6" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- cejas traviesas -->
+  <path d="M 128 234 Q 150 220 172 232" fill="none" stroke="#2B1D12" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 232 226 Q 252 240 276 236" fill="none" stroke="#2B1D12" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- boca sonriente abierta -->
+  <g clip-path="url(#mouthClip)">
+    <rect x="140" y="300" width="120" height="72" fill="url(#mouthInsideGrad)"/>
+    <rect x="150" y="306" width="100" height="11" rx="5" fill="#FFFDF6"/>
+    <rect x="150" y="315" width="100" height="4" fill="#C6AE84" opacity="0.6"/>
+    <ellipse cx="200" cy="354" rx="24" ry="16" fill="url(#tongueGrad)"/>
+    <ellipse cx="193" cy="347" rx="9" ry="5" fill="#FFFDF6" opacity="0.3"/>
+  </g>
+  <path d="M 148 308 Q 200 366 252 308 Q 200 338 148 308 Z" fill="none" stroke="#2B1D12" stroke-width="5" stroke-linejoin="round"/>
+</svg>

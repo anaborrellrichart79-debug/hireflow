@@ -2,6 +2,7 @@ import { registerRoute, initRouter, refresh } from "./router.js";
 import { initHeader } from "./components/header.js";
 import { el } from "./components/ui.js";
 import { t, getLang, setLang, getLangName, onLangChange, SUPPORTED_LANGS } from "./i18n.js";
+import { initMascot } from "./mascot.js";
 
 import * as loginScreen from "./screens/login.js";
 import * as homeScreen from "./screens/home.js";
@@ -47,6 +48,7 @@ const mainContainer = document.querySelector(".main-container");
 initLangSwitcher();
 initHeader();
 initRouter(mainContainer);
+initMascot();
 
 // Al cambiar de idioma, se vuelve a renderizar la pantalla actual sin
 // perder la posición de navegación (no es un cambio de ruta).
