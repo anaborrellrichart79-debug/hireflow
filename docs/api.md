@@ -363,6 +363,8 @@ Requerida (verifyToken) + role `recruiter`
 
 ## Obtener todas
 GET /jobs
+
+Cada oferta incluye además `company_name` (nombre de la empresa) y `applicants_count`: el número de postulaciones, **solo en las ofertas del propio usuario que consulta** (`null` en el resto), porque es información de la empresa y no de los candidatos (ver `docs/decisions.md`, entrada 030). `GET /jobs/:id` incluye también `company_name`.
 Respuesta
 200 OK
 [ ... ]

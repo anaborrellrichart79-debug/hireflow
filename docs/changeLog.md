@@ -53,6 +53,9 @@ Formato basado en Keep a Changelog.
 - `POST /ai/*` acepta `lang` (`es`, `en`, `fr`, `it`).
 - Las guías de CV respetan sus saltos de línea ("Diseño: …", "Enfoque: …") en vez de salir en un solo párrafo.
 - Accesibilidad: foco visible al navegar con teclado, enlace "Saltar al contenido", menú con `aria-expanded` que se cierra con Escape y devuelve el foco, mascota usable con teclado, nombres accesibles traducidos en los 4 idiomas y respeto de "reducir movimiento" del sistema.
+- Tarjetas de oferta más completas: inicial de la empresa en un círculo de color, nombre de la empresa, salario destacado, habilidades como etiquetas (hasta 4 y "+N"), descripción recortada a 3 líneas y "Publicada hace X días" en el idioma activo.
+- Buscador y filtros en Ofertas: búsqueda por puesto, empresa o habilidad (sin distinguir tildes), filtro por ciudad y por tipo de contrato, número de resultados y "Quitar filtros" cuando no hay coincidencias.
+- En "Mis ofertas", la empresa ve cuántos postulantes tiene cada oferta, con acceso directo a Postulantes. Borrar una oferta pide confirmación con un diálogo propio en vez del `confirm()` del navegador.
 - `backend/.env.example` con las variables necesarias; el puerto del servidor se puede cambiar con `PORT`, y el servidor se para al arrancar si falta `JWT_SECRET` (antes arrancaba y fallaba en cada login).
 - README: estructura real del proyecto (la anterior citaba archivos y carpetas que no existen) y cómo arrancarlo.
 
@@ -66,7 +69,7 @@ Formato basado en Keep a Changelog.
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 029.
+Detalle en `docs/decisions.md`, entradas 018 a 030.
 
 ---
 

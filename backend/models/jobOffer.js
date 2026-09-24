@@ -49,16 +49,34 @@ export const createJobOffer = async (jobOfferData) => {
     };
 };
 
-export const getAllJobOffers = async () => {
+// Con el nombre de la empresa, para las tarjetas de oferta. applicants_count
+// (cuántas postulaciones tiene) solo se devuelve en las ofertas del propio
+// usuario que consulta: es información de la empresa, no de los candidatos.
+// Ver docs/decisions.md, entrada 030.
+export const getAllJobOffers = async (viewerId = null) => {
     const [rows] = await db.execute(
-        `SELECT * FROM job_offers ORDER BY created_at DESC`
+        `
+        SELECT j.*, c.name AS company_name,
+            CASE WHEN j.created_by_user = ?
+                THEN (SELECT COUNT(*) FROM applications a WHERE a.job_offer_id = j.id)
+            END AS applicants_count
+        FROM job_offers j
+        LEFT JOIN companies c ON c.id = j.company_id
+        ORDER BY j.created_at DESC
+        `,
+        [viewerId]
     );
     return rows;
 };
 
 export const getJobOfferById = async (id) => {
     const [rows] = await db.execute(
-        `SELECT * FROM job_offers WHERE id = ?`,
+        `
+        SELECT j.*, c.name AS company_name
+        FROM job_offers j
+        LEFT JOIN companies c ON c.id = j.company_id
+        WHERE j.id = ?
+        `,
         [id]
     );
     return rows[0];

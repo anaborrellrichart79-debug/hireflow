@@ -29,7 +29,7 @@ export const createNewJobOffer = async (req, res) => {
 };
 
 export const getJobOffers = async (req, res) => {
-    const jobOffers = await getAllJobOffers();
+    const jobOffers = await getAllJobOffers(req.user.id);
     res.status(200).json(jobOffers);
 };
 

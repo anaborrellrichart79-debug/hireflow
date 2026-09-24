@@ -880,3 +880,42 @@ Además había tres fallos que axe no detecta:
 - La herramienta de grabación de la demo sigue funcionando: usa `.burger` y los enlaces de `#nav-drawer`, que dejan de ser `inert` al abrir el menú.
 
 **Archivos afectados:** `.gitignore`, `README.md`, `backend/.env.example` (nuevo), `backend/config/database.js`, `backend/server.js`, `backend/database/schema.sql` (renombrado), `backend/database/seed.sql`, migraciones 019 y 027 (comentarios), `frontend/index.html`, `frontend/style/layout.css` (renombrado), `frontend/style/main.css`, `frontend/style/components.css`, `frontend/js/components/ui.js`, `frontend/js/components/header.js`, `frontend/js/router.js`, `frontend/js/mascot.js`, `frontend/js/i18n.js`, `docs/Database.md`, `docs/FRONTEND_DESIGN.md`, `docs/googlePlayDataSafety.md`, `docs/changeLog.md`.
+
+---
+
+## 030 — Ofertas: tarjetas más completas, buscador y filtros
+
+**Problema:** la pantalla de Ofertas (lo primero que ve una candidata) mostraba en cada tarjeta solo el título, la ubicación, el tipo de contrato, la descripción entera y el botón. La base de datos ya tenía la empresa, el salario, las habilidades y la fecha de publicación, pero no se enseñaban; el nombre de la empresa ni siquiera llegaba al frontend. Con más de un puñado de ofertas no había forma de buscar ni filtrar. En "Mis ofertas", la empresa no veía cuántos postulantes tenía cada oferta, y borrar usaba el `confirm()` del navegador.
+
+**Decisión 1 — tarjeta de oferta:**
+- **Cabecera:** círculo con la inicial de la empresa, el título y la empresa. El color del círculo sale de un hash del nombre, así que cada empresa tiene siempre el mismo, en tonos suaves con texto oscuro. Se asigna con `element.style` porque la CSP de la entrada 021 no permite atributos `style` en el HTML.
+- **Datos:** salario en una etiqueta blanca destacada; habilidades (separadas por comas en `skills_required`) como etiquetas, como mucho 4 y "+N"; descripción recortada a 3 líneas con `line-clamp`, para que las tarjetas no crezcan sin límite.
+- **Fecha:** "Publicada hoy" o "Publicada hace 3 días" con `Intl.RelativeTimeFormat` en el idioma activo ("Posted today", "Publiée aujourd'hui"...).
+- **Botón:** "Postularme" queda siempre al pie de la tarjeta, para que en la cuadrícula los botones queden alineados.
+
+**Decisión 2 — buscador y filtros en el cliente.** Con el volumen de la app (decenas de ofertas) no compensa filtrar en el servidor: se descargan todas y se filtran al momento.
+- **Búsqueda:** por título, empresa, habilidades, descripción y ubicación. No distingue tildes ni mayúsculas, y con varias palabras deben aparecer todas.
+- **Filtros:** ciudad y tipo de contrato. La ciudad se obtiene quitando lo que va entre paréntesis ("Valencia (híbrido)" pasa a "Valencia"), así el filtro agrupa oficina e híbrido de la misma ciudad.
+- **Recuento y sin resultados:** el número de resultados se anuncia a lectores de pantalla (`aria-live`); sin resultados, se dice y se ofrece "Quitar filtros".
+- **Solo se redibuja la cuadrícula**, no la pantalla entera, para que el buscador no pierda el foco mientras se escribe. Los filtros se conservan al postularse o al cambiar de idioma.
+
+**Decisión 3 — número de postulantes, solo para la empresa dueña.** `GET /jobs` devuelve `applicants_count` calculado en la propia consulta solo cuando `created_by_user` es quien consulta; para cualquier otro, `null`. Así una candidata no ve cuánta competencia tiene cada oferta, ni una empresa el volumen de otra. En la tarjeta es un botón que lleva a Postulantes.
+
+**De paso:** borrar una oferta pide confirmación con un diálogo propio, como el resto de la app.
+
+**Verificación** (Playwright contra `hireflow_demo`):
+- **Candidata:** 6 ofertas con empresa, salario, habilidades y "Publicada hoy"; el círculo tiene su color aplicado.
+- **Búsqueda y filtros:**
+  - "node" da 2 ofertas y el buscador conserva el foco mientras se escribe;
+  - "Alicante" da 2, incluida "Alicante (híbrido)", y añadiendo jornada completa, 1;
+  - una búsqueda sin coincidencias muestra el mensaje y "Quitar filtros" devuelve las 6.
+- **Inglés:** "6 jobs" y "Posted today".
+- **Postularse** sigue funcionando con los mismos selectores que usa la grabación de la demo.
+- **Móvil (390px):** sin desbordamiento horizontal.
+- **Empresa:** ve "1 postulante" en cada oferta, el diálogo de borrar se puede cancelar y el clic en postulantes lleva a `#/applicants`.
+- **API como candidata:** `applicants_count` es `null` en todas las ofertas.
+- **axe-core:** en la primera pasada, la fecha de publicación (#5f5f5f sobre el beige de la tarjeta) daba 4,38:1 y se oscureció a #4f4f4f; después, **0 problemas** para candidata y empresa. Sin errores de consola.
+
+**Pendiente para la demo:** todos los datos de demo se crean en el mismo segundo, así que todas las ofertas salen como "Publicada hoy". Al volver a grabar convendría que `hireflow-datos.js` escalone las fechas.
+
+**Archivos afectados:** `backend/models/jobOffer.js`, `backend/controllers/jobOfferControllers.js`, `frontend/js/screens/jobs.js`, `frontend/style/components.css`, `frontend/js/i18n.js`, `docs/api.md`, `docs/changeLog.md`.
