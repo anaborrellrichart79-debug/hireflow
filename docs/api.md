@@ -50,11 +50,12 @@ Body
 {
     "name":"Ana",
     "email":"ana@hireflow.com",
-    "password":"123456",
-    "role":"candidate"
+    "password":"clave2026",
+    "role":"candidate",
+    "termsAccepted": true
 }
 Validación
-`name` obligatorio (máx. 100). `email` obligatorio, formato válido (máx. 150). `password` obligatorio, mínimo 6 caracteres. `role` opcional, debe ser `candidate` o `recruiter` si se envía.
+`name` obligatorio (máx. 100). `email` obligatorio, formato válido (máx. 150). `password` obligatorio, entre 8 y 72 caracteres, con al menos una letra y un número (72 es el máximo que bcrypt tiene en cuenta; ver `docs/decisions.md`, entrada 021). `role` opcional, debe ser `candidate` o `recruiter` si se envía.
 Respuesta
 201 Created
 {

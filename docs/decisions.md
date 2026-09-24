@@ -525,3 +525,28 @@ En el navegador (Playwright): Marta ve sus 4 empresas en "Nueva oferta" y el otr
 En el navegador (Playwright): el mensaje sale en español y, al cambiar a inglés, en inglés, tanto para el 401 como para el 429.
 
 **Archivos afectados:** `backend/middleware/rateLimiters.js` (nuevo), `backend/routes/userRoutes.js`, `backend/controllers/userControllers.js`, `backend/package.json` y `backend/package-lock.json` (`express-rate-limit`), `frontend/js/screens/login.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.
+
+---
+
+## 021 — Cabeceras de seguridad (`helmet`) y contraseñas más fuertes
+
+**Problema:** el servidor no enviaba ninguna cabecera de seguridad y anunciaba `X-Powered-By: Express`. Sin Content-Security-Policy, cualquier fallo de inyección de HTML en el frontend podía acabar ejecutando scripts, y sin `X-Frame-Options` se podía meter HireFlow en un `<iframe>` de otra web para engañar al usuario (clickjacking). Además, la contraseña mínima era de 6 caracteres sin ninguna otra regla, así que se aceptaba `123456`.
+
+**Decisión 1 — `helmet` con su configuración por defecto y una CSP ajustada** a lo que el frontend carga de verdad. Se revisó antes: no hay scripts inline, ni `eval`, ni atributos `style` en el HTML (el helper `el()` y la mascota usan `element.style`, que la CSP permite), y la mascota se carga como `<img>`. Lo único externo es la fuente Lato:
+- `script-src 'self'` (por defecto) y `script-src-attr 'none'`: solo los módulos propios, ningún `onclick=` inline;
+- `style-src 'self' https://fonts.googleapis.com` y `font-src 'self' https://fonts.gstatic.com`: más estricta que la de helmet por defecto, que permite cualquier `https:` y `'unsafe-inline'`;
+- `upgrade-insecure-requests` desactivado: la app se sirve por http (localhost, o la IP de la red local al probarla en el móvil) y esa directiva forzaría https en todas las peticiones, rompiendo la app;
+- `frame-ancestors 'self'` y `X-Frame-Options: SAMEORIGIN`: nadie puede incrustar HireFlow en otra web. La demo del portfolio es un vídeo, no un `iframe`, así que no le afecta.
+
+**Decisión 2 — contraseñas de 8 a 72 caracteres, con al menos una letra y un número** (`createUserValidators`). El máximo es 72 porque bcrypt ignora lo que pase de 72 bytes: una contraseña más larga daría una seguridad falsa. No se exigen símbolos ni mayúsculas: las guías actuales (NIST SP 800-63B) priorizan la longitud frente a las reglas de composición, que llevan a contraseñas previsibles como `Clave2026!`. La regla solo se aplica al registrarse: el login no valida el formato, así que las cuentas antiguas con contraseñas más cortas siguen entrando. La contraseña de la demo, `demo2026`, cumple la regla.
+
+**Frontend:** el registro comprueba las mismas reglas antes de enviar el formulario, con un mensaje traducido en los 4 idiomas (`auth.passwordRules`), y el campo lleva `minlength`/`maxlength`. En el login no se añaden, para no dar pistas del formato.
+
+**Verificación** (contra `hireflow_demo`):
+- con curl, la página devuelve la CSP y el resto de cabeceras, sin `X-Powered-By`; al registrarse, `abc12`, `abcdefgh` y `12345678` dan 400 con el motivo y `clave2026` da 201;
+- con Playwright, se recorrieron todas las pantallas de candidata y de recruiter (incluido enviar un mensaje al asistente IA y abrir el menú): **0 violaciones de CSP y 0 errores**, con la fuente Lato y la mascota cargadas;
+- el aviso de contraseña del registro aparece antes de enviar el formulario.
+
+Los usuarios de prueba se borraron al terminar.
+
+**Archivos afectados:** `backend/server.js`, `backend/validators/userValidators.js`, `backend/package.json` y `backend/package-lock.json` (`helmet`), `frontend/js/screens/login.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.

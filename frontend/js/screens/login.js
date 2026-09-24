@@ -18,7 +18,11 @@ export const render = (container) => {
         });
         const passwordInput = el("input", {
             type: "password", name: "password", placeholder: t("auth.passwordPlaceholder"),
-            autocomplete: mode === "login" ? "current-password" : "new-password", required: "true"
+            autocomplete: mode === "login" ? "current-password" : "new-password", required: "true",
+            // Mismas reglas que createUserValidators (backend): solo al registrarse,
+            // en el login no se valida el formato para no dar pistas.
+            minlength: mode === "register" ? "8" : undefined,
+            maxlength: mode === "register" ? "72" : undefined
         });
 
         const extraFields = mode === "register"
@@ -61,6 +65,11 @@ export const render = (container) => {
                 } else {
                     if (!termsCheckbox.checked) {
                         errorSlot.append(errorBanner(t("auth.termsRequired")));
+                        return;
+                    }
+                    const password = passwordInput.value;
+                    if (password.length < 8 || password.length > 72 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+                        errorSlot.append(errorBanner(t("auth.passwordRules")));
                         return;
                     }
                     await register({

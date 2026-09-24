@@ -12,16 +12,19 @@ Formato basado en Keep a Changelog.
 - Ya no se puede borrar una empresa que tiene ofertas (409): hay que borrar antes las ofertas, para no eliminar postulaciones sin querer.
 - El login ya no revela qué emails están registrados: devuelve siempre 401 "Email o contraseña incorrectos" (antes, 400 "Usuario no encontrado" o "contraseña incorrecta"), y tarda lo mismo exista o no el email.
 - Límite de 10 intentos de login fallidos por IP cada 15 minutos (429), con `express-rate-limit`. Los logins correctos no cuentan.
+- Cabeceras de seguridad con `helmet`: Content-Security-Policy (solo scripts propios; estilos y fuentes propios más Google Fonts), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, etc. Se quita `X-Powered-By: Express`.
+- Contraseña al registrarse: de 8 a 72 caracteres, con al menos una letra y un número (antes, mínimo 6 y sin más reglas). No afecta al login de las cuentas ya creadas.
 
 ## Cambiado
 - El formulario de oferta solo ofrece las empresas del propio recruiter.
 - Los errores de login (401 y 429) se muestran traducidos en los 4 idiomas; antes salía el texto del backend, siempre en español.
 - El mensaje de login correcto es "Sesión iniciada" en vez de "contraseña correcta".
+- El formulario de registro avisa de las reglas de la contraseña antes de enviarlo, traducido en los 4 idiomas.
 
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018, 019 y 020.
+Detalle en `docs/decisions.md`, entradas 018 a 021.
 
 ---
 

@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 import userRoutes from "./routes/userRoutes.js";
@@ -16,6 +17,22 @@ dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+
+// Cabeceras de seguridad (CSP, nosniff, anti-clickjacking, sin X-Powered-By...).
+// La CSP de helmet se ajusta a lo que carga el frontend: todo desde el propio
+// servidor salvo la fuente Lato de Google Fonts. upgrade-insecure-requests se
+// desactiva porque la app se sirve por http (localhost o la IP de la red local
+// al probar en el móvil) y forzaría https en todas las peticiones.
+// Ver docs/decisions.md, entrada 021.
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            styleSrc: ["'self'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            upgradeInsecureRequests: null
+        }
+    }
+}));
 
 app.use(express.json());
 
