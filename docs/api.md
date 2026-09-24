@@ -25,6 +25,16 @@ Todas las respuestas de error tienen al menos `{"message": "..."}`. Manejo centr
 - Los errores esperados (validación, duplicados, IDOR bloqueado, FK inválida) devuelven el mensaje específico documentado en cada endpoint, con status < 500.
 - Cualquier error no controlado explícitamente devuelve siempre `500 {"message":"Error interno del servidor"}` — nunca se expone el mensaje interno del error ni detalles del driver de MySQL al cliente; el detalle completo se registra solo en el log del servidor.
 
+## Errores de autenticación
+Las rutas protegidas (`verifyToken`) responden 401 en tres casos:
+- sin cabecera `Authorization`: `{"message":"No se proporcionó un token de autenticación"}`
+- token caducado (dura 1 hora): `{"message":"La sesión ha caducado. Vuelve a iniciar sesión."}`
+- token mal formado o firmado con otro secreto: `{"message":"Token de autenticación no válido"}`
+
+El frontend trata cualquier 401 con token (fuera de `/users/login`) como sesión caducada: cierra la sesión y lleva al login (ver `docs/decisions.md`, entrada 025).
+
+---
+
 ## Errores de validación
 
 Todos los endpoints con body (`POST`/`PUT`) validan la entrada antes de llegar al controller (`express-validator`, ver `docs/decisions.md`, entrada 008). Si algún campo no cumple las reglas, la respuesta es siempre:

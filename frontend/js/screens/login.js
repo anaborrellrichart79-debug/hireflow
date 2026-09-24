@@ -1,11 +1,15 @@
-import { el, errorBanner } from "../components/ui.js";
+import { el, errorBanner, infoBanner } from "../components/ui.js";
 import { login, register } from "../auth.js";
+import { getSessionExpiredReturnTo, clearSessionExpired } from "../api.js";
 import { navigate } from "../router.js";
 import { t } from "../i18n.js";
 import { openPrivacyPolicyDialog } from "../components/privacyPolicyDialog.js";
 
 export const render = (container) => {
     let mode = "login";
+
+    // Si la sesión anterior caducó: ruta a la que volver tras iniciar sesión.
+    const sessionExpiredReturnTo = getSessionExpiredReturnTo();
 
     const draw = () => {
         container.innerHTML = "";
@@ -80,7 +84,9 @@ export const render = (container) => {
                         termsAccepted: true
                     });
                 }
-                navigate("/");
+                const returnTo = sessionExpiredReturnTo && sessionExpiredReturnTo !== "/login" ? sessionExpiredReturnTo : "/";
+                clearSessionExpired();
+                navigate(returnTo);
             } catch (error) {
                 errorSlot.innerHTML = "";
                 // 401 (credenciales incorrectas) y 429 (demasiados intentos)
@@ -100,6 +106,7 @@ export const render = (container) => {
 
         const form = el("form", { class: "auth-form", onSubmit: submit }, [
             el("h2", { text: mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle") }),
+            mode === "login" && sessionExpiredReturnTo !== null ? infoBanner(t("auth.sessionExpired")) : null,
             errorSlot,
             ...extraFields,
             emailInput,

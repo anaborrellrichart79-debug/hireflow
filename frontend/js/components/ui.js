@@ -31,6 +31,9 @@ export const emptyState = (message) =>
 export const errorBanner = (message) =>
     el("div", { class: "error-banner", text: message });
 
+export const infoBanner = (message) =>
+    el("div", { class: "info-banner", role: "status", text: message });
+
 export const primaryButton = (text, onClick) =>
     el("button", { class: "primary-button", type: "button", onClick, text });
 

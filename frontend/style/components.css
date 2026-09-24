@@ -145,6 +145,15 @@
     margin-bottom: 12px;
 }
 
+.info-banner {
+    background: var(--hf-cream);
+    border: 1px solid var(--hf-orange);
+    color: #5a4520;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
 .success-text { color: #2c7a45; font-weight: 700; }
 
 .form-note { font-size: 13px; color: #777; }

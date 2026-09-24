@@ -31,6 +31,8 @@ Formato basado en Keep a Changelog.
 - En Postulantes, tras agendar una entrevista no se refrescaba la tarjeta; ahora se ve el estado nuevo.
 - El calendario no tenía semanas: agrupaba todas las entrevistas de la historia por día de la semana, sin fechas (una del lunes 1 y otra del lunes 22 salían juntas), las pasadas no desaparecían nunca y las del domingo no se mostraban.
 - Borrar una entrevista no pedía confirmación ni mostraba los errores.
+- La sesión caducaba a la hora sin avisar: la app seguía "con sesión" y todas las pantallas fallaban con "token de autentificación no valido". Ahora, al caducar (al recargar o en mitad del uso), se cierra la sesión, se vuelve al login con el aviso "Tu sesión ha caducado" y, tras entrar, se vuelve a la pantalla donde se estaba.
+- `verifyToken` llamaba a `next()` dentro de su `try`, así que un error síncrono de cualquier middleware posterior se respondía como 401 "token no válido". Además volcaba al log la traza de cada token caducado.
 
 ## Añadido
 - Botón "Retirar postulación" en Mis postulaciones, con un diálogo de confirmación propio (no el `confirm()` del navegador) que explica que la empresa dejará de verla.
@@ -42,7 +44,7 @@ Formato basado en Keep a Changelog.
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 024.
+Detalle en `docs/decisions.md`, entradas 018 a 025.
 
 ---
 

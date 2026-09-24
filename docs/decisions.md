@@ -655,3 +655,41 @@ mainContainer.innerHTML = `<p class="error-text">${t("common.loadError")} ${erro
 `hireflow_demo` se volvió a rellenar con `hireflow-datos.js`. El guion de la demo (`hireflow.js`) sigue funcionando: espera "Videollamada" en el calendario, y los datos de demo ponen las entrevistas en la semana actual.
 
 **Archivos afectados:** `frontend/js/screens/calendar.js`, `frontend/style/components.css`, `frontend/js/i18n.js` (claves nuevas `calendar.prevWeek`, `nextWeek`, `today`, `emptyWeek`, `goToNext`, `deleteTitle`, `deleteText`, `deleteConfirm` en los 4 idiomas; eliminadas `calendar.mon`…`sat`), `backend/models/interview.js`, `docs/api.md`, `docs/changeLog.md`.
+
+---
+
+## 025 — Sesión caducada: volver al login con aviso y a la pantalla donde se estaba
+
+**Problema:** el token JWT dura 1 hora (`expiresIn: "1h"`), pero el frontend no lo tenía en cuenta:
+- `getCurrentUser()` decodificaba el token sin mirar `exp`, así que para el router la sesión seguía abierta aunque hubiera caducado;
+- `apiFetch` no hacía nada especial con un 401, así que, pasada la hora, **todas las pantallas mostraban "token de autentificación no valido"** y la única salida era abrir el menú y cerrar sesión a mano. Con la app abierta en una pestaña, era lo primero que veía quien volvía a ella.
+
+De paso, dos fallos de `verifyToken` (backend):
+- llamaba a `next()` dentro de su `try`, así que un error síncrono de cualquier middleware o controller posterior se respondía como 401 "token no válido", ocultando el error real;
+- hacía `console.log(error)` de cada token caducado, llenando el log de trazas por algo normal.
+
+**Decisión 1 — el frontend detecta la caducidad de dos formas:**
+- **Al cargar o navegar:** `getCurrentUser()` mira `exp` del payload; si ya pasó, el token cuenta como sesión cerrada (se borra) y el router manda al login como con cualquier ruta protegida.
+- **En mitad del uso:** si una petición con token recibe 401 (salvo el propio `/users/login`, cuyo 401 es "credenciales incorrectas"), `apiFetch` cierra la sesión y lleva al login. Cubre también tokens que el cliente cree válidos y el servidor rechaza (por ejemplo, si se cambia `JWT_SECRET`).
+
+**Decisión 2 — avisar y devolver al usuario donde estaba.** Al detectar la caducidad se guarda en `sessionStorage` la ruta que se estaba usando.
+- El login muestra un aviso informativo (`infoBanner`, en tono crema y no rojo, porque no es un error del usuario): "Tu sesión ha caducado. Vuelve a iniciar sesión para continuar donde lo dejaste."
+- Tras iniciar sesión se vuelve a esa ruta en vez de a Home.
+- La marca solo se borra al iniciar sesión, así que el aviso sigue ahí aunque se recargue el login o se cambie de idioma.
+- Cerrar sesión a mano no deja marca: el login sale sin aviso y se entra a Home.
+- Todo el acceso a `sessionStorage` va en `try/catch`: sin él (modo privado estricto) solo se pierde el aviso.
+
+**Decisión 3 — backend:**
+- `verifyToken` separa el 401 de token caducado ("La sesión ha caducado. Vuelve a iniciar sesión.") del de token no válido, y ya no vuelca la traza al log.
+- `next()` sale del `try`.
+- Se corrige "autentificación" por "autenticación" en sus mensajes.
+
+**No se cambia la duración del token (1 hora)**; es una decisión de producto aparte. Con este arreglo, que caduque ya no rompe nada: se vuelve a entrar y se sigue donde se estaba. Si se quisiera alargar (por ejemplo, a una jornada de 8 horas), bastaría cambiar `expiresIn` en `userControllers.js`.
+
+**Verificación** (Playwright contra `hireflow_demo`, con tokens fabricados con `jsonwebtoken`):
+- **Token caducado al abrir `#/calendar`:** lleva a `#/login` con el aviso, que sigue ahí tras recargar (F5) y sale en inglés al cambiar de idioma. Una contraseña incorrecta muestra "Email o contraseña incorrectos" sin perder el aviso ni entrar en bucle. Al entrar se vuelve a `#/calendar`.
+- **Token firmado con otro secreto, que el cliente cree válido, al abrir `#/applications`:** el servidor responde 401, el token se borra y se va al login con el aviso. Al entrar se vuelve a `#/applications`.
+- **Cerrar sesión a mano:** login sin aviso y, al entrar, a Home.
+- Sin errores de página.
+
+**Archivos afectados:** `frontend/js/api.js`, `frontend/js/screens/login.js`, `frontend/js/components/ui.js` (`infoBanner`), `frontend/style/components.css` (`.info-banner`), `frontend/js/i18n.js` (`auth.sessionExpired` en los 4 idiomas), `backend/middleware/authMiddleware.js`, `docs/api.md`, `docs/changeLog.md`.
