@@ -24,11 +24,20 @@ const iconButton = (iconFile, titleText, onClick, extraClass = "") =>
         el("img", { src: `assets/icons/${iconFile}`, alt: titleText })
     ]);
 
+// Categoría y dificultad llegan como códigos ("technical", "advanced"); se
+// muestran traducidas. Si llega un código desconocido, se muestra tal cual.
+const questionMeta = (q) => {
+    const category = t(`ai.category.${q.category}`);
+    const difficulty = t(`ai.difficulty.${q.difficulty}`);
+    return `${category === `ai.category.${q.category}` ? q.category : category} · ${difficulty === `ai.difficulty.${q.difficulty}` ? q.difficulty : difficulty}`;
+};
+
 const renderGuides = (guides) =>
     el("div", { class: "chat-answer" }, [
         el("strong", { text: t("ai.labelGuides") }),
         ...guides.map((guide) => el("div", { class: "chat-card" }, [
-            el("p", { class: "chat-meta", text: guide.company_type }),
+            // "none" es la guía genérica (sin tipo de empresa): no hay nada que mostrar.
+            guide.company_type && guide.company_type !== "none" ? el("p", { class: "chat-meta", text: guide.company_type }) : null,
             el("p", { text: guide.recomendations })
         ]))
     ]);
@@ -38,7 +47,7 @@ const renderQuestions = (questions) =>
         el("strong", { text: t("ai.labelQuestions") }),
         ...questions.map((q) => el("div", { class: "chat-card" }, [
             el("p", { text: q.question }),
-            el("span", { class: "chat-meta", text: `${q.category} · ${q.difficulty}` })
+            el("span", { class: "chat-meta", text: questionMeta(q) })
         ]))
     ]);
 

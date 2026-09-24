@@ -693,3 +693,36 @@ De paso, dos fallos de `verifyToken` (backend):
 - Sin errores de página.
 
 **Archivos afectados:** `frontend/js/api.js`, `frontend/js/screens/login.js`, `frontend/js/components/ui.js` (`infoBanner`), `frontend/style/components.css` (`.info-banner`), `frontend/js/i18n.js` (`auth.sessionExpired` en los 4 idiomas), `backend/middleware/authMiddleware.js`, `docs/api.md`, `docs/changeLog.md`.
+
+---
+
+## 026 — Asistente IA: preguntas sin plantillas, etiquetas traducidas y mejor reconocimiento en español
+
+**Problema:**
+- **Plantillas sin rellenar.** 13 de las 51 preguntas de entrevista de `ai_interview_questions` eran plantillas pensadas para rellenar a mano y se mostraban tal cual: "¿Cómo diseñarías [X concepto]?", "¿Cuál es la diferencia principal entre [Opción A] y [Opción B]?", "la herramienta X en lugar de la Y", "Nuestros valores son X e Y"... Algunas tenían además erratas: "Háblame de tí", "definirias", una comilla suelta al final y un paréntesis de cierre sin abrir. Se ve en el vídeo de la demo (0:32).
+- **Etiquetas sin traducir.** Debajo de cada pregunta salían los códigos internos `category · difficulty` ("technical · advanced"), en inglés aunque la app estuviera en español. La guía de CV genérica mostraba "none" como tipo de empresa.
+- **Peticiones razonables tratadas como fuera de tema.** Al probarlo apareció que el clasificador solo reconocía la intención "preguntas de entrevista" con frases concretas ("preguntas de entrevista", "qué me preguntarán"...), así que "preguntas personales", "preguntas de estrés" o "preguntas de cultura avanzadas" respondían "Solo puedo ayudarte con temas de búsqueda de empleo…". Y la dificultad solo se reconocía en masculino singular ("avanzado"), no "avanzadas" ni "básicas".
+
+**Decisión 1 — reescribir las 13 preguntas como preguntas reales y genéricas**, que sirvan en cualquier sector sin que nadie las rellene, manteniendo su categoría, su dificultad y lo que evalúan. Por ejemplo:
+- "¿Cómo diseñarías [X concepto]?" pasa a "Si tuvieras que diseñar desde cero el sistema o proceso con el que trabajabas en tu último puesto, ¿qué harías distinto y por qué?";
+- "[error/fallo típico]" pasa a "Algo que funcionaba ayer ha dejado de funcionar hoy y nadie sabe por qué…".
+
+Se aplica con `backend/database/migrations/026_ai_questions_sin_plantillas.sql` (en `hireflow` y `hireflow_demo`) y en `seed.sql` para instalaciones nuevas. Cada `UPDATE` va por id y exige un trozo del texto antiguo, así que reejecutarlo no hace nada.
+
+**Detalle encontrado al migrar:** la collation de la base (`utf8mb4_0900_ai_ci`) no distingue tildes, así que para MySQL `'Háblame de tí' = 'Háblame de ti'` y el `UPDATE` de esa fila no hacía nada. Esas condiciones usan `BINARY`.
+
+**Decisión 2 — etiquetas traducidas en el frontend** (`ai.category.*` y `ai.difficulty.*` en los 4 idiomas, por ejemplo "Técnica · avanzada" o "Culture fit · advanced"). Si llega un código desconocido se muestra tal cual, en vez de la clave de traducción. La guía con `company_type = "none"` (la genérica) ya no muestra esa línea.
+
+**Decisión 3 — clasificador más tolerante en español** (`models/aiAssistant.js`):
+- **"preguntas" (en plural) cuenta como intención de preguntas de entrevista.** El plural es a propósito: "tengo una pregunta sobre mi CV" sigue yendo a revisión de CV.
+- **Categoría y dificultad se buscan por raíz** ("tecnic", "avanzad", "basic", "intermedi", "complej", "sencill"), para aceptar masculino, femenino y plural.
+- **"medio" suelto pasa a "nivel medio"**, porque ahora el texto se busca por trozos y "medio ambiente" habría contado como dificultad intermedia.
+- Se añade "situacional" a la categoría `behavioral`, que es como la muestra ahora la etiqueta traducida.
+
+**Fuera de alcance — el asistente solo entiende español.** Al probar en inglés, la propia sugerencia "What will they ask me in the interview?" recibe la respuesta de "fuera de tema", **en español**. El clasificador solo tiene palabras clave en español, los mensajes del backend están solo en español y las preguntas del catálogo también. Estaba documentado como limitación (entrada 014), pero choca con que la app se anuncie en 4 idiomas y con que las sugerencias en inglés no funcionen. Queda como siguiente mejora.
+
+**Verificación:**
+- **Clasificador**, directamente con Node sobre 14 frases: todas las peticiones de preguntas se reconocen con su categoría y dificultad; "Revísame el CV", "¿Encajo con esta oferta?" y "cómo mejorar mi comunicación" siguen yendo a su intención; "¿qué tiempo hace hoy?" y "el medio ambiente en entrevistas" siguen siendo fuera de tema.
+- **Navegador** (Playwright contra `hireflow_demo`): 7 peticiones distintas devuelven preguntas, sin ningún corchete y con las etiquetas en español ("Técnica · avanzada", "De presión · básica"...); la guía de CV ya no muestra "none"; sin errores de consola.
+
+**Archivos afectados:** `backend/database/migrations/026_ai_questions_sin_plantillas.sql` (nuevo), `backend/database/seed.sql`, `backend/models/aiAssistant.js`, `frontend/js/screens/ai.js`, `frontend/js/i18n.js`, `docs/changeLog.md`.

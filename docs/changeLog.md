@@ -32,6 +32,9 @@ Formato basado en Keep a Changelog.
 - El calendario no tenía semanas: agrupaba todas las entrevistas de la historia por día de la semana, sin fechas (una del lunes 1 y otra del lunes 22 salían juntas), las pasadas no desaparecían nunca y las del domingo no se mostraban.
 - Borrar una entrevista no pedía confirmación ni mostraba los errores.
 - La sesión caducaba a la hora sin avisar: la app seguía "con sesión" y todas las pantallas fallaban con "token de autentificación no valido". Ahora, al caducar (al recargar o en mitad del uso), se cierra la sesión, se vuelve al login con el aviso "Tu sesión ha caducado" y, tras entrar, se vuelve a la pantalla donde se estaba.
+- El asistente IA mostraba preguntas de entrevista con plantillas sin rellenar ("¿Cómo diseñarías [X concepto]?", "la herramienta X en lugar de la Y", "Nuestros valores son X e Y") y erratas ("Háblame de tí", "definirias", comillas y paréntesis sueltos). Se reescribieron las 13 afectadas como preguntas reales (migración `026_ai_questions_sin_plantillas.sql` y `seed.sql`).
+- Debajo de cada pregunta salían los códigos internos en inglés ("technical · advanced") aunque la app estuviera en español; ahora salen traducidos en los 4 idiomas ("Técnica · avanzada"). La guía genérica de CV mostraba "none" como tipo de empresa; ya no.
+- El asistente respondía "Solo puedo ayudarte con temas de búsqueda de empleo…" a peticiones como "preguntas personales" o "preguntas de cultura avanzadas", y no reconocía la dificultad en femenino o plural ("avanzadas", "básicas").
 - `verifyToken` llamaba a `next()` dentro de su `try`, así que un error síncrono de cualquier middleware posterior se respondía como 401 "token no válido". Además volcaba al log la traza de cada token caducado.
 
 ## Añadido
@@ -44,7 +47,7 @@ Formato basado en Keep a Changelog.
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 025.
+Detalle en `docs/decisions.md`, entradas 018 a 026.
 
 ---
 

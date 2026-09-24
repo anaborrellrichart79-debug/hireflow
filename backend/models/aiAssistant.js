@@ -26,7 +26,11 @@ const INTENT_KEYWORDS = {
         "que me pueden preguntar", "que me preguntaran", "preguntas de entrevista",
         "prepararme para la entrevista", "como preparo la entrevista", "practicar entrevista",
         "prepara la entrevista", "simular entrevista", "que preguntas hacen",
-        "preguntas para la entrevista", "que me van a preguntar"
+        "preguntas para la entrevista", "que me van a preguntar",
+        // "preguntas" sola: "preguntas personales", "preguntas técnicas avanzadas"...
+        // no llevaban ninguna frase de arriba y acababan como off_topic.
+        // Plural a propósito: "tengo una pregunta sobre mi cv" no debe contar.
+        "preguntas"
     ],
     interview_feedback: [
         "como mejorar", "consejos para mejorar", "mejorar mis habilidades", "mejorar skills",
@@ -90,18 +94,21 @@ export const extractIndustry = (text) => {
     return null;
 };
 
+// Raíces en vez de palabras completas ("tecnic", "avanzad"...) para que valgan
+// masculino, femenino y plural: antes "preguntas técnicas avanzadas" no
+// reconocía "avanzadas" porque solo se buscaba "avanzado".
 const CATEGORY_KEYWORDS = {
     personal: ["personal", "sobre mi", "hablame de ti"],
-    technical: ["tecnica", "tecnico", "programacion", "herramientas"],
-    behavioral: ["comportamental", "situacion pasada", "experiencia pasada"],
+    technical: ["tecnic", "programacion", "herramientas"],
+    behavioral: ["comportamental", "situacional", "situacion pasada", "experiencia pasada"],
     stress: ["estres", "presion", "dificiles"],
     culture_fit: ["cultura", "encaje cultural", "valores"]
 };
 
 const DIFFICULTY_KEYWORDS = {
-    basic: ["basico", "facil", "sencillo"],
-    intermediate: ["intermedio", "medio"],
-    advanced: ["avanzado", "dificil", "complejo"]
+    basic: ["basic", "facil", "sencill"],
+    intermediate: ["intermedi", "nivel medio"],
+    advanced: ["avanzad", "dificil", "complej"]
 };
 
 const matchFirst = (text, map) => {
