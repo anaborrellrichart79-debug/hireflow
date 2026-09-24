@@ -405,7 +405,7 @@
     padding: 10px 12px;
 }
 
-.chat-card p { margin: 4px 0 0; font-size: 13px; }
+.chat-card p { margin: 4px 0 0; font-size: 13px; white-space: pre-line; } /* respeta los saltos de línea de las guías de CV */
 .chat-meta { font-size: 11px; color: #666; }
 
 .chat-chips { display: flex; flex-wrap: wrap; gap: 8px; }

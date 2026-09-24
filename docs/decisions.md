@@ -752,3 +752,55 @@ La empresa veía entonces al mismo candidato repetido en Postulantes, con dos es
 `hireflow_demo` se volvió a rellenar con `hireflow-datos.js` al terminar.
 
 **Archivos afectados:** `backend/database/shema.sql`, `backend/database/migrations/027_applications_unique_user_job.sql` (nuevo), `backend/controllers/applicationControllers.js`, `frontend/js/screens/jobs.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/changeLog.md`.
+
+---
+
+## 028 — Asistente IA en los 4 idiomas de la app
+
+**Problema:** la app se anuncia en 4 idiomas (entrada 012), pero el asistente IA solo funcionaba en español:
+- el clasificador solo tenía palabras clave en español, así que con la app en inglés su propia sugerencia "What will they ask me in the interview?" acababa como "fuera de tema";
+- los mensajes del asistente (fuera de tema, aclaraciones) estaban escritos en español en el backend y salían en español con la app en cualquier idioma;
+- el contenido del catálogo (51 preguntas, 12 guías de CV, 20 fichas de habilidades) solo existía en español.
+
+Estaba anotado como limitación (entradas 014 y 026), pero es lo primero que ve quien cambia de idioma y prueba el asistente, empezando por la demo.
+
+**Alcance decidido con Ana:** traducirlo todo, no solo que entienda y conteste en cada idioma. Así con la app en inglés no queda nada en español.
+
+**Decisión 1 — tabla de traducciones aparte, no columnas por idioma.** `ai_content_translations (source_table, source_id, field, lang, content)`. El español sigue en las tablas originales, que es lo que ya usan el `seed.sql` y el resto del código; aquí solo van `en`, `fr` e `it`. Se descartaron las columnas por idioma (`question_en`, `question_fr`...) porque serían 21 columnas nuevas repartidas en 3 tablas, y añadir un idioma obligaría a cambiar el esquema; con la tabla aparte basta con insertar filas.
+- `translateRows()` (`models/ai.js`) hace una sola consulta por respuesta y sustituye cada campo por su traducción. Si falta alguna, se queda el español en vez de dejar un hueco.
+- La búsqueda (por categoría, dificultad, sector o nombre de habilidad) se sigue haciendo sobre las tablas en español, y se traduce después.
+
+**Decisión 2 — el idioma lo manda el frontend** (`lang` en el body de `/ai/*`, validado contra `es`, `en`, `fr` e `it`), y el backend genera sus mensajes en ese idioma (`MESSAGES` en `aiControllers.js`). No se usa la cabecera `Accept-Language`, porque el idioma que cuenta es el que ha elegido el usuario en la app, no el del navegador.
+
+**Decisión 3 — palabras clave en los 4 idiomas y coincidencia por inicio de palabra.**
+- Se añadieron frases y raíces en inglés, francés e italiano a intenciones, sectores, categorías, dificultades y habilidades.
+- Cada habilidad devuelve el trozo de su `skill_name` en español (por ejemplo, "leadership" pasa a "liderazgo"), que es por lo que se busca en la tabla.
+- Antes, las palabras clave se buscaban en cualquier posición: "ong" coincidía dentro de "strong" o "long", "agil" dentro de "fragil" y "moda" dentro de "modalidad". Ahora tienen que empezar una palabra, lo que sigue permitiendo raíces como "tecnic" o "avanzad". Las cortas y ambiguas llevan `$` y tienen que ser la palabra entera (`moda$`, `ong$`, `marca$`, `obra$`, `dati$`).
+- Falsos amigos evitados a propósito: "recherche" y "ricerca" también significan "búsqueda (de empleo)", así que no sirven para detectar el sector académico (se usan "chercheur", "ricercatore", etc.); y "commerce" empieza igual que "commercial", así que no se usa suelto.
+
+**Decisión 4 — tono de las traducciones:**
+- **Preguntas de entrevista:** en tratamiento formal en francés e italiano ("vous", "Lei"), porque las hace un reclutador y así se habla en una entrevista en esos idiomas.
+- **Guías, consejos y mensajes:** tutean ("tu" en francés e italiano), porque son el propio asistente hablando, igual que el resto de la interfaz en esos idiomas.
+- **Títulos de libros:** el original en inglés, salvo cuando hay una edición muy conocida en ese idioma (por ejemplo, "Père riche, père pauvre" o "Intelligenza emotiva").
+
+**De paso:**
+- Se corrigieron erratas del contenido en español ("Díme", "la autoaprendizaje", "ideas,sentimientos", "mismno"), en la migración y en `seed.sql`.
+- Las guías de CV respetan sus saltos de línea (`white-space: pre-line`).
+- Se documentó `POST /ai/ask` en `api.md`, que no estaba.
+- El README apuntaba a `schema.sql` y `seedData.sql`, que no existen, y ahora explica cómo instalar y aplicar migraciones.
+
+**Archivos SQL:**
+- `backend/database/seed_ai_translations.sql` (nuevo): crea la tabla si no existe y la rellena. Es idempotente (`INSERT … ON DUPLICATE KEY UPDATE`). Se genera a partir de las traducciones revisadas.
+- `backend/database/migrations/028_ai_content_translations.sql` (nuevo): crea la tabla y corrige las erratas en español con `REPLACE`, que distingue tildes y no hace nada si se reejecuta.
+- `shema.sql` incluye la tabla nueva. `hireflow-datos.js` la copia sola a `hireflow_demo`, porque copia todas las tablas de referencia.
+
+Aplicado a `hireflow` y `hireflow_demo`: 459 traducciones (153 de preguntas, 66 de guías y 240 de habilidades).
+
+**Verificación:**
+- **Clasificador** (Node, 27 frases): acierta las 27. Entran las 3 sugerencias del chat en los 4 idiomas, peticiones con categoría y dificultad en inglés, francés e italiano ("questions d'entretien comportementales faciles"), consejos por habilidad ("How can I improve my leadership?") y sectores. Casos trampa: "ma recherche d'emploi… startup" da startups y no académico; "make my cv strong… in sales" da ventas y no ONG; "modalidad remota en logística" da logística y no moda; "what's the weather like?" es fuera de tema.
+- **Navegador** (Playwright, en, fr e it, conversación nueva en cada mensaje): las 3 sugerencias, una revisión de CV con sector, un consejo de negociación y una pregunta fuera de tema responden lo que toca, con todo el texto en el idioma de la app. En francés, la guía de sanidad sale con tuteo y un apartado por línea.
+- **Regresión en español:** 7 de 7 peticiones de preguntas con etiquetas traducidas. Sin errores de consola.
+
+**Limitación que sigue:** si el usuario escribe en un idioma distinto al de la app (por ejemplo, en inglés con la app en español), el asistente le entiende, pero contesta en el idioma de la app. Es lo esperable: el idioma de la respuesta es el que ha elegido.
+
+**Archivos afectados:** `backend/models/ai.js`, `backend/models/aiAssistant.js`, `backend/controllers/aiControllers.js`, `backend/validators/aiValidators.js`, `backend/database/shema.sql`, `backend/database/seed.sql`, `backend/database/seed_ai_translations.sql` (nuevo), `backend/database/migrations/028_ai_content_translations.sql` (nuevo), `frontend/js/screens/ai.js`, `frontend/style/components.css`, `docs/api.md`, `docs/changeLog.md`, `README.md`.

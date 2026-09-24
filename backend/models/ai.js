@@ -1,9 +1,38 @@
 import { db } from "../config/database.js";
 
+export const AI_LANGS = ["es", "en", "fr", "it"];
+
+// El contenido del asistente está en español en sus tablas; las traducciones
+// (en, fr, it) viven en ai_content_translations. Sustituye en cada fila los
+// campos indicados por su traducción; si falta alguna, se queda el español.
+// Ver docs/decisions.md, entrada 028.
+const translateRows = async (sourceTable, rows, fields, lang) => {
+    if (!lang || lang === "es" || rows.length === 0) {
+        return rows;
+    }
+
+    const ids = rows.map((row) => row.id);
+    const [translations] = await db.query(
+        `SELECT source_id, field, content FROM ai_content_translations
+         WHERE source_table = ? AND lang = ? AND source_id IN (?) AND field IN (?)`,
+        [sourceTable, lang, ids, fields]
+    );
+
+    const byKey = new Map(translations.map((t) => [`${t.source_id}:${t.field}`, t.content]));
+    return rows.map((row) => {
+        const translated = { ...row };
+        fields.forEach((field) => {
+            const content = byKey.get(`${row.id}:${field}`);
+            if (content) translated[field] = content;
+        });
+        return translated;
+    });
+};
+
 // CV review: busca guías por industria (+ tipo de empresa si se indica).
 // Si no hay coincidencia exacta, cae a las guías genéricas (industry = 'none',
 // ya sembradas en database/seed.sql) en vez de devolver una lista vacía.
-export const findResumeGuides = async ({ industry, company_type }) => {
+export const findResumeGuides = async ({ industry, company_type, lang }) => {
     const params = [industry];
     let query = `SELECT * FROM ai_resume_guides WHERE industry = ?`;
 
@@ -13,22 +42,18 @@ export const findResumeGuides = async ({ industry, company_type }) => {
     }
 
     const [rows] = await db.execute(query, params);
+    const guides = rows.length > 0
+        ? rows
+        : (await db.execute(`SELECT * FROM ai_resume_guides WHERE industry = 'none'`))[0];
 
-    if (rows.length > 0) {
-        return rows;
-    }
-
-    const [generic] = await db.execute(
-        `SELECT * FROM ai_resume_guides WHERE industry = 'none'`
-    );
-    return generic;
+    return translateRows("ai_resume_guides", guides, ["company_type", "recomendations"], lang);
 };
 
 // limit se interpola directamente porque ya viene validado como entero
 // (1-50) por interviewQuestionsValidators antes de llegar aquí -- LIMIT ?
 // como parámetro preparado tiene problemas conocidos de compatibilidad
 // en mysql2 según la versión.
-export const findInterviewQuestions = async ({ category, difficulty, limit = 10 }) => {
+export const findInterviewQuestions = async ({ category, difficulty, limit = 10, lang }) => {
     const conditions = [];
     const params = [];
 
@@ -49,12 +74,12 @@ export const findInterviewQuestions = async ({ category, difficulty, limit = 10 
         `SELECT * FROM ai_interview_questions ${where} ORDER BY RAND() LIMIT ${safeLimit}`,
         params
     );
-    return rows;
+    return translateRows("ai_interview_questions", rows, ["question"], lang);
 };
 
 // Usado tanto por interview-feedback (skills mencionadas explícitamente)
 // como por job-match (skills que faltan respecto a una oferta).
-export const findSkillImprovementBySkillNames = async (skillNames) => {
+export const findSkillImprovementBySkillNames = async (skillNames, lang) => {
     if (!skillNames || skillNames.length === 0) {
         return [];
     }
@@ -66,7 +91,7 @@ export const findSkillImprovementBySkillNames = async (skillNames) => {
         `SELECT * FROM ai_skill_improvement WHERE ${conditions}`,
         params
     );
-    return rows;
+    return translateRows("ai_skill_improvement", rows, ["skill_name", "description", "improvement_methods", "resources"], lang);
 };
 
 const tokenize = (text) => {

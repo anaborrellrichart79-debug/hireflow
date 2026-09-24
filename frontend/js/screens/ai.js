@@ -1,6 +1,6 @@
 import { el, errorBanner } from "../components/ui.js";
 import { apiFetch } from "../api.js";
-import { t } from "../i18n.js";
+import { t, getLang } from "../i18n.js";
 
 // Chat libre sin categorías/pestañas: el usuario escribe lo que quiera y el
 // backend (POST /ai/ask) clasifica la intención por palabras clave, pide
@@ -187,7 +187,9 @@ export const render = (container) => {
         transcript.append(pending);
 
         try {
-            const data = await apiFetch("/ai/ask", { method: "POST", body: { message: pendingContext.join(" . ") } });
+            // lang: el backend responde (mensajes y contenido del catálogo) en el
+            // idioma activo de la app. Ver docs/decisions.md, entrada 028.
+            const data = await apiFetch("/ai/ask", { method: "POST", body: { message: pendingContext.join(" . "), lang: getLang() } });
             pending.remove();
             transcript.append(chatBubble("assistant", renderAnswer(data)));
 

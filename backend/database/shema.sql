@@ -219,3 +219,14 @@ CREATE table ai_skill_improvement(
     resources text,
     created_at timestamp default current_timestamp
 );
+
+-- Traducciones (en, fr, it) del contenido del asistente IA; el español vive
+-- en las tablas originales. Ver docs/decisions.md, entrada 028.
+CREATE table ai_content_translations (
+    source_table enum('ai_interview_questions','ai_resume_guides','ai_skill_improvement') NOT NULL,
+    source_id int NOT NULL,
+    field varchar(40) NOT NULL,
+    lang char(2) NOT NULL,
+    content text NOT NULL,
+    PRIMARY KEY (source_table, source_id, field, lang)
+);

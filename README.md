@@ -232,10 +232,14 @@ El objetivo del proyecto es crear una herramienta realista que combine gestión 
 
 ## Instalación de la Base de Datos
 
-    1. Crear la base de datos ejecutando el archivo --> schema.sql
-    2. Insertar los datos iniciales --> seedData.sql
-   
-    Esto creará una estructura completas de las tablas en cuanto a tipo de entrevistas, las preguntas, las guías de curriculums y las técnicas.
+    1. Crear la base de datos ejecutando el archivo --> backend/database/shema.sql
+    2. Insertar los datos iniciales --> backend/database/seed.sql
+    3. Insertar las traducciones del asistente IA (inglés, francés, italiano) --> backend/database/seed_ai_translations.sql
+
+    Esto creará la estructura completa de las tablas y el contenido del asistente IA: tipos de entrevista, preguntas, guías de currículum y técnicas de mejora, en los 4 idiomas de la app.
+    Ejecuta los archivos con --default-character-set=utf8mb4 para que se guarden bien las tildes.
+
+    Si ya tienes una base creada con una versión anterior, aplica en orden los archivos de backend/database/migrations/ que te falten (cada uno explica qué cambia).
 
 ## Estado del proyecto
 

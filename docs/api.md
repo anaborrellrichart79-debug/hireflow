@@ -738,7 +738,27 @@ Requerida (verifyToken)
 
 # AI
 
-**Importante:** estos 4 endpoints son consultas sobre las tablas catálogo (`ai_interview_questions`, `ai_resume_guides`, `ai_skill_improvement`), **no** llamadas a un LLM externo — no hay ninguna API key de IA configurada en el proyecto (ver `docs/decisions.md`, entrada 010). Todas las rutas requieren `verifyToken`.
+**Importante:** estos endpoints son consultas sobre las tablas catálogo (`ai_interview_questions`, `ai_resume_guides`, `ai_skill_improvement`), **no** llamadas a un LLM externo — no hay ninguna API key de IA configurada en el proyecto (ver `docs/decisions.md`, entrada 010). Todas las rutas requieren `verifyToken`.
+
+**Idioma (`lang`):** todos aceptan en el body un `lang` opcional (`es`, `en`, `fr` o `it`; por defecto `es`). El contenido del catálogo (preguntas, guías, consejos) y los mensajes del asistente se devuelven en ese idioma; las traducciones viven en `ai_content_translations` (ver `docs/decisions.md`, entrada 028). Cualquier otro valor da 400.
+
+## Asistente (chat libre)
+POST /ai/ask
+Body
+{
+    "message": "What will they ask me in the interview?",
+    "lang": "en"
+}
+Es el que usa la pantalla del Asistente IA. Clasifica la intención del mensaje por palabras clave en los 4 idiomas (no es un LLM) y responde con uno de estos `type`:
+- `answer`: con `intent` (`cv_review`, `interview_questions`, `interview_feedback` o `job_match`) y los datos correspondientes (`guides`, `questions`, `suggestions`, o el encaje con una oferta);
+- `clarify`: falta información (sector, habilidad u oferta) o la intención es ambigua; `message` es la pregunta de aclaración;
+- `off_topic`: el mensaje no trata de búsqueda de empleo; `message` lo explica.
+
+Validación
+`message` obligatorio (máx. 1000). `lang` opcional (ver arriba).
+Autenticación
+Requerida (verifyToken)
+
 
 ## Revisión de CV
 POST /ai/cv-review

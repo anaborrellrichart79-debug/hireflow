@@ -36,6 +36,9 @@ Formato basado en Keep a Changelog.
 - Debajo de cada pregunta salían los códigos internos en inglés ("technical · advanced") aunque la app estuviera en español; ahora salen traducidos en los 4 idiomas ("Técnica · avanzada"). La guía genérica de CV mostraba "none" como tipo de empresa; ya no.
 - El asistente respondía "Solo puedo ayudarte con temas de búsqueda de empleo…" a peticiones como "preguntas personales" o "preguntas de cultura avanzadas", y no reconocía la dificultad en femenino o plural ("avanzadas", "básicas").
 - Se podía uno postular dos veces a la misma oferta: con un doble clic en "Confirmar postulación", o desde dos pestañas. La empresa veía al candidato repetido. Ahora la base de datos lo impide (`UNIQUE (user_id, job_offer_id)`, migración `027_applications_unique_user_job.sql`), la API responde 409 "Ya te has postulado a esta oferta" y el botón se desactiva mientras se envía.
+- El asistente IA solo entendía español: con la app en inglés, francés o italiano, sus propias sugerencias ("What will they ask me in the interview?") recibían la respuesta de "fuera de tema", y en español. Ahora entiende y responde en los 4 idiomas (ver "Añadido").
+- La palabra clave "ong" coincidía dentro de "strong" o "long", "ágil" dentro de "frágil", "moda" dentro de "modalidad"...: el asistente podía confundir el sector del CV. Ahora cada palabra clave tiene que empezar palabra (o ser la palabra entera, en las cortas).
+- Erratas en el contenido del asistente en español: "Díme", "la autoaprendizaje", "ideas,sentimientos", "mismno".
 - `verifyToken` llamaba a `next()` dentro de su `try`, así que un error síncrono de cualquier middleware posterior se respondía como 401 "token no válido". Además volcaba al log la traza de cada token caducado.
 
 ## Añadido
@@ -43,12 +46,15 @@ Formato basado en Keep a Changelog.
 - `aria-label` en los desplegables de estado (candidato y empresa).
 - Calendario por semanas: botones de semana anterior, "Hoy" y semana siguiente, el rango de fechas como título, fecha en cada día, el día de hoy resaltado y el domingo incluido. Si la semana está vacía lo dice y ofrece saltar a la próxima entrevista. Tras agendar una entrevista se salta a su semana. En móvil, los días van en lista y se ocultan los vacíos.
 - El candidato ve en cada entrevista del calendario la oferta y la empresa (antes solo la hora y el lugar).
+- Asistente IA en 4 idiomas: palabras clave en inglés, francés e italiano, mensajes del asistente traducidos y todo el contenido del catálogo (51 preguntas de entrevista, 12 guías de CV y 20 fichas de habilidades) traducido, en la tabla nueva `ai_content_translations` (459 textos). Migración `028_ai_content_translations.sql` + `seed_ai_translations.sql`.
+- `POST /ai/*` acepta `lang` (`es`, `en`, `fr`, `it`).
+- Las guías de CV respetan sus saltos de línea ("Diseño: …", "Enfoque: …") en vez de salir en un solo párrafo.
 - Favicon (`frontend/assets/icons/favicon.svg`): la "H" naranja del logo. Antes el navegador pedía `/favicon.ico` en cada carga y la consola mostraba un 404.
 
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 027.
+Detalle en `docs/decisions.md`, entradas 018 a 028.
 
 ---
 

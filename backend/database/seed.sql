@@ -85,13 +85,13 @@ INSERT INTO ai_interview_questions (question, category, difficulty) VALUES
 -- logistics, engineering, sales) para ampliar el catálogo.
 INSERT into ai_resume_guides (industry, company_type, recomendations) VALUES
 ('none','none','La mayoría de empresas grandes usan un software (ATS) que escanea palabras clave. Independientemente del sector, asegúrate de que los títulos de tus puestos coincidan con los de la oferta de trabajo.'),
-('none','none','¿Díme en qué sector profesional te mueves tú para poder darte consejos más específicos?'),
+('none','none','Dime en qué sector profesional te mueves para poder darte consejos más específicos.'),
 ('corporate_companies','banca, consultoría, derecho, seguros, gran industria','Buscan seriedad, estabilidad y resultados cuantificables.
 Diseño: Limpio, sobrio, con mucho espacio en blanco y fuentes clásicas (Arial, Calibri). Evita gráficos excesivos.
 Enfoque: Pon el foco en tu formación académica y en hitos logrados.
 Palabras clave: "Optimización", "Rentabilidad", "Gestión de equipos", "Cumplimiento de objetivos".
 Tip: Usa el formato cronológico inverso (lo más reciente primero).'),
-('startups','programación, marketing, Data Science, Fintech','Valoran la agilidad, la autoaprendizaje y las herramientas técnicas.
+('startups','programación, marketing, Data Science, Fintech','Valoran la agilidad, el autoaprendizaje y las herramientas técnicas.
 Diseño: Moderno y funcional. Puedes incluir enlaces a tu GitHub, Portfolio o LinkedIn.
 Enfoque: Prioriza tus habilidades técnicas (Stack) y los proyectos en los que has participado. Menos títulos, más soluciones.
 Palabras clave: "Escalabilidad", "Metodologías Ágiles", "Desarrollo", "Implementación".
@@ -141,7 +141,7 @@ Palabras clave: "Cumplimiento de cuota", "Cartera de clientes", "Cierre de venta
 Tip: Un CV de ventas sin números concretos es la mayor señal de alarma para un reclutador de este sector.');
 
 INSERT INTO ai_skill_improvement (skill_name, description, improvement_methods, resources) VALUES
-('comunicación asertiva','Capacidad de expresar ideas,sentimientos y necesidades de manera directa, segura y honesta, respetando al mismno tiempo los derechos de los demás. Es vital para evitar malentendidos y resolver conflictos.', 'Antes de responder, parafrasea lo que el otro dijo para confirmar que entendiste el mensaje real.','Libro: Crucial Conversations. Plataformas: Toastmasters International (para hablar en público).'),
+('comunicación asertiva','Capacidad de expresar ideas, sentimientos y necesidades de manera directa, segura y honesta, respetando al mismo tiempo los derechos de los demás. Es vital para evitar malentendidos y resolver conflictos.', 'Antes de responder, parafrasea lo que el otro dijo para confirmar que entendiste el mensaje real.','Libro: Crucial Conversations. Plataformas: Toastmasters International (para hablar en público).'),
 ('pensamiento crítico y resolución de problemas','La habilidad de analizar información de forma objetiva, cuestionar premisas y llegar a conclusiones lógicas para resolver situaciones complejas de manera eficiente.','Ante un problema, pregunta "¿Por qué?" cinco veces seguidas para llegar a la raíz del asunto en lugar de tratar solo el síntoma.','Curso: Critical Thinking en LinkedIn Learning. Metodología: Los 6 Sombreros para Pensar (Edward de Bono).'),
 ('adaptabilidad y flexibilidad','Capacidad para ajustarse rápidamente a nuevos entornos, tecnologías o cambios en la estrategia de la empresa sin perder la productividad.','Inscríbete en cursos de temas que no domines para acostumbrarte a ser "principiante" constantemente.','Plataforma: Coursera o edX (para cursos cortos). Concepto: Learnability (habilidad de aprender a aprender).'),
 ('Alfabetización de Datos (Data Literacy)','La habilidad de leer, trabajar, analizar y argumentar con datos. No se trata de ser matemático, sino de entender qué dicen los números para tomar decisiones.','Dominio de Herramientas de Visualización. Aprende a usar Excel avanzado, Power BI o Tableau para convertir tablas aburridas en gráficos que cuenten una historia.','Recurso: Google Data Analytics Professional Certificate. Web: Kaggle (para practicar con datos reales).'),
