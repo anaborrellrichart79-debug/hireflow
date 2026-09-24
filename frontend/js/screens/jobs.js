@@ -33,6 +33,7 @@ const openApplyConsentDialog = (candidateName, onConfirm) => {
 
     confirmButton.addEventListener("click", async () => {
         errorSlot.innerHTML = "";
+        if (confirmButton.disabled) return;
         if (!consentCheckbox.checked) {
             errorSlot.append(errorBanner(t("jobs.consentRequired")));
             return;
@@ -41,12 +42,20 @@ const openApplyConsentDialog = (candidateName, onConfirm) => {
             errorSlot.append(errorBanner(t("jobs.signatureRequired")));
             return;
         }
+        // Se desactiva mientras se envía: un doble clic creaba dos postulaciones.
+        confirmButton.disabled = true;
         try {
             await onConfirm(signatureInput.value.trim());
             dialog.close();
         } catch (error) {
-            const detail = error.errors?.map((e) => e.message).join(" · ");
-            errorSlot.append(errorBanner(detail || error.message));
+            // 409: ya había una postulación a esta oferta (por ejemplo, desde
+            // otra pestaña). Se explica con el texto traducido.
+            const detail = error.status === 409
+                ? t("jobs.alreadyAppliedError")
+                : error.errors?.map((e) => e.message).join(" · ") || error.message;
+            errorSlot.append(errorBanner(detail));
+        } finally {
+            confirmButton.disabled = false;
         }
     });
 };

@@ -8,19 +8,32 @@ import { createApplication,
     markApplicationStatusUpdatesSeen } from "../models/application.js";
 import { APPLICATION_STATUS } from "../constants/applicationStatus.js";
 
+const ALREADY_APPLIED_MESSAGE = "Ya te has postulado a esta oferta";
+
 export const createNewApplication = async (req, res) => {
     // Postularse a una oferta de HireFlow es postularse de verdad: la empresa
     // la recibe al momento, así que entra como "applied" (con su fecha). Solo
     // un seguimiento personal sin oferta asociada empieza en "wishlist".
     // Ver docs/decisions.md, entrada 023.
-    const application = await createApplication({
-        user_id: req.user.id, // Obtener el ID del usuario autenticado
-        job_offer_id: req.body.job_offer_id,
-        status: req.body.job_offer_id ? APPLICATION_STATUS.APPLIED : APPLICATION_STATUS.WISHLIST,
-        notes: req.body.notes,
-        consent_share_contact: req.body.consent === true,
-        signature_name: req.body.signature
-    });
+    let application;
+    try {
+        application = await createApplication({
+            user_id: req.user.id, // Obtener el ID del usuario autenticado
+            job_offer_id: req.body.job_offer_id,
+            status: req.body.job_offer_id ? APPLICATION_STATUS.APPLIED : APPLICATION_STATUS.WISHLIST,
+            notes: req.body.notes,
+            consent_share_contact: req.body.consent === true,
+            signature_name: req.body.signature
+        });
+    } catch (error) {
+        // uq_application_user_job: ya existe una postulación de este
+        // candidato a esta oferta (doble clic, dos pestañas...). Ver
+        // docs/decisions.md, entrada 027.
+        if (error.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({ message: ALREADY_APPLIED_MESSAGE });
+        }
+        throw error;
+    }
 
     res.status(201).json(application);
 };

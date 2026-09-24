@@ -226,6 +226,7 @@ Respuesta
 Errores
 400 — validación (ver sección "Errores de validación"), incluido no aceptar el consentimiento o no firmar
 400 — `job_offer_id` no existe (constraint FK)
+409 — el candidato ya tiene una postulación a esa oferta: `{"message":"Ya te has postulado a esta oferta"}` (restricción `uq_application_user_job`; ver `docs/decisions.md`, entrada 027). Los seguimientos personales, sin `job_offer_id`, se pueden repetir.
 
 ---
 

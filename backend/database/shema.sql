@@ -94,6 +94,11 @@ CREATE table applications (
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp on update current_timestamp,
 
+-- Una sola postulación por candidato y oferta (ver docs/decisions.md, entrada 027).
+-- Con job_offer_id NULL (seguimiento personal) no aplica: UNIQUE admite varios NULL.
+constraint uq_application_user_job
+	unique (user_id, job_offer_id),
+
 constraint fk_application_user
 	foreign key (user_id)
     references users(id)

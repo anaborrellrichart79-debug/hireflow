@@ -726,3 +726,29 @@ Se aplica con `backend/database/migrations/026_ai_questions_sin_plantillas.sql` 
 - **Navegador** (Playwright contra `hireflow_demo`): 7 peticiones distintas devuelven preguntas, sin ningún corchete y con las etiquetas en español ("Técnica · avanzada", "De presión · básica"...); la guía de CV ya no muestra "none"; sin errores de consola.
 
 **Archivos afectados:** `backend/database/migrations/026_ai_questions_sin_plantillas.sql` (nuevo), `backend/database/seed.sql`, `backend/models/aiAssistant.js`, `frontend/js/screens/ai.js`, `frontend/js/i18n.js`, `docs/changeLog.md`.
+
+---
+
+## 027 — Una sola postulación por candidato y oferta
+
+**Problema:** nada impedía postularse dos veces a la misma oferta. El frontend ocultaba el botón "Postularme" en las ofertas ya postuladas, pero:
+- un doble clic en "Confirmar postulación" enviaba dos peticiones antes de que se redibujara la lista;
+- con la app abierta en dos pestañas se podía postular desde ambas;
+- por la API no había ningún límite.
+
+La empresa veía entonces al mismo candidato repetido en Postulantes, con dos estados que se podían mover por separado.
+
+**Decisión 1 — restricción en la base de datos, no una comprobación previa en el código.** `UNIQUE (user_id, job_offer_id)` en `applications` (`uq_application_user_job`). Una comprobación "¿ya existe?" antes del `INSERT` no evita la carrera del doble clic: las dos peticiones leen "no existe" y las dos insertan. La restricción sí: la segunda falla con `ER_DUP_ENTRY` y el controller la convierte en **409** "Ya te has postulado a esta oferta" (en vez del 400 genérico de `errorMiddleware`). En MySQL un índice `UNIQUE` admite varias filas con `NULL`, así que los seguimientos personales (sin `job_offer_id`) se pueden repetir, que es lo que se quiere.
+
+**Decisión 2 — en el frontend**, el botón "Confirmar postulación" se desactiva mientras se envía, y un 409 se muestra con un texto traducido en los 4 idiomas (`jobs.alreadyAppliedError`) que dice dónde está la postulación ("Puedes verla en Mis postulaciones").
+
+**Migración:** `backend/database/migrations/027_applications_unique_user_job.sql`, aplicada a `hireflow` y `hireflow_demo` tras comprobar que no había duplicados (la consulta de comprobación va en el propio archivo). `shema.sql` ya incluye la restricción.
+
+**Verificación** (contra `hireflow_demo`):
+- **curl:** dos peticiones simultáneas a la misma oferta dan 201 y 409, con una sola fila en la base; una tercera, 409. Dos seguimientos personales sin oferta, 201 y 201.
+- **Playwright, doble clic:** doble clic real en "Confirmar postulación": una sola postulación nueva (de 3 a 4).
+- **Playwright, dos pestañas:** con el diálogo abierto en una pestaña y la postulación hecha antes desde otra, la primera muestra "Ya te has postulado a esta oferta. Puedes verla en Mis postulaciones." y el botón vuelve a estar activo. Sin errores de página.
+
+`hireflow_demo` se volvió a rellenar con `hireflow-datos.js` al terminar.
+
+**Archivos afectados:** `backend/database/shema.sql`, `backend/database/migrations/027_applications_unique_user_job.sql` (nuevo), `backend/controllers/applicationControllers.js`, `frontend/js/screens/jobs.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/changeLog.md`.
