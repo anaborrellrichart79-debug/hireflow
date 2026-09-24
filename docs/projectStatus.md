@@ -63,9 +63,9 @@ Estado
 ✔ Crear (solo `recruiter`)
 ✔ Obtener todas
 ✔ Obtener por ID
-✔ Actualizar (solo `recruiter`)
-✔ Eliminar (solo `recruiter`)
-✔ Tests manuales verificados (curl: permisos por rol, email duplicado, 404)
+✔ Actualizar (solo el `recruiter` que la creó)
+✔ Eliminar (solo el `recruiter` que la creó, y solo si ya no tiene ofertas)
+✔ Tests manuales verificados (curl: permisos por rol, email duplicado, 404; propiedad por `created_by_user`, ver `docs/decisions.md`, entrada 019)
 
 Decisión de arquitectura: primer control de acceso basado en rol del proyecto (`middleware/roleMiddleware.js`), ver `docs/decisions.md`, entrada 003.
 ---

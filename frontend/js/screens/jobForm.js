@@ -1,5 +1,5 @@
 import { el, errorBanner } from "../components/ui.js";
-import { apiFetch } from "../api.js";
+import { apiFetch, getCurrentUser } from "../api.js";
 import { navigate } from "../router.js";
 import { t } from "../i18n.js";
 import { EMPLOYMENT_TYPE_CODES, SALARY_CODES, jobOptionLabel } from "../jobOptions.js";
@@ -46,9 +46,17 @@ export const render = async (container, params) => {
 
     const errorSlot = el("div", {});
 
+    // Solo se ofrecen las empresas propias (el backend rechaza publicar en
+    // la de otro recruiter). Al editar se mantiene también la empresa actual
+    // de la oferta, por si es anterior a companies.created_by_user.
+    const userId = getCurrentUser().id;
+    const selectableCompanies = companies.filter((c) =>
+        c.created_by_user === userId || String(c.id) === String(job.company_id)
+    );
+
     const companySelect = el("select", { name: "company_id" }, [
         el("option", { value: "", text: t("jobForm.selectCompanyPlaceholder") }),
-        ...companies.map((c) => el("option", {
+        ...selectableCompanies.map((c) => el("option", {
             value: c.id,
             selected: String(c.id) === String(job.company_id) ? "true" : undefined,
             text: c.name

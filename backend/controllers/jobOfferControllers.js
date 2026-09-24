@@ -6,7 +6,7 @@ import {
     deleteJobOffer
 } from "../models/jobOffer.js";
 
-const INVALID_COMPANY_MESSAGE = "La empresa indicada (company_id) no existe";
+const INVALID_COMPANY_MESSAGE = "La empresa indicada (company_id) no existe o no es tuya";
 
 export const createNewJobOffer = async (req, res) => {
     try {
@@ -14,6 +14,10 @@ export const createNewJobOffer = async (req, res) => {
             ...req.body,
             created_by_user: req.user.id
         });
+
+        if (!jobOffer) {
+            return res.status(400).json({ message: INVALID_COMPANY_MESSAGE });
+        }
 
         res.status(201).json(jobOffer);
     } catch (error) {
@@ -48,7 +52,7 @@ export const updateExistingJobOffer = async (req, res) => {
         }
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Oferta no encontrada" });
+            return res.status(404).json({ message: "Oferta no encontrada, o la empresa indicada no es tuya" });
         }
 
         res.status(200).json({ message: "Oferta actualizada correctamente" });

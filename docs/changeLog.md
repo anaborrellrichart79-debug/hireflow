@@ -8,8 +8,16 @@ Formato basado en Keep a Changelog.
 
 ## Seguridad
 - Eliminado `GET /users`: cualquier usuario con sesión iniciada podía listar el email y el teléfono de todos los usuarios, saltándose el consentimiento que se pide al postularse. Ninguna pantalla lo usaba. Borrados también `getUsers` (controller), `getAllUsers` (modelo) y la petición "Get Users" de la colección de Postman.
+- Las empresas ahora tienen dueño (`companies.created_by_user`). Antes cualquier recruiter podía editar o borrar la empresa de otro (y al borrarla se perdían en cascada sus ofertas y las postulaciones de los candidatos), o publicar ofertas a nombre de otra empresa. Ahora solo el recruiter que creó la empresa puede editarla o borrarla, y solo puede publicar o mover ofertas a sus propias empresas.
+- Ya no se puede borrar una empresa que tiene ofertas (409): hay que borrar antes las ofertas, para no eliminar postulaciones sin querer.
 
-Detalle en `docs/decisions.md`, entrada 018.
+## Cambiado
+- El formulario de oferta solo ofrece las empresas del propio recruiter.
+
+## Migración
+- `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
+
+Detalle en `docs/decisions.md`, entradas 018 y 019.
 
 ---
 

@@ -14,16 +14,25 @@ export const createJobOffer = async (jobOfferData) => {
         created_by_user
     } = jobOfferData;
 
+    // El INSERT ... SELECT solo inserta si la empresa pertenece al recruiter
+    // autenticado -- evita publicar ofertas a nombre de la empresa de otro
+    // (mismo patrón que createInterview en interview.js).
     const [result] = await db.execute(
         `
         INSERT INTO job_offers (
             company_id, title, description, salary, location,
             employment_type, skills_required, source, external_url, created_by_user
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        SELECT ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        FROM companies
+        WHERE id = ? AND created_by_user = ?
         `,
-        [company_id, title, description, salary, location, employment_type, skills_required, source, external_url, created_by_user]
+        [company_id, title, description, salary, location, employment_type, skills_required, source, external_url, created_by_user, company_id, created_by_user]
     );
+
+    if (result.affectedRows === 0) {
+        return null;
+    }
 
     return {
         id: result.insertId,
@@ -75,9 +84,21 @@ export const updateJobOffer = async (id, userId, jobOfferData) => {
     const setClause = fieldsToUpdate.map((field) => `${field} = ?`).join(", ");
     const values = fieldsToUpdate.map((field) => jobOfferData[field]);
 
+    // Si se cambia company_id, la nueva empresa también tiene que ser del
+    // recruiter. Se permite dejar la que ya tenía (ofertas antiguas cuya
+    // empresa no tiene dueño registrado, de antes de companies.created_by_user).
+    let companyCheck = "";
+    const companyParams = [];
+    if (jobOfferData.company_id !== undefined) {
+        companyCheck = `AND (company_id = ? OR EXISTS (
+            SELECT 1 FROM companies WHERE id = ? AND created_by_user = ?
+        ))`;
+        companyParams.push(jobOfferData.company_id, jobOfferData.company_id, userId);
+    }
+
     const [result] = await db.execute(
-        `UPDATE job_offers SET ${setClause} WHERE id = ? AND created_by_user = ?`,
-        [...values, id, userId]
+        `UPDATE job_offers SET ${setClause} WHERE id = ? AND created_by_user = ? ${companyCheck}`,
+        [...values, id, userId, ...companyParams]
     );
 
     return result;

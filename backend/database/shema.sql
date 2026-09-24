@@ -43,8 +43,14 @@ CREATE table companies (
     industry varchar(120),
     location varchar(120),
     phone varchar(30),
+    created_by_user int,
     created_at timestamp default current_timestamp,
-    updated_at timestamp default current_timestamp on update current_timestamp
+    updated_at timestamp default current_timestamp on update current_timestamp,
+
+constraint fk_company_creator
+	foreign key (created_by_user)
+    references users(id)
+    on delete set null
     );
 
 CREATE table job_offers (

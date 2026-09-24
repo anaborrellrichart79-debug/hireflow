@@ -468,3 +468,34 @@ Se añadieron los valores estándar de WHATWG donde hay una correspondencia clar
 **Verificación:** `GET /api/users` con token válido devuelve 404 (lo recoge `notFound`); registro (`POST /users`), login, `GET/PUT/DELETE /users/me` siguen funcionando.
 
 **Archivos afectados:** `backend/routes/userRoutes.js`, `backend/controllers/userControllers.js` (`getUsers` eliminado), `backend/models/User.js` (`getAllUsers` eliminado), `postman/collections/HireFlow API/Users/Get Users.request.yaml` (eliminado), `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.
+
+---
+
+## 019 — Las empresas tienen dueño: solo quien la creó puede editarla o borrarla
+
+**Problema:** la tabla `companies` no guardaba quién había creado cada empresa, así que `PUT` y `DELETE /companies/:id` solo comprobaban el rol `recruiter`. Cualquier empresa podía:
+- renombrar o cambiar los datos de contacto de otra empresa;
+- borrarla, y con ella, por los `ON DELETE CASCADE` (`fk_job_company`, `fk_application_job`), todas sus ofertas y **todas las postulaciones de los candidatos** a esas ofertas;
+- publicar ofertas a nombre de otra empresa (`POST /jobs` con un `company_id` ajeno), o mover una oferta propia a otra empresa.
+
+Es el mismo tipo de fallo que ya se corrigió en ofertas (entrada 017), pero en la tabla de la que cuelga todo lo demás.
+
+**Decisión 1 — columna `companies.created_by_user`** (FK a `users`, `ON DELETE SET NULL`, mismo patrón que `job_offers.created_by_user`). Se fija siempre desde el token al crear, nunca desde el body, y no está en la lista blanca de campos actualizables. `updateCompany` y `deleteCompany` filtran por `id` y `created_by_user` en la propia query (como en el resto del proyecto, nunca leyendo y comprobando después en el controller).
+
+**Decisión 2 — ofertas solo sobre empresas propias.** `createJobOffer` pasa a ser un `INSERT ... SELECT FROM companies WHERE id = ? AND created_by_user = ?` (patrón de `createInterview`): si la empresa no es del recruiter, no se inserta nada y se responde 400. En `updateJobOffer`, si se envía `company_id` tiene que ser la empresa actual de la oferta o una propia. Se acepta la actual para no bloquear la edición de ofertas antiguas cuya empresa se quedó sin dueño al migrar.
+
+**Decisión 3 — no se borra una empresa con ofertas (409).** Aunque ya solo pueda hacerlo su dueño, un único clic borraba en cascada las postulaciones de los candidatos, que son datos suyos, no de la empresa. Ahora el recruiter tiene que borrar antes las ofertas, una a una. Se eligió bloquear en vez de cambiar la FK a `RESTRICT` para poder devolver un mensaje claro y distinguirlo de "no existe o no es tuya" (404).
+
+**Decisión 4 — migración de datos existentes** (`backend/database/migrations/019_companies_created_by_user.sql`, aplicada a `hireflow` y `hireflow_demo`). Cada empresa pasa a ser del recruiter que publicó sus ofertas, solo si todas son del mismo recruiter. Las que no cumplen eso (en `hireflow`, 16 empresas de pruebas antiguas sin ofertas o con ofertas sin autor) quedan sin dueño: nadie puede editarlas ni borrarlas desde la API, que es la opción segura. En `hireflow_demo` las 4 empresas quedaron asignadas a Marta, y `hireflow-datos.js` (herramienta de grabación de la demo) ya las crea con su token, así que sigue funcionando sin cambios.
+
+**Frontend:** el desplegable de empresa del formulario de oferta (`jobForm.js`) solo muestra las empresas del propio recruiter, más la empresa actual cuando se edita una oferta.
+
+**Verificación** (curl contra `hireflow_demo`, con un segundo recruiter de prueba borrado al terminar):
+- el otro recruiter recibe 404 al editar o borrar la empresa de Marta, 400 al publicar en ella y 404 al mover su oferta a ella;
+- con su propia empresa puede publicar y editar ofertas; borrar la empresa con ofertas da 409 y, sin ofertas, 200;
+- Marta sigue pudiendo editar su empresa y sus ofertas;
+- una candidata recibe 403.
+
+En el navegador (Playwright): Marta ve sus 4 empresas en "Nueva oferta" y el otro recruiter solo la suya, sin errores de consola.
+
+**Archivos afectados:** `backend/database/shema.sql`, `backend/database/migrations/019_companies_created_by_user.sql` (nuevo), `backend/models/company.js`, `backend/controllers/companyControllers.js`, `backend/models/jobOffer.js`, `backend/controllers/jobOfferControllers.js`, `frontend/js/screens/jobForm.js`, `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.

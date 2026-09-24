@@ -288,6 +288,8 @@ Body
 
 `created_by_user` **no** se acepta del body — se fija siempre al `id` del usuario autenticado (ver `docs/decisions.md`, entrada 004).
 
+`company_id` tiene que ser una empresa **del propio recruiter** (`companies.created_by_user`); no se puede publicar a nombre de la empresa de otro (ver `docs/decisions.md`, entrada 019).
+
 Validación
 `company_id` obligatorio, entero válido. `title` obligatorio (máx. 150). `salary` (máx. 100), `location` (máx. 120), `employment_type` (máx. 50) opcionales. `source` opcional, debe ser una de `internal`/`linkedin`/`api`. `external_url` opcional, debe ser una URL válida si se envía.
 
@@ -302,7 +304,7 @@ Respuesta
 }
 Errores
 400 — validación (ver sección "Errores de validación")
-400 — `company_id` no existe: `{"message":"La empresa indicada (company_id) no existe"}`
+400 — `company_id` no existe o no es del recruiter: `{"message":"La empresa indicada (company_id) no existe o no es tuya"}`
 403 — autenticado pero no es `recruiter`
 Autenticación
 Requerida (verifyToken) + role `recruiter`
@@ -340,6 +342,7 @@ Body (todos los campos opcionales, se actualizan solo los enviados)
     "salary": "40000-50000"
 }
 `created_by_user` no es actualizable — no se puede reasignar la autoría de una oferta.
+Si se envía `company_id`, debe ser la empresa actual de la oferta o una empresa del propio recruiter.
 
 Validación
 Mismas reglas que en la creación, pero todos los campos opcionales (solo se validan los que se envían).
@@ -351,7 +354,7 @@ Respuesta
 Errores
 400 — validación (ver sección "Errores de validación")
 400 — ningún campo válido enviado, o `company_id` no existe
-404 — oferta no encontrada
+404 — oferta no encontrada (o no es del recruiter), o el nuevo `company_id` no es del recruiter
 403 — autenticado pero no es `recruiter`
 Autenticación
 Requerida (verifyToken) + role `recruiter`
@@ -375,7 +378,7 @@ Requerida (verifyToken) + role `recruiter`
 
 # COMPANIES
 
-Todas las rutas requieren `verifyToken`. `POST`, `PUT` y `DELETE` requieren además `role = "recruiter"` (ver `docs/decisions.md`, entrada 003) — un `candidate` autenticado puede leer pero no escribir. La tabla `companies` no tiene columna de propietario, así que no hay filtrado por usuario en lectura/escritura, solo por rol.
+Todas las rutas requieren `verifyToken`. `POST`, `PUT` y `DELETE` requieren además `role = "recruiter"` (ver `docs/decisions.md`, entrada 003) — un `candidate` autenticado puede leer pero no escribir. Cada empresa guarda quién la creó (`created_by_user`): solo ese recruiter puede editarla o borrarla. La lectura sigue siendo un catálogo compartido (ver `docs/decisions.md`, entrada 019).
 
 ## Crear empresa
 POST /companies
@@ -388,7 +391,7 @@ Body
     "location": "Madrid",
     "phone": "600000000"
 }
-Solo `name` y `email` son obligatorios (constraint de la BD), el resto es opcional.
+Solo `name` y `email` son obligatorios (constraint de la BD), el resto es opcional. `created_by_user` no se acepta del body: se fija al `id` del usuario autenticado.
 
 Validación
 `name` obligatorio (máx. 150). `email` obligatorio, formato válido (máx. 150). `industry` (máx. 120), `location` (máx. 120), `phone` (máx. 30) opcionales.
@@ -402,7 +405,8 @@ Respuesta
     "description": "Empresa de tecnología",
     "industry": "Tech",
     "location": "Madrid",
-    "phone": "600000000"
+    "phone": "600000000",
+    "created_by_user": 7
 }
 Errores
 400 — validación (ver sección "Errores de validación")
@@ -454,7 +458,7 @@ Respuesta
 Errores
 400 — validación (ver sección "Errores de validación")
 400 — ningún campo válido enviado, o email duplicado
-404 — empresa no encontrada
+404 — empresa no encontrada o no es del recruiter
 403 — autenticado pero no es `recruiter`
 Autenticación
 Requerida (verifyToken) + role `recruiter`
@@ -469,7 +473,8 @@ Respuesta
     "message":"Empresa eliminada correctamente"
 }
 Errores
-404 — empresa no encontrada
+404 — empresa no encontrada o no es del recruiter
+409 — la empresa aún tiene ofertas: `{"message":"La empresa tiene ofertas publicadas. Bórralas antes de eliminar la empresa."}` (borrarla arrastraría en cascada las ofertas y las postulaciones de los candidatos)
 403 — autenticado pero no es `recruiter`
 Autenticación
 Requerida (verifyToken) + role `recruiter`
