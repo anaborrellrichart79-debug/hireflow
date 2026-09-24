@@ -5,6 +5,7 @@ import { getCurrentUser } from "../auth.js";
 import { navigate } from "../router.js";
 import { t, getLang } from "../i18n.js";
 import { jobOptionLabel } from "../jobOptions.js";
+import { setApplicantsJobFilter } from "./applicants.js";
 
 // Antes de crear la postulación se pide consentimiento explícito para
 // compartir nombre/email/teléfono con la empresa (nunca datos bancarios ni
@@ -139,7 +140,7 @@ const renderRecruiterCard = (job, onDelete) =>
             class: "applicants-count",
             type: "button",
             text: plural(Number(job.applicants_count) || 0, "jobs.applicantsOne", "jobs.applicantsMany"),
-            onClick: () => navigate("/applicants")
+            onClick: () => { setApplicantsJobFilter(job.id); navigate("/applicants"); }
         }),
         el("div", { class: "card-actions" }, [
             el("button", { class: "secondary-button", type: "button", text: t("common.edit"), onClick: () => navigate(`/jobs/edit/${job.id}`) }),

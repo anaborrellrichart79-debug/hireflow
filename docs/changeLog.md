@@ -41,6 +41,9 @@ Formato basado en Keep a Changelog.
 - Erratas en el contenido del asistente en español: "Díme", "la autoaprendizaje", "ideas,sentimientos", "mismno".
 - `config/database.js` ignoraba `DB_PORT` del `.env`: con MySQL en otro puerto la app no conectaba.
 - Accesibilidad (auditoría con axe-core, WCAG 2.1 A/AA, de 31 problemas a 0 en 8 pantallas y diálogos): botones de la cabecera sin nombre (el avatar era un `div` clicable), imágenes sin texto alternativo, etiquetas de formulario no asociadas a su campo, desplegables sin nombre y texto secundario con contraste insuficiente (#666 sobre beige, 3,94:1; #999 en el chat, 2,8:1).
+- Mis postulaciones hacía una petición a `/jobs/:id` por cada postulación; ahora hace una sola a `/jobs`.
+- El aviso "¡Actualizado por la empresa!" desaparecía al primer redibujado de Mis postulaciones (por ejemplo, al pasar a Notas y volver); ahora se mantiene mientras se está en la pantalla.
+- `applicants.statusLabel` estaba duplicada en los 4 idiomas de `i18n.js` (una copia sin usar, añadida en la entrada 023).
 - Con el menú lateral cerrado, sus enlaces seguían recibiendo el foco con el tabulador aunque estuvieran fuera de la pantalla.
 - `verifyToken` llamaba a `next()` dentro de su `try`, así que un error síncrono de cualquier middleware posterior se respondía como 401 "token no válido". Además volcaba al log la traza de cada token caducado.
 
@@ -56,6 +59,8 @@ Formato basado en Keep a Changelog.
 - Tarjetas de oferta más completas: inicial de la empresa en un círculo de color, nombre de la empresa, salario destacado, habilidades como etiquetas (hasta 4 y "+N"), descripción recortada a 3 líneas y "Publicada hace X días" en el idioma activo.
 - Buscador y filtros en Ofertas: búsqueda por puesto, empresa o habilidad (sin distinguir tildes), filtro por ciudad y por tipo de contrato, número de resultados y "Quitar filtros" cuando no hay coincidencias.
 - En "Mis ofertas", la empresa ve cuántos postulantes tiene cada oferta, con acceso directo a Postulantes. Borrar una oferta pide confirmación con un diálogo propio en vez del `confirm()` del navegador.
+- Tablero Kanban en Postulantes (empresa): columnas Postulado → En entrevista → Oferta recibida → Rechazado con su contador; se arrastra una tarjeta a otra columna para cambiar el estado (con el desplegable de cada tarjeta como alternativa para teclado y móvil), filtro por oferta y, desde el recuento de postulantes de cada oferta en Ofertas, se llega con esa oferta ya filtrada.
+- Tablero Kanban de solo lectura en Mis postulaciones (candidata), con el nombre de la empresa en cada tarjeta.
 - `backend/.env.example` con las variables necesarias; el puerto del servidor se puede cambiar con `PORT`, y el servidor se para al arrancar si falta `JWT_SECRET` (antes arrancaba y fallaba en cada login).
 - README: estructura real del proyecto (la anterior citaba archivos y carpetas que no existen) y cómo arrancarlo.
 
@@ -69,7 +74,7 @@ Formato basado en Keep a Changelog.
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 030.
+Detalle en `docs/decisions.md`, entradas 018 a 031.
 
 ---
 

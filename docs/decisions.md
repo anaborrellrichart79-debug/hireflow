@@ -919,3 +919,49 @@ Además había tres fallos que axe no detecta:
 **Pendiente para la demo:** todos los datos de demo se crean en el mismo segundo, así que todas las ofertas salen como "Publicada hoy". Al volver a grabar convendría que `hireflow-datos.js` escalone las fechas.
 
 **Archivos afectados:** `backend/models/jobOffer.js`, `backend/controllers/jobOfferControllers.js`, `frontend/js/screens/jobs.js`, `frontend/style/components.css`, `frontend/js/i18n.js`, `docs/api.md`, `docs/changeLog.md`.
+
+---
+
+## 031 — Tablero Kanban de postulaciones
+
+**Problema:** Postulantes (empresa) y Mis postulaciones (candidata) eran cuadrículas de tarjetas iguales, sin orden por estado. Para saber cuántos candidatos había en entrevista había que leer tarjeta por tarjeta, y cambiar el estado se hacía solo con un desplegable. Un tablero por columnas es la forma natural de ver un proceso de selección y lo que más luce en una demo.
+
+**Decisión 1 — componente común `components/kanban.js`**, usado por las dos pantallas:
+- Recibe las columnas, los elementos y una función `renderCard`, y reparte las tarjetas por estado con un contador en cada columna.
+- Si se le pasa `onMove`, las tarjetas se arrastran entre columnas con el drag and drop nativo de HTML5, sin librerías, coherente con el resto de la app.
+- El movimiento se pinta **al momento** (actualización optimista) y, si `onMove` falla, la tarjeta vuelve a su columna.
+- Sin `onMove`, el tablero es de solo lectura.
+- En móvil las columnas se desplazan en horizontal **dentro** del tablero (`overflow-x: auto`), así la página nunca se desborda.
+- Cada columna lleva una franja de color por estado y se resalta al arrastrar encima.
+
+**Decisión 2 — arrastrar no es la única forma de cambiar el estado.** El drag and drop de HTML5 no funciona con teclado ni en pantallas táctiles, así que cada tarjeta de Postulantes conserva su desplegable de estado, con nombre accesible que incluye el nombre del candidato. El texto de ayuda sobre el tablero lo dice ("…o usa su desplegable…").
+
+**Decisión 3 — Postulantes (empresa):**
+- **Columnas:** Postulado, En entrevista, Oferta recibida y Rechazado. "Interesa" solo aparece si queda alguna postulación antigua en ese estado (entrada 023).
+- **Tarjeta:** candidato, oferta, "Postulado el 24 sept", desplegable, "Ver perfil" (ahora con `aria-expanded`) y "Añadir entrevista". Agendar una entrevista redibuja el tablero y la tarjeta pasa sola a "En entrevista" (entrada 023).
+- **Filtro por oferta**, en el propio cliente. El recuento de postulantes de cada oferta en Ofertas (entrada 030) fija ese filtro antes de navegar (`setApplicantsJobFilter`), así se llega a Postulantes con esa oferta ya seleccionada.
+- **Se mantienen los textos y controles que usa el guion de grabación de la demo** ("Oferta: …", "Ver perfil", el desplegable, "Añadir entrevista").
+
+**Decisión 4 — Mis postulaciones (candidata):**
+- **Tablero de solo lectura**, porque el estado de las postulaciones a ofertas lo mueve la empresa (entrada 023). Cada tarjeta muestra la oferta, la empresa, el aviso "¡Actualizado por la empresa!" (ahora destacado en naranja) y "Retirar postulación". Los seguimientos personales, sin oferta, conservan su desplegable.
+- **Una sola petición:** se pide `/jobs` una vez (trae título y empresa de todas las ofertas) en vez de `/jobs/:id` por cada postulación.
+- **El aviso ya no desaparece:** las postulaciones con cambios sin ver se calculan una sola vez al abrir la pantalla. Antes se recalculaban en cada redibujado, y como abrir la pantalla las marca como vistas, el aviso se perdía al primer cambio o al pasar a Notas y volver.
+- Los botones "Ver estado"/"Ver notas" indican cuál está activo (`aria-pressed`).
+
+**De paso:** `applicants.statusLabel` estaba duplicada en los 4 idiomas: la entrada 023 añadió una segunda copia sin ver que ya existía, y en un objeto de JavaScript gana la última, así que la nueva nunca se usó. Se quitó esa copia sin cambiar nada visible.
+
+**Verificación** (Playwright contra `hireflow_demo`):
+- **Empresa:**
+  - 4 columnas con contador y 5 tarjetas arrastrables.
+  - Arrastrar a Pablo de Postulado a En entrevista lo mueve, actualiza su desplegable y el contador, muestra el aviso y persiste al recargar.
+  - Con el servidor devolviendo 500 (simulado), la tarjeta vuelve a su columna y se muestra el error.
+  - El desplegable también mueve la tarjeta; "Ver perfil" muestra el contacto.
+  - Agendar una entrevista pasa la tarjeta a En entrevista con "Entrevista programada correctamente".
+  - Desde el recuento de "QA Automation" en Ofertas se llega con esa oferta filtrada (1 tarjeta), y "Todas las ofertas" vuelve a 5.
+- **Candidata:** tablero sin tarjetas arrastrables, con empresa, 3 avisos de "Actualizado" y "Retirar". Los avisos siguen tras ir a Notas y volver.
+- **Móvil (390px):** la página no se desborda y el tablero se desplaza por dentro.
+- **axe-core:** 0 problemas en las dos pantallas. Sin errores de consola.
+
+`hireflow_demo` se volvió a rellenar con `hireflow-datos.js` al terminar.
+
+**Archivos afectados:** `frontend/js/components/kanban.js` (nuevo), `frontend/js/screens/applicants.js`, `frontend/js/screens/applications.js`, `frontend/js/screens/jobs.js`, `frontend/style/components.css`, `frontend/js/i18n.js`, `docs/changeLog.md`.

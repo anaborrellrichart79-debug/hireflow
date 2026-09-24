@@ -1,5 +1,6 @@
-import { el, errorBanner, openDialog } from "../components/ui.js";
+import { el, errorBanner, openDialog, emptyState } from "../components/ui.js";
 import { cardGrid } from "../components/cardGrid.js";
+import { kanbanBoard } from "../components/kanban.js";
 import { apiFetch } from "../api.js";
 import { t } from "../i18n.js";
 import { STATUS_OPTIONS, statusLabel } from "../applicationStatus.js";
@@ -30,43 +31,36 @@ const openWithdrawDialog = (onConfirm) => {
     });
 };
 
-const statusCard = (app, jobTitle, onStatusChange, onWithdraw) => {
-    // En una postulación a una oferta de HireFlow el estado lo mueve la
-    // empresa: el candidato lo ve y puede retirarla. Solo los seguimientos
-    // personales (sin oferta) conservan el desplegable. Ver decisions.md, entrada 023.
+// Tarjeta del tablero. En una postulación a una oferta de HireFlow el estado
+// lo mueve la empresa: la candidata lo ve (por la columna) y puede retirarla.
+// Solo los seguimientos personales (sin oferta) conservan el desplegable.
+// Ver decisions.md, entradas 023 y 031.
+const boardCard = (app, job, isUnseen, onStatusChange, onWithdraw) => {
     const controls = app.job_offer_id
-        ? [
-            el("button", { class: "secondary-button danger", type: "button", text: t("applications.withdrawButton"), onClick: () => onWithdraw(app.id) })
-        ]
-        : [
-            el("select", {
-                "aria-label": t("applications.viewStatus"),
-                onChange: (event) => onStatusChange(app.id, event.target.value)
-            }, STATUS_OPTIONS.map((status) =>
-                el("option", { value: status, selected: status === app.status ? "true" : undefined, text: statusLabel(status) })
-            ))
-        ];
-
-    // wasUnseen se calcula ANTES de llamar a mark-seen (ver render()), así
-    // que aquí sigue reflejando si la empresa cambió el estado desde la
-    // última vez que el candidato abrió esta pantalla -- es el aviso en sí.
-    const updateBadge = app.wasUnseen && app.status_updated_by === "recruiter"
-        ? el("span", { class: "status-badge", text: t("applications.recentlyUpdated") })
-        : null;
+        ? el("button", { class: "secondary-button danger", type: "button", text: t("applications.withdrawButton"), onClick: () => onWithdraw(app.id) })
+        : el("select", {
+            "aria-label": `${t("applications.viewStatus")}: ${job.title}`,
+            onChange: (event) => onStatusChange(app.id, event.target.value)
+        }, STATUS_OPTIONS.map((status) =>
+            el("option", { value: status, selected: status === app.status ? "true" : undefined, text: statusLabel(status) })
+        ));
 
     return el("div", { class: "card-content" }, [
-        el("h3", { text: jobTitle }),
-        el("span", { class: "status-badge", text: statusLabel(app.status) }),
-        updateBadge,
-        ...controls
+        el("h4", { class: "kanban-card-title", text: job.title }),
+        job.company ? el("p", { class: "card-meta", text: job.company }) : null,
+        isUnseen && app.status_updated_by === "recruiter"
+            ? el("span", { class: "status-badge status-badge--new", text: t("applications.recentlyUpdated") })
+            : null,
+        controls
     ]);
 };
 
-const notesCard = (app, jobTitle, onNotesSave) => {
-    const textarea = el("textarea", { rows: "3", text: app.notes || "" });
+const notesCard = (app, job, onNotesSave) => {
+    const textarea = el("textarea", { rows: "3", "aria-label": `${t("applications.viewNotes")}: ${job.title}`, text: app.notes || "" });
 
     return el("div", { class: "card-content" }, [
-        el("h3", { text: jobTitle }),
+        el("h3", { text: job.title }),
+        job.company ? el("p", { class: "card-meta", text: job.company }) : null,
         textarea,
         el("button", {
             class: "secondary-button",
@@ -77,45 +71,60 @@ const notesCard = (app, jobTitle, onNotesSave) => {
     ]);
 };
 
+// Orden de las columnas del tablero de la candidata. "Interesa" solo aparece
+// si tiene algún seguimiento personal en ese estado.
+const CANDIDATE_COLUMNS = ["applied", "interview", "offer", "rejected"];
+
 export const render = async (container) => {
     let mode = "estado";
 
-    const toggle = el("div", { class: "toggle-group" }, [
-        el("button", { class: "secondary-button", type: "button", text: t("applications.viewStatus"), onClick: () => { mode = "estado"; draw(); } }),
-        el("button", { class: "secondary-button", type: "button", text: t("applications.viewNotes"), onClick: () => { mode = "notas"; draw(); } })
-    ]);
+    const boardButton = el("button", { class: "secondary-button", type: "button", "aria-pressed": "true", text: t("applications.viewStatus"), onClick: () => setMode("estado") });
+    const notesButton = el("button", { class: "secondary-button", type: "button", "aria-pressed": "false", text: t("applications.viewNotes"), onClick: () => setMode("notas") });
+    const setMode = (newMode) => {
+        mode = newMode;
+        boardButton.setAttribute("aria-pressed", String(mode === "estado"));
+        notesButton.setAttribute("aria-pressed", String(mode === "notas"));
+        draw();
+    };
 
-    const listSlot = el("div", { class: "list-slot" });
-    container.append(toggle, listSlot);
+    const listSlot = el("div", { class: "kanban-screen" });
+    container.append(el("div", { class: "toggle-group" }, [boardButton, notesButton]), listSlot);
+
+    // Qué postulaciones tenían cambios de la empresa sin ver AL ABRIR la
+    // pantalla. Se calcula una sola vez: abrir la pantalla las marca como
+    // vistas (mark-seen), y si se recalculara en cada redibujado el aviso
+    // "¡Actualizado por la empresa!" desaparecería al primer cambio.
+    let unseenIds = null;
 
     const draw = async () => {
         listSlot.innerHTML = "";
         listSlot.append(el("p", { text: t("common.loading") }));
 
         try {
-            const applications = await apiFetch("/applications");
-            applications.forEach((app) => { app.wasUnseen = !app.status_seen_by_candidate; });
+            // Una sola petición a /jobs (trae título y empresa de todas) en vez
+            // de una a /jobs/:id por cada postulación.
+            const [applications, jobs] = await Promise.all([apiFetch("/applications"), apiFetch("/jobs")]);
+            if (unseenIds === null) {
+                unseenIds = new Set(applications.filter((app) => !app.status_seen_by_candidate).map((app) => app.id));
+                // Efecto secundario intencional: abrir esta pantalla es la señal
+                // de que la candidata ha visto los cambios pendientes (ver
+                // home.js). Si falla, el aviso seguirá en Home la próxima vez.
+                apiFetch("/applications/mark-seen", { method: "PUT" }).catch(() => {});
+            }
 
-            // Efecto secundario intencional: abrir esta pantalla es la señal de
-            // que el candidato ha visto los cambios de estado pendientes (ver
-            // home.js, que muestra el contador mientras no se llame a esto).
-            // No se espera ni bloquea el render -- si falla, simplemente el
-            // aviso seguirá apareciendo en Home la próxima vez.
-            apiFetch("/applications/mark-seen", { method: "PUT" }).catch(() => {});
-
-            const jobTitles = {};
-            await Promise.all(
-                [...new Set(applications.map((a) => a.job_offer_id).filter(Boolean))].map(async (jobOfferId) => {
-                    try {
-                        const job = await apiFetch(`/jobs/${jobOfferId}`);
-                        jobTitles[jobOfferId] = job.title;
-                    } catch {
-                        jobTitles[jobOfferId] = t("applications.jobDeleted");
-                    }
-                })
-            );
+            const jobsById = new Map(jobs.map((job) => [job.id, job]));
+            const jobOf = (app) => {
+                if (!app.job_offer_id) return { title: t("applications.noOffer"), company: null };
+                const job = jobsById.get(app.job_offer_id);
+                return job ? { title: job.title, company: job.company_name } : { title: t("applications.jobDeleted"), company: null };
+            };
 
             listSlot.innerHTML = "";
+
+            if (applications.length === 0) {
+                listSlot.append(emptyState(t("applications.emptyMessage")));
+                return;
+            }
 
             // El PUT es parcial: solo se envía lo que cambia (el estado o la nota).
             const onStatusChange = async (id, status) => {
@@ -133,15 +142,25 @@ export const render = async (container) => {
                 draw();
             });
 
-            const renderCard = mode === "estado"
-                ? (app) => statusCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onStatusChange, onWithdraw)
-                : (app) => notesCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onNotesSave);
+            if (mode === "notas") {
+                listSlot.append(cardGrid(applications, (app) => notesCard(app, jobOf(app), onNotesSave), t("applications.emptyMessage")));
+                return;
+            }
 
-            // Una sola vez encima de la lista, no en cada tarjeta.
-            if (mode === "estado" && applications.some((app) => app.job_offer_id)) {
+            // Tablero de solo lectura: el estado lo mueve la empresa.
+            if (applications.some((app) => app.job_offer_id)) {
                 listSlot.append(el("p", { class: "form-note", text: t("applications.statusManagedByCompany") }));
             }
-            listSlot.append(cardGrid(applications, renderCard, t("applications.emptyMessage")));
+            const statuses = applications.some((app) => app.status === "wishlist")
+                ? ["wishlist", ...CANDIDATE_COLUMNS]
+                : CANDIDATE_COLUMNS;
+            listSlot.append(kanbanBoard({
+                columns: statuses.map((status) => ({ status, label: statusLabel(status) })),
+                items: applications,
+                getStatus: (app) => app.status,
+                renderCard: (app) => boardCard(app, jobOf(app), unseenIds.has(app.id), onStatusChange, onWithdraw),
+                emptyColumnText: t("applicants.emptyColumn")
+            }));
         } catch (error) {
             listSlot.innerHTML = "";
             listSlot.append(errorBanner(error.message));
