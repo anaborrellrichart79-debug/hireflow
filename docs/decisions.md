@@ -965,3 +965,41 @@ Además había tres fallos que axe no detecta:
 `hireflow_demo` se volvió a rellenar con `hireflow-datos.js` al terminar.
 
 **Archivos afectados:** `frontend/js/components/kanban.js` (nuevo), `frontend/js/screens/applicants.js`, `frontend/js/screens/applications.js`, `frontend/js/screens/jobs.js`, `frontend/style/components.css`, `frontend/js/i18n.js`, `docs/changeLog.md`.
+
+---
+
+## 032 — Panel de la empresa en Inicio
+
+**Problema:** el Inicio de la empresa solo decía "6 ofertas publicadas". La empresa no tenía dónde ver de un vistazo cuántos postulantes tiene, cómo avanza el proceso, qué entrevistas tiene próximamente ni qué ofertas atraen más candidatos. Todo eso ya se podía calcular con lo que devuelve la API.
+
+**Decisión 1 — sin endpoints nuevos.** El panel (`components/recruiterDashboard.js`) pide en paralelo `/jobs` (ofertas propias), `/applications/recruiter` (postulaciones con su estado) e `/interviews`, y calcula todo en el cliente. Con el volumen de la app no merece la pena un endpoint de estadísticas; si algún día hay miles de postulaciones, se puede mover el cálculo al servidor sin cambiar la presentación.
+
+**Decisión 2 — forma elegida con la guía de visualización de datos (skill `dataviz`)**, eligiendo la forma antes que el color:
+- **Números clave:** son tarjetas de métricas y no gráficos, porque un gráfico de una sola barra no aporta nada. Son ofertas publicadas, postulantes, entrevistas esta semana y % que llega a entrevista.
+- **Avance del proceso:** son categorías ordenadas de una sola serie (postulantes → en entrevista u oferta → con oferta), así que van en **barras horizontales de un solo color** y sin leyenda, porque el título ya dice qué se mide. Las marcas siguen las especificaciones de la guía: 16px de grosor (máximo 24px), extremo redondeado de 4px y base recta, pista un paso más clara del mismo tono, valor en la punta y tooltip "3 de 5 (60 %)". Cada fila recibe el foco con el tabulador y el tooltip aparece también con teclado; el mismo texto va en `aria-label`, así el tooltip nunca es la única forma de leer el dato.
+- **"En entrevista u oferta" y no "llegaron a entrevista":** la app solo guarda el estado actual, no el historial. Un rechazado puede haber pasado o no por entrevista, así que no se puede afirmar cuántos llegaron. Los rechazados se muestran aparte, como nota.
+- **Detalle por oferta:** es una **tabla**, que hace además de vista en tabla del gráfico. La columna de postulantes lleva una minibarra del mismo color (decorativa, `aria-hidden`; el número va al lado). Los números están alineados (`tabular-nums`) y el título de cada oferta lleva a Postulantes con esa oferta filtrada (entrada 031).
+- **Próximas entrevistas:** las 3 siguientes, con un enlace al calendario.
+
+**Decisión 3 — color validado con el script de la guía, no a ojo** (`validate_palette.js`, sobre el blanco de las tarjetas):
+- el naranja de la marca **#ebad64** falla: es demasiado claro (luminosidad 0,79) y solo da 1,96:1 de contraste;
+- el naranja oscuro que ya usa la app, **#d98f3f**, pasa la banda de luminosidad pero solo da 2,64:1, por debajo del 3:1 que pide un elemento gráfico;
+- **#c47a28** pasa las cinco comprobaciones, incluido el 3:1, y sigue siendo de la familia de la marca, así que es el color de las barras.
+El texto no lleva nunca el color de los datos (va en los tonos de texto de la app), y los enlaces van en #8a4f12, con contraste de texto suficiente.
+
+**Ajustes tras mirar el resultado:**
+- el tooltip tapaba el valor de la fila de arriba, así que se movió sobre el inicio de la barra;
+- la fecha salía "Vie, 25 Sept" por `text-transform: capitalize`; ahora solo va en mayúscula la primera letra;
+- los "Accesos rápidos" ocupaban todo el ancho bajo un panel de 1040px; ahora tienen el mismo ancho que el contenido de encima (1040px en el panel de la empresa, 720px en el resumen de la candidata).
+
+**Fuera de alcance:** la app no tiene modo oscuro, así que no se validó el color sobre una superficie oscura; habría que hacerlo si se añade. La candidata conserva su resumen de siempre.
+
+**Verificación** (Playwright contra `hireflow_demo`):
+- **Datos:** métricas 6 / 5 / 3 / 60 % y embudo 5 (100 %), 3 (60 %) y 1 (20 %), que cuadran con los datos de demo. La tabla ordena por número de postulantes y el clic en "Backend Node.js y MySQL" lleva a Postulantes con esa oferta filtrada.
+- **Tooltip:** aparece con el tabulador y al pasar el ratón.
+- **Inglés:** "Published offers", "Reach interview", "How the process is going".
+- **Móvil (390px):** el panel se apila en una columna sin desbordamiento.
+- **Candidata:** no ve el panel y conserva su resumen.
+- **axe-core:** 0 problemas. Sin errores de consola.
+
+**Archivos afectados:** `frontend/js/components/recruiterDashboard.js` (nuevo), `frontend/js/screens/home.js`, `frontend/style/components.css`, `frontend/js/i18n.js`, `docs/changeLog.md`.

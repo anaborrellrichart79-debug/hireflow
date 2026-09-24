@@ -61,6 +61,7 @@ Formato basado en Keep a Changelog.
 - En "Mis ofertas", la empresa ve cuántos postulantes tiene cada oferta, con acceso directo a Postulantes. Borrar una oferta pide confirmación con un diálogo propio en vez del `confirm()` del navegador.
 - Tablero Kanban en Postulantes (empresa): columnas Postulado → En entrevista → Oferta recibida → Rechazado con su contador; se arrastra una tarjeta a otra columna para cambiar el estado (con el desplegable de cada tarjeta como alternativa para teclado y móvil), filtro por oferta y, desde el recuento de postulantes de cada oferta en Ofertas, se llega con esa oferta ya filtrada.
 - Tablero Kanban de solo lectura en Mis postulaciones (candidata), con el nombre de la empresa en cada tarjeta.
+- Panel de la empresa en Inicio: cuatro métricas (ofertas publicadas, postulantes, entrevistas esta semana, % que llega a entrevista), un gráfico de cómo avanza el proceso (postulantes → en entrevista u oferta → con oferta, con tooltip también con teclado), las próximas entrevistas y una tabla de postulantes por oferta que lleva a Postulantes con esa oferta filtrada. Antes solo mostraba "6 ofertas publicadas".
 - `backend/.env.example` con las variables necesarias; el puerto del servidor se puede cambiar con `PORT`, y el servidor se para al arrancar si falta `JWT_SECRET` (antes arrancaba y fallaba en cada login).
 - README: estructura real del proyecto (la anterior citaba archivos y carpetas que no existen) y cómo arrancarlo.
 
@@ -74,7 +75,7 @@ Formato basado en Keep a Changelog.
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 031.
+Detalle en `docs/decisions.md`, entradas 018 a 032.
 
 ---
 

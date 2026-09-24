@@ -4,6 +4,7 @@ import { getCurrentUser } from "../auth.js";
 import { navigate } from "../router.js";
 import { t, getLang } from "../i18n.js";
 import { statusLabel } from "../applicationStatus.js";
+import { buildRecruiterDashboard } from "../components/recruiterDashboard.js";
 
 const CANDIDATE_LINKS = () => [
     ["/jobs", t("nav.jobsCandidate")],
@@ -86,30 +87,22 @@ const buildCandidateSummary = async () => {
     return el("div", { class: "home-summary" }, [stats, badges]);
 };
 
-const buildRecruiterSummary = async (userId) => {
-    const jobs = await apiFetch("/jobs");
-    const ownJobs = jobs.filter((job) => job.created_by_user === userId);
-
-    const stats = el("div", { class: "stat-row" }, [
-        statCard(ownJobs.length, t("home.summaryJobsPublished"))
-    ]);
-
-    return el("div", { class: "home-summary" }, [stats]);
-};
-
 export const render = async (container) => {
     const user = getCurrentUser();
     const isRecruiter = user.role === "recruiter";
 
     const welcome = el("p", { class: "home-welcome", text: isRecruiter ? t("home.welcomeRecruiter") : t("home.welcomeCandidate") });
-    const summarySlot = el("div", {});
+    // El panel de la empresa es más ancho que el resumen de la candidata (entrada 032).
+    const summarySlot = el("div", { class: isRecruiter ? "home-dashboard" : "" });
     const linksTitle = el("h2", { class: "section-title", text: t("home.quickLinksTitle") });
     const linksGrid = quickLinksGrid(isRecruiter ? RECRUITER_LINKS() : CANDIDATE_LINKS());
 
-    container.append(welcome, summarySlot, linksTitle, linksGrid);
+    // Los accesos rápidos con el mismo ancho que el resumen o el panel de encima.
+    const linksSection = el("div", { class: isRecruiter ? "home-dashboard" : "home-links" }, [linksTitle, linksGrid]);
+    container.append(welcome, summarySlot, linksSection);
 
     try {
-        const summary = isRecruiter ? await buildRecruiterSummary(user.id) : await buildCandidateSummary();
+        const summary = isRecruiter ? await buildRecruiterDashboard(user.id) : await buildCandidateSummary();
         summarySlot.append(summary);
     } catch (error) {
         summarySlot.append(errorBanner(error.message));
