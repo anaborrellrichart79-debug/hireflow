@@ -550,3 +550,26 @@ En el navegador (Playwright): el mensaje sale en español y, al cambiar a inglé
 Los usuarios de prueba se borraron al terminar.
 
 **Archivos afectados:** `backend/server.js`, `backend/validators/userValidators.js`, `backend/package.json` y `backend/package-lock.json` (`helmet`), `frontend/js/screens/login.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.
+
+---
+
+## 022 — El router muestra los errores como texto, no como HTML; favicon
+
+**Problema:** cuando una pantalla fallaba al cargar, `router.js` mostraba el error así:
+
+```js
+mainContainer.innerHTML = `<p class="error-text">${t("common.loadError")} ${error.message}</p>`;
+```
+
+`error.message` puede venir del backend o incluir datos escritos por un usuario, y con `innerHTML` se interpretaba como HTML: un mensaje con `<img src=x onerror=...>` habría ejecutado código en el navegador de quien lo viera (XSS). Era el único sitio del frontend que se saltaba la regla del helper `el()` de `components/ui.js`, pensado precisamente para evitar esto. La CSP de la entrada 021 ya bloqueaba los scripts inline, pero no conviene depender de una sola barrera.
+
+**Decisión:** crear el párrafo con `el("p", { class: "error-text", text: ... })`, igual que el resto de la app, para que el mensaje siempre se muestre como texto.
+
+**Favicon:** la app no tenía, así que el navegador pedía `/favicon.ico` en cada carga y la consola mostraba un 404, lo que ensuciaba las pruebas de "cero errores de consola". Se añade `frontend/assets/icons/favicon.svg`: la "H" naranja del logo (`#ebad64`) sobre el crema de la app (`#fdf6ea`). Está dibujada con rectángulos y no con texto, para que no dependa de las fuentes del sistema.
+
+**Verificación** (Playwright contra `hireflow_demo`): se sustituyó al vuelo el módulo de la pantalla Calendario por uno que lanza `new Error('<img src=x id="inyectado"><b>negrita</b>')`.
+- Con el `router.js` anterior, el HTML se interpretaba: aparecían 2 elementos inyectados en la página.
+- Con el nuevo, el mensaje se ve tal cual, como texto, y no aparece ninguno.
+- El favicon responde 200 y no queda ningún error en la consola.
+
+**Archivos afectados:** `frontend/js/router.js`, `frontend/index.html`, `frontend/assets/icons/favicon.svg` (nuevo), `docs/changeLog.md`.

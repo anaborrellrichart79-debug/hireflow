@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- La "H" naranja del logo (HIREFLOW) sobre el crema de la app. Hecha con
+       rectángulos, no con texto, para no depender de la fuente del sistema. -->
+  <rect width="64" height="64" rx="14" fill="#fdf6ea"/>
+  <rect x="15" y="12" width="10" height="40" rx="2" fill="#ebad64"/>
+  <rect x="39" y="12" width="10" height="40" rx="2" fill="#ebad64"/>
+  <rect x="23" y="27" width="18" height="10" fill="#ebad64"/>
+</svg>

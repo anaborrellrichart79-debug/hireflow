@@ -1,5 +1,6 @@
 import { isAuthenticated } from "./auth.js";
 import { t } from "./i18n.js";
+import { el } from "./components/ui.js";
 
 const routes = [];
 let mainContainer = null;
@@ -71,7 +72,10 @@ const runRoute = async () => {
     try {
         await route.render(mainContainer, params);
     } catch (error) {
-        mainContainer.innerHTML = `<p class="error-text">${t("common.loadError")} ${error.message}</p>`;
+        // Con el(), no con innerHTML: error.message puede venir del backend
+        // o de datos del usuario y nunca debe interpretarse como HTML.
+        mainContainer.innerHTML = "";
+        mainContainer.append(el("p", { class: "error-text", text: `${t("common.loadError")} ${error.message}` }));
     }
 };
 
