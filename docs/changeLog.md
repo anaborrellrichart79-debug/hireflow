@@ -4,6 +4,15 @@ Formato basado en Keep a Changelog.
 
 ---
 
+# [Sin publicar]
+
+## Seguridad
+- Eliminado `GET /users`: cualquier usuario con sesión iniciada podía listar el email y el teléfono de todos los usuarios, saltándose el consentimiento que se pide al postularse. Ninguna pantalla lo usaba. Borrados también `getUsers` (controller), `getAllUsers` (modelo) y la petición "Get Users" de la colección de Postman.
+
+Detalle en `docs/decisions.md`, entrada 018.
+
+---
+
 # [1.3.0] - Agosto 2026 — Flujo de contratación completo: postulantes, consentimiento, entrevistas y política de privacidad
 
 ## Añadido

@@ -99,29 +99,11 @@ No requerida
 
 ---
 
-## Obtener usuarios
+## Obtener usuarios (eliminado)
 GET /users
-Respuesta
-200 OK
-[
-    {
-        "id": 1,
-        "name": "Ana",
-        "email": "ana@hireflow.com",
-        "role": "candidate",
-        "sector": null,
-        "phone": null,
-        "location": null,
-        "profile_visible": 1,
-        "created_at": "...",
-        "updated_at": "..."
-    }
-]
-Nota de seguridad: la respuesta nunca incluye `password_hash` (corregido agosto 2026).
-Autenticación
-Requerida (verifyToken)
+**Eliminado en septiembre 2026.** Devolvía el email y el teléfono de todos los usuarios a cualquiera con sesión iniciada, saltándose el consentimiento al postularse. Ninguna pantalla lo usaba. Ahora responde 404. Para el perfil propio: `GET /users/me`. Ver `docs/decisions.md`, entrada 018.
 Estado
-🟢 Implementado
+🔴 Eliminado
 
 ---
 
@@ -141,7 +123,7 @@ Respuesta
     "created_at": "...",
     "updated_at": "..."
 }
-Sin `password_hash`, igual que `GET /users`.
+Sin `password_hash`.
 Autenticación
 Requerida (verifyToken) — siempre devuelve el perfil del usuario del token, no admite consultar el perfil de otro usuario.
 Estado

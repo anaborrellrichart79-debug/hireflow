@@ -1,11 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { findUserByEmail, createUser, getAllUsers, getUserById, updateUser, deleteUser } from "../models/User.js";
-
-export const getUsers = async (req, res) => {
-    const users = await getAllUsers();
-    res.json(users);
-};
+import { findUserByEmail, createUser, getUserById, updateUser, deleteUser } from "../models/User.js";
 
 export const createNewUser = async (req, res) => {
     try {

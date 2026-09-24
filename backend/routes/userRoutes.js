@@ -1,7 +1,7 @@
 // routes/userRoutes.js
 
 import express from "express";
-import { getUsers, createNewUser, loginUser, getProfile, updateProfile, deleteProfile } from "../controllers/userControllers.js";
+import { createNewUser, loginUser, getProfile, updateProfile, deleteProfile } from "../controllers/userControllers.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
@@ -9,7 +9,6 @@ import { createUserValidators, loginValidators, updateProfileValidators } from "
 
 const router = express.Router();
 
-router.get("/", verifyToken, asyncHandler(getUsers));
 router.post("/", createUserValidators, validate, asyncHandler(createNewUser));
 router.post("/login", loginValidators, validate, asyncHandler(loginUser));
 

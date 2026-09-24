@@ -1,14 +1,6 @@
 import { db } from "../config/database.js";
 import bcrypt from "bcryptjs";
 
-// GET ALL USERS
-export const getAllUsers = async () => {
-    const [rows] = await db.query(
-        "SELECT id, name, email, role, sector, phone, location, profile_visible, created_at, updated_at FROM users"
-    );
-    return rows;
-};
-
 // CREATE USER CON ENCRIPTADO DE CONTRASEÑA
     // crear usuario (regirtrarse)
 export const createUser = async (userData) => {

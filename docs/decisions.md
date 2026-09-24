@@ -456,3 +456,15 @@ Se añadieron los valores estándar de WHATWG donde hay una correspondencia clar
 **Nota aparte — `shema.sql` estaba duplicado de arriba a abajo** (todo el contenido del archivo aparecía dos veces seguidas, incluido un segundo `CREATE database hireflow`, que habría hecho fallar una instalación limpia). No tiene relación con esta funcionalidad, pero al tener que tocar ese archivo para las columnas nuevas se aprovechó para dejarlo limpio.
 
 ---
+
+---
+
+## 018 — Eliminado `GET /users`: exponía los datos de contacto de todos los usuarios
+
+**Problema:** `GET /api/users` solo exigía `verifyToken`, así que cualquier usuario con sesión (candidato o recruiter) recibía `name`, `email`, `phone`, `sector` y `location` de todos los usuarios registrados. Esto anulaba el sistema de consentimiento de la entrada 017: una empresa podía obtener el teléfono de un candidato sin que se hubiera postulado a ninguna de sus ofertas, y un candidato podía obtener los datos de otros candidatos.
+
+**Decisión:** eliminar la ruta en vez de protegerla. Ninguna pantalla del frontend la usaba (el usuario actual sale del JWT o de `GET /users/me`) y la app no tiene rol de administrador que la justifique. Si en el futuro hace falta un panel de administración, se añadirá un rol `admin` con su propia ruta y `requireRole(["admin"])`, en lugar de reabrir esta.
+
+**Verificación:** `GET /api/users` con token válido devuelve 404 (lo recoge `notFound`); registro (`POST /users`), login, `GET/PUT/DELETE /users/me` siguen funcionando.
+
+**Archivos afectados:** `backend/routes/userRoutes.js`, `backend/controllers/userControllers.js` (`getUsers` eliminado), `backend/models/User.js` (`getAllUsers` eliminado), `postman/collections/HireFlow API/Users/Get Users.request.yaml` (eliminado), `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.

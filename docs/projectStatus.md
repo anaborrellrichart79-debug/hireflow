@@ -51,7 +51,7 @@ Estado
 ✔ Obtener perfil propio (GET /users/me)
 ✔ Actualizar perfil propio (PUT /users/me)
 ✔ Eliminar cuenta propia (DELETE /users/me)
-✔ Obtener todos (GET /users)
+✖ Obtener todos (GET /users) — eliminado por exponer datos de contacto de todos los usuarios (ver `docs/decisions.md`, entrada 018)
 ✔ Registro exige aceptar la Política de Privacidad (`terms_accepted_at`, ver `docs/decisions.md`, entrada 017)
 ✔ Tests manuales verificados (Postman)
 
