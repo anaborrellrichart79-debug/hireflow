@@ -22,13 +22,23 @@ Formato basado en Keep a Changelog.
 - El mensaje de login correcto es "Sesión iniciada" en vez de "contraseña correcta".
 - El formulario de registro avisa de las reglas de la contraseña antes de enviarlo, traducido en los 4 idiomas.
 
+## Corregido
+- "Postularme" dejaba la postulación en "Interesa" (`wishlist`) y sin fecha, aunque la empresa ya la recibía. Ahora entra como "Postulado" (`applied`) con la fecha del día.
+- El candidato podía ponerse a sí mismo en "Oferta recibida" o "En entrevista", pisando lo que decidía la empresa. En las postulaciones a ofertas de HireFlow el estado ahora lo mueve solo la empresa (403 si el candidato lo intenta); el candidato puede retirar la postulación. Los seguimientos personales (sin oferta) siguen siendo libres.
+- La empresa podía devolver a un candidato a "Interesa"; ya no (400).
+- Guardar una nota borraba el aviso de "¡Actualizado por la empresa!". Ahora las notas y el estado se actualizan por separado (`PUT /applications/:id` es parcial).
+- Agendar una entrevista no cambiaba el estado: la empresa tenía que ponerlo a mano. Ahora pasa a "En entrevista" automáticamente (si estaba en "Interesa" o "Postulado") y se avisa al candidato.
+- En Postulantes, tras agendar una entrevista no se refrescaba la tarjeta; ahora se ve el estado nuevo.
+
 ## Añadido
+- Botón "Retirar postulación" en Mis postulaciones, con un diálogo de confirmación propio (no el `confirm()` del navegador) que explica que la empresa dejará de verla.
+- `aria-label` en los desplegables de estado (candidato y empresa).
 - Favicon (`frontend/assets/icons/favicon.svg`): la "H" naranja del logo. Antes el navegador pedía `/favicon.ico` en cada carga y la consola mostraba un 404.
 
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 022.
+Detalle en `docs/decisions.md`, entradas 018 a 023.
 
 ---
 

@@ -187,12 +187,18 @@ POST /applications
 Body
 {
     "job_offer_id": 1,
-    "notes": "Oferta interesante"
+    "notes": "Oferta interesante",
+    "consent": true,
+    "signature": "Lucía Navarro"
 }
-Ambos campos son opcionales. **`status` no se acepta en la creación** — el controller fija siempre `"wishlist"`, ignorando cualquier valor de `status` que se envíe en el body (por diseño: toda postulación nace en `wishlist`, y solo avanza de estado vía `PUT /applications/:id`).
+`consent` (tiene que ser `true`) y `signature` (el nombre completo del candidato) son obligatorios: al postularse, la empresa recibe su nombre, email y teléfono (ver `docs/decisions.md`, entrada 017). `job_offer_id` y `notes` son opcionales.
+
+**`status` no se acepta en la creación**; lo fija el controller (ver `docs/decisions.md`, entrada 023):
+- **con `job_offer_id`** (postularse a una oferta de HireFlow): `"applied"`, con `applied_date` = hoy. La empresa la ve al momento en `/applications/recruiter`.
+- **sin `job_offer_id`** (seguimiento personal de una oferta de fuera): `"wishlist"`, sin `applied_date`.
 
 Validación
-`job_offer_id` opcional, si se envía debe ser un entero válido. `notes` opcional, texto libre.
+`job_offer_id` opcional, si se envía debe ser un entero válido. `notes` opcional, texto libre. `consent` debe ser `true`. `signature` obligatorio (máx. 150).
 
 Respuesta
 201 Created
@@ -200,15 +206,15 @@ Respuesta
     "id": 7,
     "user_id": 11,
     "job_offer_id": 1,
-    "status": "wishlist",
+    "status": "applied",
     "notes": "Oferta interesante",
-    "applied_date": null
+    "applied_date": "2026-09-24T18:56:05.420Z",
+    "consent_share_contact": true,
+    "signature_name": "Lucía Navarro",
+    "consent_at": "2026-09-24T18:56:05.420Z"
 }
-
-**Nota sobre `applied_date`:** siempre `null` al crear, ya que el status de creación siempre es `"wishlist"`. Se rellena más adelante, ver nota en `PUT /applications/:id`.
-
 Errores
-400 — validación (ver sección "Errores de validación")
+400 — validación (ver sección "Errores de validación"), incluido no aceptar el consentimiento o no firmar
 400 — `job_offer_id` no existe (constraint FK)
 
 ---
@@ -235,25 +241,57 @@ Se devuelve 404 (no 403) tanto si el ID no existe como si existe pero pertenece 
 
 ---
 
-## Actualizar
+## Actualizar (candidato)
 PUT /applications/:id
-Body
+Body (update parcial: se cambia solo lo que se envía)
 {
-    "status":"applied",
     "notes":"Entrevista el viernes"
 }
 Validación
-**`status` es obligatorio** (uno de: `wishlist`, `applied`, `interview`, `offer`, `rejected`) — a diferencia del resto de recursos, `updateApplication` sobreescribe siempre ambos campos, no hace update parcial, así que omitir `status` está bloqueado por validación (antes de la validación esto producía un error 500, ver `docs/decisions.md`, entrada 008). `notes` es opcional.
+`status` opcional (uno de: `wishlist`, `applied`, `interview`, `offer`, `rejected`). `notes` opcional. Hay que enviar al menos uno.
+
+**Quién mueve el estado** (ver `docs/decisions.md`, entrada 023):
+- En una postulación **a una oferta de HireFlow** (`job_offer_id` no nulo) el estado lo gestiona la empresa (`PUT /applications/:id/status`). El candidato puede cambiar sus notas, pero no el estado: si envía un `status` distinto del actual recibe 403. Si ya no le interesa, puede retirarla con `DELETE /applications/:id`.
+- En un **seguimiento personal** (sin `job_offer_id`) el candidato mueve el estado libremente.
+
+Guardar solo las notas no cambia `status_updated_by`, así que no borra el aviso de "actualizado por la empresa".
+
 Respuesta
 200 OK
 {
     "message":"Postulación actualizada correctamente"
 }
 Errores
-400 — validación (ver sección "Errores de validación")
+400 — validación (ver sección "Errores de validación"), o no se envía ningún campo
+403 — intenta cambiar el estado de una postulación a una oferta de HireFlow
 404 — postulación no encontrada (o de otro usuario)
 
-**Nota sobre `applied_date`:** si el `status` enviado es `"applied"` y la postulación todavía no tenía `applied_date`, se rellena automáticamente con la fecha actual. Si ya tenía fecha (por ejemplo, viene de `interview` de vuelta a `applied`), no se sobrescribe.
+**Nota sobre `applied_date`:** si el `status` enviado es `"applied"` y la postulación todavía no tenía `applied_date`, se rellena automáticamente con la fecha actual. Si ya tenía fecha, no se sobrescribe.
+
+---
+
+## Cambiar estado (empresa)
+PUT /applications/:id/status
+Body
+{
+    "status": "interview"
+}
+Solo el recruiter que publicó la oferta de la postulación. Marca el cambio como de la empresa (`status_updated_by = "recruiter"`, `status_seen_by_candidate = 0`), así que el candidato lo ve como novedad en Home y en Mis postulaciones. No toca las notas privadas del candidato.
+
+Validación
+`status` obligatorio, uno de: `applied`, `interview`, `offer`, `rejected`. `wishlist` no se admite: la empresa no puede devolver a nadie a "Interesa" (ver `docs/decisions.md`, entrada 023).
+
+Respuesta
+200 OK
+{
+    "message": "Estado actualizado. El candidato lo verá reflejado en sus postulaciones."
+}
+Errores
+400 — validación
+403 — autenticado pero no es `recruiter`
+404 — postulación no encontrada o de una oferta de otro recruiter
+Autenticación
+Requerida (verifyToken) + role `recruiter`
 
 ---
 
@@ -517,6 +555,8 @@ Errores
 400 — `interview_type_id` no existe (constraint FK)
 Autenticación
 Requerida (verifyToken)
+
+**Cuando la agenda la empresa** (recruiter), la postulación pasa además a `"interview"` si estaba en `"wishlist"` o `"applied"`, y se avisa al candidato igual que con un cambio de estado manual. Si ya estaba en `"offer"` o `"rejected"` no se toca. Las dos cosas van en una transacción. La respuesta incluye `"application_status_changed": true|false` (ver `docs/decisions.md`, entrada 023).
 
 ---
 

@@ -2,7 +2,7 @@ import { el, errorBanner, openDialog } from "../components/ui.js";
 import { cardGrid } from "../components/cardGrid.js";
 import { apiFetch } from "../api.js";
 import { t } from "../i18n.js";
-import { STATUS_OPTIONS, statusLabel } from "../applicationStatus.js";
+import { RECRUITER_STATUS_OPTIONS, statusLabel } from "../applicationStatus.js";
 
 // Pantalla de la empresa: quién se ha postulado a sus ofertas, con opción de
 // ver los datos de contacto (solo si el candidato dio su consentimiento al
@@ -90,9 +90,16 @@ const applicantCard = (application, onStatusChange, onScheduleInterview) => {
         }
     });
 
+    // Si una postulación antigua sigue en "wishlist", se muestra también esa
+    // opción para que el desplegable refleje su estado real.
+    const statusOptions = RECRUITER_STATUS_OPTIONS.includes(application.status)
+        ? RECRUITER_STATUS_OPTIONS
+        : [application.status, ...RECRUITER_STATUS_OPTIONS];
+
     const statusSelect = el("select", {
+        "aria-label": t("applicants.statusLabel"),
         onChange: (event) => onStatusChange(application.id, event.target.value)
-    }, STATUS_OPTIONS.map((status) =>
+    }, statusOptions.map((status) =>
         el("option", { value: status, selected: status === application.status ? "true" : undefined, text: statusLabel(status) })
     ));
 
@@ -137,9 +144,12 @@ export const render = async (container) => {
                 }
             };
 
+            // Agendar la entrevista cambia el estado a "En entrevista" en el
+            // backend, así que se redibuja la lista antes de mostrar el aviso
+            // (después, no antes: draw() vacía successSlot).
             const onScheduleInterview = (application) => {
-                openScheduleInterviewDialog(application, () => {
-                    successSlot.innerHTML = "";
+                openScheduleInterviewDialog(application, async () => {
+                    await draw();
                     successSlot.append(el("p", { class: "success-text", text: t("calendar.interviewCreated") }));
                 });
             };

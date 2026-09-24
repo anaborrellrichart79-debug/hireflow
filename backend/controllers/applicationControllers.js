@@ -9,10 +9,14 @@ import { createApplication,
 import { APPLICATION_STATUS } from "../constants/applicationStatus.js";
 
 export const createNewApplication = async (req, res) => {
+    // Postularse a una oferta de HireFlow es postularse de verdad: la empresa
+    // la recibe al momento, así que entra como "applied" (con su fecha). Solo
+    // un seguimiento personal sin oferta asociada empieza en "wishlist".
+    // Ver docs/decisions.md, entrada 023.
     const application = await createApplication({
         user_id: req.user.id, // Obtener el ID del usuario autenticado
         job_offer_id: req.body.job_offer_id,
-        status: APPLICATION_STATUS.WISHLIST,
+        status: req.body.job_offer_id ? APPLICATION_STATUS.APPLIED : APPLICATION_STATUS.WISHLIST,
         notes: req.body.notes,
         consent_share_contact: req.body.consent === true,
         signature_name: req.body.signature
@@ -67,10 +71,20 @@ export const getApplication = async (req, res) => {
 export const updateExistingApplication = async (req, res) => {
     const { status, notes } = req.body;
 
-    const result = await updateApplication(req.params.id, req.user.id, status, notes);
+    const result = await updateApplication(req.params.id, req.user.id, { status, notes });
+
+    if (!result) {
+        return res.status(400).json({ message: "Ningún campo válido para actualizar" });
+    }
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Postulación no encontrada" });
+        // No se actualizó: o no existe / no es suya, o intentaba cambiar el
+        // estado de una postulación a una oferta de HireFlow (lo gestiona la empresa).
+        const application = await getApplicationById(req.params.id, req.user.id);
+        if (!application) {
+            return res.status(404).json({ message: "Postulación no encontrada" });
+        }
+        return res.status(403).json({ message: "El estado de una postulación a una oferta lo gestiona la empresa. Puedes retirar la postulación si ya no te interesa." });
     }
 
     res.status(200).json({ message: "Postulación actualizada correctamente" });

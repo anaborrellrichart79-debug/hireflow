@@ -1,15 +1,51 @@
-import { el, errorBanner } from "../components/ui.js";
+import { el, errorBanner, openDialog } from "../components/ui.js";
 import { cardGrid } from "../components/cardGrid.js";
 import { apiFetch } from "../api.js";
 import { t } from "../i18n.js";
 import { STATUS_OPTIONS, statusLabel } from "../applicationStatus.js";
 
-const statusCard = (app, jobTitle, onStatusChange) => {
-    const select = el("select", {
-        onChange: (event) => onStatusChange(app.id, event.target.value)
-    }, STATUS_OPTIONS.map((status) =>
-        el("option", { value: status, selected: status === app.status ? "true" : undefined, text: statusLabel(status) })
-    ));
+// Confirmación propia (no el confirm() nativo) antes de retirar: se borra la
+// postulación y, con ella, el consentimiento y las entrevistas programadas.
+const openWithdrawDialog = (onConfirm) => {
+    const errorSlot = el("div", {});
+    const cancelButton = el("button", { type: "button", class: "secondary-button", text: t("applications.withdrawCancel") });
+    const confirmButton = el("button", { type: "button", class: "primary-button", text: t("applications.withdrawConfirm") });
+
+    const dialog = openDialog([
+        el("h2", { id: "withdraw-dialog-title", text: t("applications.withdrawTitle") }),
+        errorSlot,
+        el("p", { text: t("applications.withdrawText") }),
+        el("div", { class: "hf-dialog-actions" }, [cancelButton, confirmButton])
+    ], { labelledBy: "withdraw-dialog-title" });
+
+    cancelButton.addEventListener("click", () => dialog.close());
+    confirmButton.addEventListener("click", async () => {
+        errorSlot.innerHTML = "";
+        try {
+            await onConfirm();
+            dialog.close();
+        } catch (error) {
+            errorSlot.append(errorBanner(error.message));
+        }
+    });
+};
+
+const statusCard = (app, jobTitle, onStatusChange, onWithdraw) => {
+    // En una postulación a una oferta de HireFlow el estado lo mueve la
+    // empresa: el candidato lo ve y puede retirarla. Solo los seguimientos
+    // personales (sin oferta) conservan el desplegable. Ver decisions.md, entrada 023.
+    const controls = app.job_offer_id
+        ? [
+            el("button", { class: "secondary-button danger", type: "button", text: t("applications.withdrawButton"), onClick: () => onWithdraw(app.id) })
+        ]
+        : [
+            el("select", {
+                "aria-label": t("applications.viewStatus"),
+                onChange: (event) => onStatusChange(app.id, event.target.value)
+            }, STATUS_OPTIONS.map((status) =>
+                el("option", { value: status, selected: status === app.status ? "true" : undefined, text: statusLabel(status) })
+            ))
+        ];
 
     // wasUnseen se calcula ANTES de llamar a mark-seen (ver render()), así
     // que aquí sigue reflejando si la empresa cambió el estado desde la
@@ -22,7 +58,7 @@ const statusCard = (app, jobTitle, onStatusChange) => {
         el("h3", { text: jobTitle }),
         el("span", { class: "status-badge", text: statusLabel(app.status) }),
         updateBadge,
-        select
+        ...controls
     ]);
 };
 
@@ -81,22 +117,30 @@ export const render = async (container) => {
 
             listSlot.innerHTML = "";
 
+            // El PUT es parcial: solo se envía lo que cambia (el estado o la nota).
             const onStatusChange = async (id, status) => {
-                const app = applications.find((a) => a.id === id);
-                await apiFetch(`/applications/${id}`, { method: "PUT", body: { status, notes: app.notes } });
+                await apiFetch(`/applications/${id}`, { method: "PUT", body: { status } });
                 draw();
             };
 
             const onNotesSave = async (id, notes) => {
-                const app = applications.find((a) => a.id === id);
-                await apiFetch(`/applications/${id}`, { method: "PUT", body: { status: app.status, notes } });
+                await apiFetch(`/applications/${id}`, { method: "PUT", body: { notes } });
                 draw();
             };
 
+            const onWithdraw = (id) => openWithdrawDialog(async () => {
+                await apiFetch(`/applications/${id}`, { method: "DELETE" });
+                draw();
+            });
+
             const renderCard = mode === "estado"
-                ? (app) => statusCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onStatusChange)
+                ? (app) => statusCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onStatusChange, onWithdraw)
                 : (app) => notesCard(app, jobTitles[app.job_offer_id] || t("applications.noOffer"), onNotesSave);
 
+            // Una sola vez encima de la lista, no en cada tarjeta.
+            if (mode === "estado" && applications.some((app) => app.job_offer_id)) {
+                listSlot.append(el("p", { class: "form-note", text: t("applications.statusManagedByCompany") }));
+            }
             listSlot.append(cardGrid(applications, renderCard, t("applications.emptyMessage")));
         } catch (error) {
             listSlot.innerHTML = "";

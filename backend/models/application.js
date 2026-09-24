@@ -65,21 +65,44 @@ export const getApplicationById = async (id, userId) => {
     return rows[0];
 };
 
-export const updateApplication = async (id, userId, status, notes = null) => {
+// Actualización del propio candidato. Las notas siempre se pueden cambiar.
+// El estado solo en seguimientos personales (sin oferta de HireFlow): en una
+// postulación a una oferta el estado lo mueve la empresa (ver
+// updateApplicationStatusByRecruiter), y el candidato solo puede retirarla.
+// Enviar el mismo estado que ya tiene no cuenta como cambio (así el cliente
+// puede reenviar la postulación entera sin que falle).
+// Devuelve null si no se envía ningún campo.
+export const updateApplication = async (id, userId, { status, notes }) => {
+    const sets = [];
+    const params = [];
+
+    if (notes !== undefined) {
+        sets.push("notes = ?");
+        params.push(notes);
+    }
+
+    let statusCheck = "";
+    const statusParams = [];
+    if (status !== undefined) {
+        // Solo se marca como cambio del candidato si el estado cambia de verdad:
+        // guardar una nota no debe borrar el aviso de "actualizado por la empresa".
+        sets.push(
+            "status_updated_by = IF(status <> ?, 'candidate', status_updated_by)",
+            "applied_date = IF(? = 'applied' AND applied_date IS NULL, CURDATE(), applied_date)",
+            "status = ?"
+        );
+        params.push(status, status, status);
+        statusCheck = "AND (job_offer_id IS NULL OR status = ?)";
+        statusParams.push(status);
+    }
+
+    if (sets.length === 0) {
+        return null;
+    }
+
     const [result] = await db.execute(
-        `
-        UPDATE applications
-        SET status = ?,
-            notes = ?,
-            status_updated_by = 'candidate',
-            status_seen_by_candidate = 1,
-            applied_date = CASE
-                WHEN ? = 'applied' AND applied_date IS NULL THEN CURDATE()
-                ELSE applied_date
-            END
-        WHERE id = ? AND user_id = ?
-        `,
-        [status, notes, status, id, userId]
+        `UPDATE applications SET ${sets.join(", ")} WHERE id = ? AND user_id = ? ${statusCheck}`,
+        [...params, id, userId, ...statusParams]
     );
     return result;
 };

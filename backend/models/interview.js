@@ -55,29 +55,60 @@ export const createInterviewForRecruiter = async (interviewData, recruiterId) =>
         notes = null
     } = interviewData;
 
-    const [result] = await db.execute(
-        `
-        INSERT INTO interviews (application_id, interview_type_id, scheduled_date, location, notes)
-        SELECT ?, ?, ?, ?, ?
-        FROM applications a
-        JOIN job_offers j ON a.job_offer_id = j.id
-        WHERE a.id = ? AND j.created_by_user = ?
-        `,
-        [application_id, interview_type_id, scheduled_date, location, notes, application_id, recruiterId]
-    );
+    // Agendar una entrevista mueve la postulación a "interview" (si aún
+    // estaba en "wishlist" o "applied") y avisa al candidato, igual que un
+    // cambio de estado manual de la empresa. Si ya iba más avanzada (oferta,
+    // rechazada) no se toca. Todo en una transacción: o las dos cosas o ninguna.
+    // Ver docs/decisions.md, entrada 023.
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
 
-    if (result.affectedRows === 0) {
-        return null;
+        const [result] = await connection.execute(
+            `
+            INSERT INTO interviews (application_id, interview_type_id, scheduled_date, location, notes)
+            SELECT ?, ?, ?, ?, ?
+            FROM applications a
+            JOIN job_offers j ON a.job_offer_id = j.id
+            WHERE a.id = ? AND j.created_by_user = ?
+            `,
+            [application_id, interview_type_id, scheduled_date, location, notes, application_id, recruiterId]
+        );
+
+        if (result.affectedRows === 0) {
+            await connection.rollback();
+            return null;
+        }
+
+        const [statusResult] = await connection.execute(
+            `
+            UPDATE applications
+            SET status = 'interview',
+                status_updated_by = 'recruiter',
+                status_seen_by_candidate = 0,
+                applied_date = COALESCE(applied_date, CURDATE())
+            WHERE id = ? AND status IN ('wishlist', 'applied')
+            `,
+            [application_id]
+        );
+
+        await connection.commit();
+
+        return {
+            id: result.insertId,
+            application_id,
+            interview_type_id,
+            scheduled_date,
+            location,
+            notes,
+            application_status_changed: statusResult.affectedRows > 0
+        };
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
     }
-
-    return {
-        id: result.insertId,
-        application_id,
-        interview_type_id,
-        scheduled_date,
-        location,
-        notes
-    };
 };
 
 export const getInterviewsForRecruiter = async (recruiterId) => {

@@ -573,3 +573,50 @@ mainContainer.innerHTML = `<p class="error-text">${t("common.loadError")} ${erro
 - El favicon responde 200 y no queda ningún error en la consola.
 
 **Archivos afectados:** `frontend/js/router.js`, `frontend/index.html`, `frontend/assets/icons/favicon.svg` (nuevo), `docs/changeLog.md`.
+
+---
+
+## 023 — Estados de las postulaciones: quién mueve cada uno
+
+**Problema:** tres fallos del flujo de contratación, relacionados entre sí:
+1. **"Postularme" creaba la postulación en `wishlist`** ("Interesa") y sin `applied_date`, aunque la empresa ya la recibía con los datos de contacto y la firma. El candidato veía "Interesa" justo después de postularse (se ve en el vídeo de la demo).
+2. **El candidato podía cambiar el estado a lo que quisiera**, incluso "Oferta recibida" o "En entrevista", y pisar lo que había decidido la empresa, que luego lo veía así en su lista. Además, `PUT /applications/:id` sobrescribía siempre estado y notas, y marcaba `status_updated_by = 'candidate'`, así que **guardar una nota borraba el aviso de "¡Actualizado por la empresa!"**. La empresa, por su parte, podía devolver a un candidato a "Interesa".
+3. **Agendar una entrevista no cambiaba el estado**: la empresa tenía que ponerlo en "En entrevista" a mano, y si se le olvidaba el candidato tenía una entrevista en el calendario con la postulación en "Postulado".
+
+**Decisión 1 — el estado inicial depende de si hay oferta.** Con `job_offer_id`, la postulación nace en `applied` con la fecha del día. Sin oferta (un seguimiento personal de una oferta de fuera, que la API permite aunque hoy ninguna pantalla lo cree), sigue naciendo en `wishlist`.
+
+**Decisión 2 — en una postulación a una oferta de HireFlow, el estado es de la empresa.**
+- El candidato ve el estado y puede **retirar** la postulación (`DELETE`), pero no cambiarlo: si envía un `status` distinto del actual recibe 403, con un mensaje que le sugiere retirarla. Enviar el mismo estado que ya tiene no falla, para no romper clientes que reenvían la postulación entera.
+- Los seguimientos personales (sin oferta) conservan el estado libre, porque ahí no hay empresa que lo gestione.
+- La comprobación va en la propia query (`AND (job_offer_id IS NULL OR status = ?)`); solo si no se actualiza nada se lee la postulación para distinguir 404 (no existe o no es suya) de 403.
+- `PUT /applications/:id` pasa a ser **parcial**, como el resto de recursos: notas y estado por separado. `status_updated_by` solo cambia a `candidate` si el estado cambia de verdad, así que guardar una nota ya no borra el aviso de la empresa.
+- La empresa ya no puede poner `wishlist` (`RECRUITER_STATUS_VALUES` en el validador y `RECRUITER_STATUS_OPTIONS` en el frontend). Si una postulación antigua sigue en `wishlist`, su desplegable muestra esa opción para reflejar el estado real.
+
+**Decisión 3 — agendar una entrevista mueve la postulación a `interview`.** En `createInterviewForRecruiter`, dentro de una transacción con el `INSERT`: si estaba en `wishlist` o `applied` pasa a `interview` y se avisa al candidato (`status_updated_by = 'recruiter'`, `status_seen_by_candidate = 0`), igual que con un cambio manual. Si ya estaba en `offer` o `rejected` no se toca, porque sería retroceder. La respuesta incluye `application_status_changed`. No se hace lo mismo cuando la agenda el propio candidato: su entrevista puede ser de un seguimiento personal.
+
+**Frontend:**
+- **Mis postulaciones:** en las postulaciones a ofertas desaparece el desplegable de estado y aparece "Retirar postulación", con un diálogo propio (`openDialog`, no el `confirm()` nativo) que explica que la empresa dejará de verla, junto con los datos de contacto y las entrevistas (que se borran en cascada). Encima de la lista, una sola vez, se explica que el estado lo actualiza la empresa. Las notas se guardan enviando solo `notes`.
+- **Postulantes:** el desplegable ya no ofrece "Interesa". Tras agendar una entrevista se redibuja la lista antes de mostrar el aviso, para que se vea el estado nuevo.
+- Todos los textos están en los 4 idiomas, y los desplegables de estado llevan `aria-label`.
+
+**Datos existentes:** no hizo falta migrar nada. En `hireflow`, las 3 postulaciones en `wishlist` son anteriores al consentimiento (sin firma), así que no vienen de "Postularme"; en `hireflow_demo` no había ninguna.
+
+**Demo:** `hireflow-datos.js` sigue funcionando sin cambios, porque solo usa estados que la empresa puede poner. En `hireflow.js`, el paso en que Marta pone "En entrevista" a mano antes de agendar ya no hace falta, aunque no molesta; y en el vídeo, la postulación nueva de Lucía saldrá como "Postulado".
+
+**Verificación** (contra `hireflow_demo`):
+- Con curl:
+  - postularse da `applied` con fecha;
+  - la candidata recibe 403 al poner `offer`, 200 al reenviar el mismo estado, 400 con el body vacío y 404 con un id ajeno;
+  - guardar una nota en una postulación actualizada por la empresa mantiene `status_updated_by = recruiter`;
+  - la empresa recibe 400 con `wishlist`;
+  - agendar sobre una postulación `applied` la pasa a `interview` con `visto = 0`, y sobre una en `offer` no la toca;
+  - retirar la postulación borra también su entrevista;
+  - un seguimiento personal nace en `wishlist` y sí se puede mover.
+- Con Playwright, candidata:
+  - se postula y ve "Postulado", sin desplegable y con "Retirar postulación";
+  - cancelar el diálogo mantiene la tarjeta y confirmarlo la quita;
+  - guarda una nota.
+- Con Playwright, empresa: el desplegable ofrece solo Postulado, En entrevista, Oferta recibida y Rechazado; al agendar la entrevista de Pablo, su tarjeta pasa de "Postulado" a "En entrevista".
+- Sin errores de consola. Al terminar, `hireflow_demo` se rellenó de nuevo con `hireflow-datos.js`.
+
+**Archivos afectados:** `backend/controllers/applicationControllers.js`, `backend/models/application.js`, `backend/validators/applicationValidators.js`, `backend/models/interview.js`, `frontend/js/applicationStatus.js`, `frontend/js/screens/applications.js`, `frontend/js/screens/applicants.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/changeLog.md`.
