@@ -39,6 +39,9 @@ Formato basado en Keep a Changelog.
 - El asistente IA solo entendía español: con la app en inglés, francés o italiano, sus propias sugerencias ("What will they ask me in the interview?") recibían la respuesta de "fuera de tema", y en español. Ahora entiende y responde en los 4 idiomas (ver "Añadido").
 - La palabra clave "ong" coincidía dentro de "strong" o "long", "ágil" dentro de "frágil", "moda" dentro de "modalidad"...: el asistente podía confundir el sector del CV. Ahora cada palabra clave tiene que empezar palabra (o ser la palabra entera, en las cortas).
 - Erratas en el contenido del asistente en español: "Díme", "la autoaprendizaje", "ideas,sentimientos", "mismno".
+- `config/database.js` ignoraba `DB_PORT` del `.env`: con MySQL en otro puerto la app no conectaba.
+- Accesibilidad (auditoría con axe-core, WCAG 2.1 A/AA, de 31 problemas a 0 en 8 pantallas y diálogos): botones de la cabecera sin nombre (el avatar era un `div` clicable), imágenes sin texto alternativo, etiquetas de formulario no asociadas a su campo, desplegables sin nombre y texto secundario con contraste insuficiente (#666 sobre beige, 3,94:1; #999 en el chat, 2,8:1).
+- Con el menú lateral cerrado, sus enlaces seguían recibiendo el foco con el tabulador aunque estuvieran fuera de la pantalla.
 - `verifyToken` llamaba a `next()` dentro de su `try`, así que un error síncrono de cualquier middleware posterior se respondía como 401 "token no válido". Además volcaba al log la traza de cada token caducado.
 
 ## Añadido
@@ -49,12 +52,21 @@ Formato basado en Keep a Changelog.
 - Asistente IA en 4 idiomas: palabras clave en inglés, francés e italiano, mensajes del asistente traducidos y todo el contenido del catálogo (51 preguntas de entrevista, 12 guías de CV y 20 fichas de habilidades) traducido, en la tabla nueva `ai_content_translations` (459 textos). Migración `028_ai_content_translations.sql` + `seed_ai_translations.sql`.
 - `POST /ai/*` acepta `lang` (`es`, `en`, `fr`, `it`).
 - Las guías de CV respetan sus saltos de línea ("Diseño: …", "Enfoque: …") en vez de salir en un solo párrafo.
+- Accesibilidad: foco visible al navegar con teclado, enlace "Saltar al contenido", menú con `aria-expanded` que se cierra con Escape y devuelve el foco, mascota usable con teclado, nombres accesibles traducidos en los 4 idiomas y respeto de "reducir movimiento" del sistema.
+- `backend/.env.example` con las variables necesarias; el puerto del servidor se puede cambiar con `PORT`, y el servidor se para al arrancar si falta `JWT_SECRET` (antes arrancaba y fallaba en cada login).
+- README: estructura real del proyecto (la anterior citaba archivos y carpetas que no existen) y cómo arrancarlo.
+
+## Eliminado del repositorio
+- `.vscode/postman.postman-for-vscode-1.19.1.vsix` (instalador de una extensión de VS Code, 39 MB) y los `.ai` de Illustrator de `frontend/assets/icons/`. Siguen en local, ignorados por `.gitignore`.
+
+## Renombrado
+- `frontend/style/layaut.css` → `layout.css` y `backend/database/shema.sql` → `schema.sql` (erratas). Las entradas antiguas de este changelog y de `decisions.md` mantienen el nombre que tenía el archivo en su momento.
 - Favicon (`frontend/assets/icons/favicon.svg`): la "H" naranja del logo. Antes el navegador pedía `/favicon.ico` en cada carga y la consola mostraba un 404.
 
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 028.
+Detalle en `docs/decisions.md`, entradas 018 a 029.
 
 ---
 

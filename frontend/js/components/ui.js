@@ -23,6 +23,28 @@ export const el = (tag, props = {}, children = []) => {
     return node;
 };
 
+// Accesibilidad: muchos formularios y diálogos ponen un <label> justo antes de
+// su campo sin relacionarlos, así que un lector de pantalla no anunciaba el
+// nombre del campo. Esto los asocia (for/id) y, a los campos que solo tienen
+// placeholder, les da ese texto como nombre accesible. Se llama tras pintar
+// cada pantalla (router.js) y al abrir un diálogo. Ver decisions.md, entrada 029.
+let autoIdCounter = 0;
+export const linkLabels = (root) => {
+    root.querySelectorAll("label:not([for])").forEach((label) => {
+        if (label.querySelector("input, select, textarea")) return; // ya lo envuelve
+        const control = label.nextElementSibling;
+        if (!control || !control.matches("input, select, textarea")) return;
+        if (!control.id) control.id = `hf-field-${++autoIdCounter}`;
+        label.htmlFor = control.id;
+    });
+    root.querySelectorAll("input[placeholder], textarea[placeholder]").forEach((control) => {
+        const hasLabel = control.labels && control.labels.length > 0;
+        if (!hasLabel && !control.hasAttribute("aria-label")) {
+            control.setAttribute("aria-label", control.placeholder);
+        }
+    });
+};
+
 export const emptyState = (message) =>
     el("div", { class: "empty-state" }, [
         el("p", { class: "empty-state-text", text: message })
@@ -52,6 +74,7 @@ export const openDialog = (contentNodes, { labelledBy } = {}) => {
 
     dialog.addEventListener("close", () => dialog.remove());
     document.body.append(dialog);
+    linkLabels(dialog);
     dialog.showModal();
 
     return dialog;

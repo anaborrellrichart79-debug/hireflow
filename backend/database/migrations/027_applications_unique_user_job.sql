@@ -1,5 +1,5 @@
 -- 027 — Una sola postulación por candidato y oferta (ver docs/decisions.md,
--- entrada 027). Para bases creadas antes de este cambio; shema.sql ya la trae.
+-- entrada 027). Para bases creadas antes de este cambio; schema.sql ya la trae.
 -- Antes de aplicarla, comprobar que no hay duplicados:
 --   SELECT user_id, job_offer_id, COUNT(*) FROM applications
 --   WHERE job_offer_id IS NOT NULL GROUP BY 1, 2 HAVING COUNT(*) > 1;

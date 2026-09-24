@@ -118,98 +118,52 @@ El objetivo del proyecto es crear una herramienta realista que combine gestión 
   
 ## Arquitectura del proyecto
 
-    El proyecto esta dividido en frontend y backend.
+    El proyecto está dividido en frontend (JavaScript sin framework, módulos ES) y backend (Node.js + Express + MySQL).
+    El propio servidor Express sirve el frontend, así que todo funciona en http://localhost:3000.
 
-        hireFlow/
+        hireflow/
         |
         |--- frontend/
-        |       |
         |       |---- index.html
-        |       |
-        |       |----- style/
-        |       |       |----- main.css
-        |       |       |----- layout.css
-        |       |       |_____ components.css
-        |       |
-        |       |---- assets/
-        |       |       |----icons/
-        |       |       |___ images/
-        |       |
-        |       |___ js/
-        |       |     |--- app.js
-        |       |     |
-        |       |    |--- state/
-        |       |    |       |____ store.js
-        |       |    |
-        |       |     |--- service/
-        |       |    |      |------ aplicationService.js
-        │       |    │      ├------ userService.js
-        │       |    │      ├------ jobService.js
-        │       |    │      |______ calendarService.js
-        |       |    |
-        |       |    |--- ui/
-        |       |    |    |--- board.js
-        |       |    |    |--- forms.js
-        |       |    |    |--- chart.js
-        |       |    |    |--- stats.js
-        |       |    |    |--- menu.js
-        |       |    |    |--- calendar.js
-        |       |    |    |____curriculumAI.js
-        |       |    |
-        |       |    |--- utils/
-        |       |    |      |--- storage.js
-        |       |    |      |--- helpers.js
-        |       |    |      |___ validator.js
-        |       |    |
-        |       |    |___ api/
-        |       |           |___ apiClient.js
-        |       |
-        |       |____ README.md
+        |       |---- style/            main.css, layout.css, components.css, mascot.css
+        |       |---- assets/           iconos SVG, favicon y mascota
+        |       |---- js/
+        |               |---- app.js            arranque: rutas, cabecera, idioma, mascota
+        |               |---- router.js         rutas por hash (#/jobs, #/calendar...)
+        |               |---- api.js            fetch a /api, token JWT, sesión caducada
+        |               |---- auth.js           login, registro, cierre de sesión
+        |               |---- i18n.js           textos en español, inglés, francés e italiano
+        |               |---- mascot.js         mascota animada
+        |               |---- components/       ui.js (el(), diálogos, avisos), header, cardGrid...
+        |               |---- screens/          una por pantalla: login, home, jobs, jobForm,
+        |                                       applications, applicants, calendar, profileForm, ai
         |
-        |___ backend/
-                |
-                |---- server.js
-                |
-                |---- config/
-                |       |____ database.js
-                |
-                |---- routes/
-                |       |----- authRoutes.js
-                |       |----- userRoutes.js
-                |       |----- applicationRoutes.js
-                |       |----- jobRoutes.js
-                |       |----- calendarRoutes.js
-                |       |_____ aiRoutes.js
-                |
-                |---- controllers/
-                |       |----- authControllers.js
-                |       |----- userControllers.js
-                |       |----- applicationControllers.js
-                |       |----- jobControllers.js
-                |       |----- calendarControllers.js
-                |       |_____ aiControllers.js
-                |
-                |---- models/
-                |       |----- User.js
-                |       |----- Company.js
-                |       |----- Application.js
-                |       |----- JobOffer.js
-                |       |----- interview.js
-                |       |_____ AIKnowledge.js
-                |
-                |---- services/
-                |       |----- linkedinService.js
-                |       |----- jobImportService.js
-                |       |----- aiService.js
-                |
-                |
-                |---- database/
-                |       |----- shema.sql
-                |       |____ seedData.sql
-                |       
-                |---- package.json
-                |
-                |____ .env
+        |--- backend/
+        |       |---- server.js         Express, cabeceras de seguridad (helmet), rutas /api
+        |       |---- .env.example      variables de entorno necesarias (copiar a .env)
+        |       |---- config/           conexión a MySQL
+        |       |---- routes/           users, jobs, companies, applications, interviews, calendar, ai
+        |       |---- controllers/      lógica de cada ruta
+        |       |---- models/           consultas SQL (con comprobación de propiedad en la propia query)
+        |       |---- validators/       validación de entrada (express-validator)
+        |       |---- middleware/       token JWT, roles, límite de intentos de login, errores
+        |       |---- constants/        estados de una postulación
+        |       |---- database/
+        |               |---- schema.sql                estructura de todas las tablas
+        |               |---- seed.sql                  contenido del asistente IA (en español)
+        |               |---- seed_ai_translations.sql  su traducción a inglés, francés e italiano
+        |               |---- migrations/               cambios para bases ya creadas, en orden
+        |
+        |--- docs/          API, base de datos, decisiones técnicas, changelog, estado del proyecto
+        |--- postman/       colección de Postman para probar la API
+
+## Cómo arrancarlo
+
+    1. Instala las dependencias:  cd backend  y  npm install
+    2. Crea la base de datos (ver "Instalación de la Base de Datos", más abajo).
+    3. Copia backend/.env.example a backend/.env y rellena tus datos de MySQL y un JWT_SECRET largo y aleatorio.
+    4. Arranca el servidor:  npm start  (o  npm run dev  para que se reinicie al guardar cambios).
+    5. Abre http://localhost:3000
 
 ## Tecnologías aplicadas
 
@@ -232,7 +186,7 @@ El objetivo del proyecto es crear una herramienta realista que combine gestión 
 
 ## Instalación de la Base de Datos
 
-    1. Crear la base de datos ejecutando el archivo --> backend/database/shema.sql
+    1. Crear la base de datos ejecutando el archivo --> backend/database/schema.sql
     2. Insertar los datos iniciales --> backend/database/seed.sql
     3. Insertar las traducciones del asistente IA (inglés, francés, italiano) --> backend/database/seed_ai_translations.sql
 

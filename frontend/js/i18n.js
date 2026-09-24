@@ -29,6 +29,9 @@ const dictionaries = {
         "nav.applicants": "Postulantes",
         "nav.drawerHint": "Inicia sesión para ver el menú",
         "nav.logout": "Cerrar sesión",
+        "nav.menuOpen": "Abrir menú",
+        "nav.menuClose": "Cerrar menú",
+        "nav.skipToContent": "Saltar al contenido",
         "nav.langLabel": "Idioma",
 
         "auth.loginTitle": "Iniciar sesión",
@@ -242,6 +245,9 @@ const dictionaries = {
         "nav.applicants": "Applicants",
         "nav.drawerHint": "Log in to see the menu",
         "nav.logout": "Log out",
+        "nav.menuOpen": "Open menu",
+        "nav.menuClose": "Close menu",
+        "nav.skipToContent": "Skip to content",
         "nav.langLabel": "Language",
 
         "auth.loginTitle": "Log in",
@@ -455,6 +461,9 @@ const dictionaries = {
         "nav.applicants": "Candidatures reçues",
         "nav.drawerHint": "Connectez-vous pour voir le menu",
         "nav.logout": "Se déconnecter",
+        "nav.menuOpen": "Ouvrir le menu",
+        "nav.menuClose": "Fermer le menu",
+        "nav.skipToContent": "Aller au contenu",
         "nav.langLabel": "Langue",
 
         "auth.loginTitle": "Connexion",
@@ -668,6 +677,9 @@ const dictionaries = {
         "nav.applicants": "Candidati",
         "nav.drawerHint": "Accedi per vedere il menu",
         "nav.logout": "Esci",
+        "nav.menuOpen": "Apri il menu",
+        "nav.menuClose": "Chiudi il menu",
+        "nav.skipToContent": "Vai al contenuto",
         "nav.langLabel": "Lingua",
 
         "auth.loginTitle": "Accedi",

@@ -804,3 +804,79 @@ Aplicado a `hireflow` y `hireflow_demo`: 459 traducciones (153 de preguntas, 66 
 **Limitación que sigue:** si el usuario escribe en un idioma distinto al de la app (por ejemplo, en inglés con la app en español), el asistente le entiende, pero contesta en el idioma de la app. Es lo esperable: el idioma de la respuesta es el que ha elegido.
 
 **Archivos afectados:** `backend/models/ai.js`, `backend/models/aiAssistant.js`, `backend/controllers/aiControllers.js`, `backend/validators/aiValidators.js`, `backend/database/shema.sql`, `backend/database/seed.sql`, `backend/database/seed_ai_translations.sql` (nuevo), `backend/database/migrations/028_ai_content_translations.sql` (nuevo), `frontend/js/screens/ai.js`, `frontend/style/components.css`, `docs/api.md`, `docs/changeLog.md`, `README.md`.
+
+---
+
+## 029 — Limpieza del repositorio y accesibilidad
+
+### Limpieza
+
+**Problema:** lo primero que ve quien abre el repositorio tenía fallos evidentes:
+- un instalador de extensión de VS Code de 39 MB (`.vscode/postman.postman-for-vscode-1.19.1.vsix`) y tres archivos fuente de Illustrator (`.ai`) subidos junto a los iconos;
+- erratas en dos nombres de archivo (`layaut.css`, `shema.sql`);
+- ningún `.env.example`, así que quien clonara el proyecto no sabía qué variables definir;
+- un README cuya estructura citaba archivos y carpetas que no existen (`authControllers.js`, `services/linkedinService.js`, `seedData.sql`…).
+
+**Decisiones:**
+- **`.vsix` y `.ai`:** fuera del repositorio con `git rm --cached` (siguen en el disco de Ana) y añadidos a `.gitignore`.
+  - **El historial no se ha tocado.** El `.vsix` sigue en commits antiguos, así que clonar el repositorio sigue descargando esos 39 MB. Quitarlo también de ahí exige reescribir el historial y hacer force push, algo que afecta a cualquier copia existente del repositorio; queda como opción si se quiere, no se ha hecho por defecto.
+- **`layaut.css` → `layout.css` y `shema.sql` → `schema.sql`**, con `git mv` para conservar su historial. Se actualizaron las referencias vivas (`index.html`, README, `Database.md`, `FRONTEND_DESIGN.md`, `googlePlayDataSafety.md`, `seed.sql`, comentarios de las migraciones). Las entradas antiguas de `decisions.md` y `changeLog.md` conservan el nombre de entonces, porque describen lo que pasó en su momento.
+- **`backend/.env.example`** con todas las variables y cómo generar un `JWT_SECRET`.
+- **Dos fallos de configuración, de paso:**
+  - `config/database.js` ignoraba `DB_PORT`, aunque estaba en el `.env`, así que con MySQL en otro puerto la app no conectaba;
+  - sin `JWT_SECRET` el servidor arrancaba y fallaba en cada login con un 500 poco claro; ahora se para al arrancar diciendo qué falta.
+
+  El puerto del servidor se puede cambiar con `PORT` (por defecto, 3000).
+- **README:** estructura real del proyecto, pasos para arrancarlo y, desde la entrada 028, pasos de instalación de la base con los nombres correctos. La sección "Funcionalidades principales" **no se ha tocado**, aunque describe cosas que no existen (importar de LinkedIn, integrar Google Calendar…): es texto de producto y conviene que lo decida Ana.
+
+### Accesibilidad
+
+**Problema:** la auditoría con **axe-core** (WCAG 2.1 A y AA) sobre login, Inicio, Mis ofertas, Nueva oferta, Postulantes, Calendario, Asistente IA y el diálogo de agendar entrevista daba **31 problemas**:
+- 7 botones sin nombre: el menú y el avatar, que además era un `div` clicable que no se podía usar con teclado;
+- 7 imágenes sin texto alternativo;
+- 12 textos con contraste insuficiente;
+- 3 campos sin etiqueta y 2 desplegables sin nombre.
+
+Además había tres fallos que axe no detecta:
+- con el menú cerrado, sus enlaces (fuera de la pantalla) seguían recibiendo el foco con el tabulador;
+- no había ningún estilo de foco para quien navega con teclado;
+- la mascota no se podía activar con teclado.
+
+**Decisiones:**
+- **Foco visible** (`:focus-visible`, solo con teclado, no al hacer clic): contorno casi negro de 3px. No se usa el naranja de la marca porque #d98f3f sobre blanco da 2,6:1, por debajo del 3:1 que pide un indicador de foco.
+- **Cabecera:**
+  - el avatar pasa a ser un `<button>`;
+  - el menú tiene `aria-expanded` y `aria-controls`;
+  - los dos llevan nombre accesible traducido ("Abrir menú" / "Cerrar menú"; "Mi perfil" o "Iniciar sesión" según haya sesión);
+  - los iconos son decorativos (`alt=""`).
+- **Menú lateral:**
+  - `inert` mientras está cerrado, para que el foco no entre en él;
+  - al abrirlo, el foco pasa al primer enlace;
+  - Escape lo cierra y devuelve el foco al botón.
+- **"Saltar al contenido":** primer elemento del tabulador, invisible hasta que recibe el foco. Es un `<button>` y no un enlace, porque con rutas por hash un `href="#main"` navegaría a una ruta "main".
+- **Etiquetas de formulario:**
+  - muchos formularios y diálogos ponen un `<label>` antes de su campo sin relacionarlos;
+  - en vez de tocarlos uno a uno, `linkLabels()` (`components/ui.js`) los asocia (`for`/`id`) después de pintar cada pantalla (router) y al abrir cada diálogo;
+  - los campos que solo tienen placeholder reciben ese texto como `aria-label`;
+  - así también quedan cubiertas las pantallas que se añadan después.
+- **Mascota:** `role="button"`, en el orden de foco, se activa con Enter o espacio y tiene nombre traducido ("Asistente IA").
+- **Contraste:**
+  - texto secundario de tarjetas y estadísticas: #666 → #4f4f4f (sobre el beige de las tarjetas daba 3,94:1);
+  - notas de formulario: #777 → #5f5f5f (4,48:1, justo por debajo de 4,5:1);
+  - etiquetas "TÚ"/"ASISTENTE" del chat: #999 → #6b6b6b (2,8:1).
+- **Movimiento:** `prefers-reduced-motion` desactiva animaciones y transiciones (la mascota que se desplaza y gira, el menú) para quien lo pide en su sistema.
+- Los textos nuevos están en los 4 idiomas (`nav.menuOpen`, `nav.menuClose`, `nav.skipToContent`).
+
+**Verificación:**
+- **axe-core** (mismas 8 vistas): el último commit, levantado aparte con `git worktree`, da 31 problemas; esta versión da **0**.
+- **Teclado** (Playwright):
+  - el primer Tab va a "Saltar al contenido", visible, y Enter lleva el foco al contenido;
+  - con el menú cerrado, 0 enlaces alcanzables; con Enter se abre (`aria-expanded=true`, foco en "Inicio") y Escape lo cierra y devuelve el foco al botón;
+  - la mascota con Enter lleva al asistente;
+  - el formulario de oferta tiene 7 de 7 campos con nombre accesible;
+  - en inglés, los nombres pasan a "Open menu", "My profile" y "Skip to content".
+- **Configuración:** sin `JWT_SECRET`, el servidor sale con código 1 y el mensaje; con `PORT=3005` arranca en ese puerto y el login contra la base de demo funciona.
+- Sin errores de página.
+- La herramienta de grabación de la demo sigue funcionando: usa `.burger` y los enlaces de `#nav-drawer`, que dejan de ser `inert` al abrir el menú.
+
+**Archivos afectados:** `.gitignore`, `README.md`, `backend/.env.example` (nuevo), `backend/config/database.js`, `backend/server.js`, `backend/database/schema.sql` (renombrado), `backend/database/seed.sql`, migraciones 019 y 027 (comentarios), `frontend/index.html`, `frontend/style/layout.css` (renombrado), `frontend/style/main.css`, `frontend/style/components.css`, `frontend/js/components/ui.js`, `frontend/js/components/header.js`, `frontend/js/router.js`, `frontend/js/mascot.js`, `frontend/js/i18n.js`, `docs/Database.md`, `docs/FRONTEND_DESIGN.md`, `docs/googlePlayDataSafety.md`, `docs/changeLog.md`.

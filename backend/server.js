@@ -14,6 +14,15 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Sin JWT_SECRET la app arrancaba, pero cada login fallaba con un 500 poco
+// claro. Mejor parar al arrancar y decir qué falta (ver backend/.env.example).
+if (!process.env.JWT_SECRET) {
+    console.error("Falta JWT_SECRET en backend/.env (ver backend/.env.example).");
+    process.exit(1);
+}
+
+const PORT = Number(process.env.PORT) || 3000;
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
@@ -58,6 +67,6 @@ app.use("/api/users", userRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(3000, () => {
-    console.log(" HireFlow corriendo en http://localhost:3000 ");
+app.listen(PORT, () => {
+    console.log(`HireFlow corriendo en http://localhost:${PORT}`);
 });

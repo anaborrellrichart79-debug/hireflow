@@ -107,7 +107,7 @@ HireFlow tiene **una sola interfaz para ambos roles** (candidate / company). No 
 
 **Endpoints:**
 - Candidate: `PUT /users/me` (perfil básico, ya implementado) — los campos de CV extendido (`skills`, `experience`, etc.) necesitan el CRUD de `user_profiles`, que todavía no existe en el backend
-- Company: `POST /jobs` / `PUT /jobs/:id` (ya implementados) — **nota:** `job_offers` no tiene columna `urgency` en el schema actual (`shema.sql`); si se quiere persistir la urgencia habrá que añadir la columna y registrar la decisión en `docs/decisions.md` antes de tocar el schema
+- Company: `POST /jobs` / `PUT /jobs/:id` (ya implementados) — **nota:** `job_offers` no tiene columna `urgency` en el schema actual (`schema.sql`); si se quiere persistir la urgencia habrá que añadir la columna y registrar la decisión en `docs/decisions.md` antes de tocar el schema
 
 **Nota de arquitectura:** el componente `Form` recibe un prop `mode: "profile" | "job_offer"` que determina qué campos renderiza y a qué endpoint hace submit. Un solo componente, no dos.
 

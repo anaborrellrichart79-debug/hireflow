@@ -7,7 +7,7 @@
     <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 
     <link rel="stylesheet" href="style/main.css">
-    <link rel="stylesheet" href="style/layaut.css">
+    <link rel="stylesheet" href="style/layout.css">
     <link rel="stylesheet" href="style/components.css">
     <link rel="stylesheet" href="style/mascot.css">
 
@@ -16,11 +16,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Botón y no enlace: con rutas por hash, href="#main" navegaría a una ruta "main". -->
+    <button type="button" class="skip-link" id="skip-link"></button>
     <header class="topbar">
 
-                <div class="user-icon topbar-left">
-                    <img src="assets/icons/usuario.svg" alt="icono de usuario"/>
-                </div>
+                <button type="button" class="user-icon topbar-left">
+                    <img src="assets/icons/usuario.svg" alt=""/>
+                </button>
 
                 <div class="logo-title">
                     <h1><span class="accent">H</span>IREFLO<span class="accent">W</span></h1>
@@ -28,12 +30,12 @@
 
                 <div class="topbar-right">
                     <select id="lang-switcher" class="lang-switcher" aria-label="Idioma / Language"></select>
-                    <button class="burger"><img src="assets/icons/burger-menu.svg"></button>
+                    <button type="button" class="burger" aria-controls="nav-drawer" aria-expanded="false"><img src="assets/icons/burger-menu.svg" alt=""></button>
                 </div>
 
     </header>
-    <nav id="nav-drawer" class="nav-drawer"></nav>
-    <main class="main-container">
+    <nav id="nav-drawer" class="nav-drawer" inert></nav>
+    <main class="main-container" id="main-content" tabindex="-1">
 
 
 

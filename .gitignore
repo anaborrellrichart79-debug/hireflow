@@ -2,3 +2,8 @@ node_modules/
 .env
 .DS_Store
 *.log
+
+# Instaladores de extensiones y archivos fuente de diseño (Illustrator):
+# se quedan en local, no en el repo. Ver docs/decisions.md, entrada 029.
+*.vsix
+*.ai

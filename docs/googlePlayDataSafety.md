@@ -34,7 +34,7 @@ No aplica: HireFlow no está dirigida a menores de 16 años (ver Política de Pr
 
 - **Por qué se comparten datos con "terceros" en el sentido de Google Play**: a ojos de Google, cada empresa/reclutador que usa HireFlow para publicar ofertas es un "tercero" respecto al candidato que se postula, aunque ambos sean usuarios de la misma app. De ahí que nombre/email/teléfono se marquen como "compartidos", condicionados siempre al consentimiento explícito capturado en `applications.consent_share_contact` (ver `backend/models/application.js`).
 - **Por qué el resto de datos (sector, ubicación) no se marca como "compartido" de forma independiente**: solo se exponen junto con el resto del perfil de contacto a la empresa correspondiente, bajo el mismo consentimiento — no se venden ni se ceden por separado a nadie más.
-- **Base para "eliminación de datos bajo petición"**: `DELETE /users/me` (`backend/controllers/userControllers.js`) + `ON DELETE CASCADE` en las tablas relacionadas (`shema.sql`).
+- **Base para "eliminación de datos bajo petición"**: `DELETE /users/me` (`backend/controllers/userControllers.js`) + `ON DELETE CASCADE` en las tablas relacionadas (`schema.sql`).
 
 ## 6. Enlace a la Política de Privacidad
 

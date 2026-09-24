@@ -23,3 +23,41 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+/* --- Accesibilidad (ver docs/decisions.md, entrada 029) --- */
+
+/* Foco visible al navegar con teclado (no al hacer clic con el ratón).
+   Casi negro y no naranja: el naranja de la marca no llega a 3:1 sobre blanco. */
+:focus-visible {
+    outline: 3px solid #2a2a2a;
+    outline-offset: 2px;
+}
+
+#main-content:focus { outline: none; } /* recibe el foco del "saltar al contenido" */
+
+/* "Saltar al contenido": invisible hasta que recibe el foco con el tabulador */
+.skip-link {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    z-index: 100;
+    padding: 10px 16px;
+    border: 2px solid #2a2a2a;
+    border-radius: 10px;
+    background: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.skip-link:focus { top: 12px; }
+
+/* Quien pide menos movimiento en su sistema: sin animaciones ni transiciones */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

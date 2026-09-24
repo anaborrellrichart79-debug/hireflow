@@ -1,6 +1,6 @@
 import { isAuthenticated } from "./auth.js";
 import { t } from "./i18n.js";
-import { el } from "./components/ui.js";
+import { el, linkLabels } from "./components/ui.js";
 
 const routes = [];
 let mainContainer = null;
@@ -71,6 +71,7 @@ const runRoute = async () => {
 
     try {
         await route.render(mainContainer, params);
+        linkLabels(mainContainer);
     } catch (error) {
         // Con el(), no con innerHTML: error.message puede venir del backend
         // o de datos del usuario y nunca debe interpretarse como HTML.

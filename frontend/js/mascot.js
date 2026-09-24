@@ -1,6 +1,6 @@
 import { getCurrentUser } from "./api.js";
 import { navigate } from "./router.js";
-import { onLangChange, getMascotPhrases } from "./i18n.js";
+import { t, onLangChange, getMascotPhrases } from "./i18n.js";
 
 // Mascota global (persiste en todas las pantallas, se monta una sola vez
 // desde app.js en #mascot-root, fuera de .main-container para no perderse
@@ -74,11 +74,22 @@ export const initMascot = () => {
 
     const img = document.createElement("img");
     img.src = "assets/mascota-soporte.svg";
-    img.alt = "Asistente HireFlow";
+    img.alt = ""; // el nombre accesible va en root (role="button")
     img.className = "mascot-img";
 
     root.append(bubble, img);
     root.addEventListener("click", () => navigate("/ai"));
+    // Era un <div> clicable: sin teclado ni nombre para lectores de pantalla.
+    root.setAttribute("role", "button");
+    root.tabIndex = 0;
+    root.setAttribute("aria-label", t("nav.ai"));
+    onLangChange(() => root.setAttribute("aria-label", t("nav.ai")));
+    root.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            navigate("/ai");
+        }
+    });
 
     let anchors = getAnchors();
     let anchorIndex = 0;

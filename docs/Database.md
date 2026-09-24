@@ -6,7 +6,7 @@ hireflow
 
 ---
 
-**Nota de esta actualización (Agosto 2026):** este documento estaba desactualizado respecto al código real (`backend/database/shema.sql`). Se han añadido 9 tablas que ya existían en el schema pero no estaban documentadas, y se ha corregido la relación `job_offers`↔`companies` que tenía un error de FK ya solucionado (ver `docs/decisions.md`, entrada 001-003).
+**Nota de esta actualización (Agosto 2026):** este documento estaba desactualizado respecto al código real (`backend/database/schema.sql`). Se han añadido 9 tablas que ya existían en el schema pero no estaban documentadas, y se ha corregido la relación `job_offers`↔`companies` que tenía un error de FK ya solucionado (ver `docs/decisions.md`, entrada 001-003).
 
 ---
 

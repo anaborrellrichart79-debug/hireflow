@@ -1,5 +1,5 @@
 -- 019 — Dueño de cada empresa (ver docs/decisions.md, entrada 019).
--- Para bases creadas antes de este cambio; shema.sql ya incluye la columna.
+-- Para bases creadas antes de este cambio; schema.sql ya incluye la columna.
 
 ALTER TABLE companies
     ADD COLUMN created_by_user int NULL AFTER phone,

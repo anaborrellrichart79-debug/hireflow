@@ -26,7 +26,37 @@ export const initHeader = () => {
     const drawer = document.getElementById("nav-drawer");
     const avatar = document.querySelector(".user-icon");
 
-    const closeDrawer = () => drawer.classList.remove("open");
+    // Cerrado, el drawer está fuera de la pantalla pero sus enlaces seguían
+    // recibiendo el foco con el tabulador: inert los saca del orden de foco.
+    const setOpen = (open) => {
+        drawer.classList.toggle("open", open);
+        drawer.inert = !open;
+        burger.setAttribute("aria-expanded", String(open));
+        burger.setAttribute("aria-label", open ? t("nav.menuClose") : t("nav.menuOpen"));
+    };
+    const closeDrawer = () => setOpen(false);
+
+    // Nombres accesibles traducidos de los botones de la cabecera.
+    const updateLabels = () => {
+        burger.setAttribute("aria-label", drawer.classList.contains("open") ? t("nav.menuClose") : t("nav.menuOpen"));
+        avatar.setAttribute("aria-label", isAuthenticated() ? t("nav.profile") : t("auth.loginTitle"));
+        const skip = document.getElementById("skip-link");
+        if (skip) skip.textContent = t("nav.skipToContent");
+    };
+    updateLabels();
+    window.addEventListener("hashchange", updateLabels);
+
+    document.getElementById("skip-link")?.addEventListener("click", () => {
+        document.getElementById("main-content")?.focus();
+    });
+
+    // Escape cierra el menú y devuelve el foco al botón que lo abrió.
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && drawer.classList.contains("open")) {
+            closeDrawer();
+            burger.focus();
+        }
+    });
 
     const renderDrawer = () => {
         drawer.innerHTML = "";
@@ -65,7 +95,10 @@ export const initHeader = () => {
 
     burger.addEventListener("click", () => {
         renderDrawer();
-        drawer.classList.toggle("open");
+        const open = !drawer.classList.contains("open");
+        setOpen(open);
+        // Al abrir, el foco pasa al primer enlace del menú.
+        if (open) drawer.querySelector("a, button")?.focus();
     });
 
     avatar.addEventListener("click", () => {
@@ -82,6 +115,7 @@ export const initHeader = () => {
     // instante; si está cerrado, ya se generará traducido la próxima vez
     // que se abra (renderDrawer se llama siempre al hacer click en burger).
     onLangChange(() => {
+        updateLabels();
         if (drawer.classList.contains("open")) {
             renderDrawer();
         }

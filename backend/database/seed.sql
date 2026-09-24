@@ -2,7 +2,7 @@ USE hireflow;
 
 
 -- Columnas y valores de ENUM corregidos para coincidir con el esquema real
--- (shema.sql / BD real usan name_interview_types + description_interview_types,
+-- (schema.sql / BD real usan name_interview_types + description_interview_types,
 -- con name_interview_types como ENUM en inglés, no texto libre en español).
 -- Ver docs/decisions.md, entrada 006, para el detalle de este fix y el
 -- mapeo de las categorías originales en español a los valores del ENUM.
