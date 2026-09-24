@@ -10,14 +10,18 @@ Formato basado en Keep a Changelog.
 - Eliminado `GET /users`: cualquier usuario con sesión iniciada podía listar el email y el teléfono de todos los usuarios, saltándose el consentimiento que se pide al postularse. Ninguna pantalla lo usaba. Borrados también `getUsers` (controller), `getAllUsers` (modelo) y la petición "Get Users" de la colección de Postman.
 - Las empresas ahora tienen dueño (`companies.created_by_user`). Antes cualquier recruiter podía editar o borrar la empresa de otro (y al borrarla se perdían en cascada sus ofertas y las postulaciones de los candidatos), o publicar ofertas a nombre de otra empresa. Ahora solo el recruiter que creó la empresa puede editarla o borrarla, y solo puede publicar o mover ofertas a sus propias empresas.
 - Ya no se puede borrar una empresa que tiene ofertas (409): hay que borrar antes las ofertas, para no eliminar postulaciones sin querer.
+- El login ya no revela qué emails están registrados: devuelve siempre 401 "Email o contraseña incorrectos" (antes, 400 "Usuario no encontrado" o "contraseña incorrecta"), y tarda lo mismo exista o no el email.
+- Límite de 10 intentos de login fallidos por IP cada 15 minutos (429), con `express-rate-limit`. Los logins correctos no cuentan.
 
 ## Cambiado
 - El formulario de oferta solo ofrece las empresas del propio recruiter.
+- Los errores de login (401 y 429) se muestran traducidos en los 4 idiomas; antes salía el texto del backend, siempre en español.
+- El mensaje de login correcto es "Sesión iniciada" en vez de "contraseña correcta".
 
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 y 019.
+Detalle en `docs/decisions.md`, entradas 018, 019 y 020.
 
 ---
 

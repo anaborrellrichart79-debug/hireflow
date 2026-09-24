@@ -86,13 +86,13 @@ Validación
 Respuesta
 200 OK
 {
-    "message": "contraseña correcta",
+    "message": "Sesión iniciada",
     "token": "JWT..."
 }
 Errores
 400 — validación (ver sección "Errores de validación")
-400 — usuario no encontrado: `{"message":"Usuario no encontrado"}`
-400 — contraseña incorrecta: `{"message":"contraseña incorrecta"}`
+401 — email no registrado o contraseña incorrecta, con el mismo mensaje en ambos casos para no revelar qué emails tienen cuenta: `{"message":"Email o contraseña incorrectos"}`
+429 — más de 10 intentos fallidos desde la misma IP en 15 minutos (los logins correctos no cuentan): `{"message":"Demasiados intentos de inicio de sesión. Vuelve a intentarlo en unos minutos."}`. Incluye las cabeceras `RateLimit` y `RateLimit-Policy`.
 500 — error interno (ej. JWT_SECRET no configurado en .env)
 Autenticación
 No requerida

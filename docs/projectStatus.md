@@ -47,7 +47,7 @@ Decisión de arquitectura: ver `docs/decisions.md`, entrada 008.
 Estado
 🟢 CRUD Completo
 ✔ Crear (registro)
-✔ Login
+✔ Login (mensaje de error genérico con 401 y límite de 10 intentos fallidos por IP cada 15 min, ver `docs/decisions.md`, entrada 020)
 ✔ Obtener perfil propio (GET /users/me)
 ✔ Actualizar perfil propio (PUT /users/me)
 ✔ Eliminar cuenta propia (DELETE /users/me)

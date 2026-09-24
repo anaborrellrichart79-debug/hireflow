@@ -499,3 +499,29 @@ Es el mismo tipo de fallo que ya se corrigió en ofertas (entrada 017), pero en 
 En el navegador (Playwright): Marta ve sus 4 empresas en "Nueva oferta" y el otro recruiter solo la suya, sin errores de consola.
 
 **Archivos afectados:** `backend/database/shema.sql`, `backend/database/migrations/019_companies_created_by_user.sql` (nuevo), `backend/models/company.js`, `backend/controllers/companyControllers.js`, `backend/models/jobOffer.js`, `backend/controllers/jobOfferControllers.js`, `frontend/js/screens/jobForm.js`, `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.
+
+---
+
+## 020 — Login: mensaje de error genérico y límite de intentos
+
+**Problema:** `POST /users/login` respondía "Usuario no encontrado" si el email no existía y "contraseña incorrecta" si existía. Así cualquiera podía comprobar qué emails tienen cuenta en HireFlow (enumeración de usuarios), algo delicado en una app de empleo: confirma que una persona concreta está buscando trabajo. Además no había límite de intentos, así que se podía probar contraseñas sin freno.
+
+**Decisión 1 — mismo mensaje y mismo código en los dos casos:** `401 {"message":"Email o contraseña incorrectos"}`. Se pasa de 400 a 401 porque el problema son las credenciales, no el formato de la petición (los errores de formato siguen siendo 400, vía `validate`).
+
+**Decisión 2 — mismo tiempo de respuesta.** Aunque el mensaje sea igual, si el email no existía se respondía al instante y si existía se esperaba a `bcrypt.compare` (~80 ms), así que el tiempo seguía delatando el email. Ahora, si el usuario no existe, se compara contra un hash de relleno (`DUMMY_PASSWORD_HASH`, calculado una vez al arrancar), y los dos casos cuestan lo mismo.
+
+**Decisión 3 — límite de intentos con `express-rate-limit`** (`middleware/rateLimiters.js`, `loginLimiter`, solo en `/users/login`): 10 intentos fallidos por IP cada 15 minutos; el siguiente recibe 429. Con `skipSuccessfulRequests` los logins correctos no cuentan: un usuario normal nunca lo nota, ni tampoco la herramienta de grabación de la demo (`grabar-demos`), que inicia sesión varias veces seguidas. Se limita por IP y no por email para que un atacante no pueda bloquear la cuenta de otra persona a propósito fallando su contraseña. El contador vive en memoria (se reinicia al reiniciar el servidor); si algún día hay varias instancias, habrá que pasarlo a un almacén compartido (Redis).
+
+**Decisión 4 — mensajes traducidos en el frontend.** Los mensajes del backend solo están en español, así que `login.js` traduce por código de estado (401 → `auth.invalidCredentials`, 429 → `auth.tooManyAttempts`) en los 4 idiomas.
+
+**Fuera de alcance, a propósito:** el registro sigue diciendo "El email ya está registrado". Evitarlo exige un flujo de confirmación por email, que la app todavía no tiene; se deja anotado.
+
+**Verificación** (curl contra `hireflow_demo`):
+- un email inexistente y una contraseña mala devuelven el mismo 401 y el mismo mensaje, en tiempos equivalentes (~0,09–0,14 s);
+- el login correcto devuelve 200;
+- 5 logins correctos seguidos no cuentan para el límite;
+- el 11.º intento fallido devuelve 429 con las cabeceras `RateLimit`.
+
+En el navegador (Playwright): el mensaje sale en español y, al cambiar a inglés, en inglés, tanto para el 401 como para el 429.
+
+**Archivos afectados:** `backend/middleware/rateLimiters.js` (nuevo), `backend/routes/userRoutes.js`, `backend/controllers/userControllers.js`, `backend/package.json` y `backend/package-lock.json` (`express-rate-limit`), `frontend/js/screens/login.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/projectStatus.md`, `docs/changeLog.md`.

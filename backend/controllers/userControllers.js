@@ -14,19 +14,24 @@ export const createNewUser = async (req, res) => {
     }
 };
 
+// Hash de relleno para comparar cuando el email no existe: así el login
+// tarda lo mismo exista o no el usuario, y el tiempo de respuesta no delata
+// qué emails están registrados.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync("hireflow-dummy-password", 10);
+
+// Mismo mensaje y mismo 401 tanto si el email no existe como si la
+// contraseña es incorrecta -- distinguirlos permitía averiguar qué emails
+// tienen cuenta. Ver docs/decisions.md, entrada 020.
+const INVALID_CREDENTIALS_MESSAGE = "Email o contraseña incorrectos";
+
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await findUserByEmail(email);
+    const validPassword = await bcrypt.compare(password, user?.password_hash ?? DUMMY_PASSWORD_HASH);
 
-    if (!user) {
-        return res.status(400).json({ message: "Usuario no encontrado" });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password_hash);
-
-    if (!validPassword) {
-        return res.status(400).json({ message: "contraseña incorrecta" });
+    if (!user || !validPassword) {
+        return res.status(401).json({ message: INVALID_CREDENTIALS_MESSAGE });
     }
 
     const token = jwt.sign(
@@ -35,7 +40,7 @@ export const loginUser = async (req, res) => {
         { expiresIn: "1h" }
     );
 
-    res.json({ message: "contraseña correcta", token });
+    res.json({ message: "Sesión iniciada", token });
 };
 
 // GET /users/me

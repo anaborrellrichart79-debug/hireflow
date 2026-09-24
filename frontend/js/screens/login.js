@@ -73,8 +73,18 @@ export const render = (container) => {
                 }
                 navigate("/");
             } catch (error) {
-                const detail = error.errors?.map((e) => e.message).join(" · ");
                 errorSlot.innerHTML = "";
+                // 401 (credenciales incorrectas) y 429 (demasiados intentos)
+                // se traducen aquí: el mensaje del backend solo está en español.
+                if (error.status === 401) {
+                    errorSlot.append(errorBanner(t("auth.invalidCredentials")));
+                    return;
+                }
+                if (error.status === 429) {
+                    errorSlot.append(errorBanner(t("auth.tooManyAttempts")));
+                    return;
+                }
+                const detail = error.errors?.map((e) => e.message).join(" · ");
                 errorSlot.append(errorBanner(detail || error.message));
             }
         };
