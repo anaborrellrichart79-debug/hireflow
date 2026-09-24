@@ -620,3 +620,38 @@ mainContainer.innerHTML = `<p class="error-text">${t("common.loadError")} ${erro
 - Sin errores de consola. Al terminar, `hireflow_demo` se rellenó de nuevo con `hireflow-datos.js`.
 
 **Archivos afectados:** `backend/controllers/applicationControllers.js`, `backend/models/application.js`, `backend/validators/applicationValidators.js`, `backend/models/interview.js`, `frontend/js/applicationStatus.js`, `frontend/js/screens/applications.js`, `frontend/js/screens/applicants.js`, `frontend/js/i18n.js`, `docs/api.md`, `docs/changeLog.md`.
+
+---
+
+## 024 — Calendario por semanas
+
+**Problema:** `calendar.js` calculaba el día de la semana de cada entrevista (`getDay()`) y las metía en 6 columnas fijas, de lunes a sábado, sin mirar la fecha. Consecuencias:
+- se mezclaban semanas: una entrevista del lunes 1 y otra del lunes 22 salían en la misma columna, y las cabeceras no tenían fecha, así que no había forma de saber de qué semana era cada una;
+- las entrevistas pasadas no desaparecían nunca;
+- las del domingo se descartaban (`index < 6`), así que una entrevista en domingo no aparecía en ningún sitio;
+- borrar una entrevista no pedía confirmación y, si fallaba, el error acababa en la consola.
+
+**Decisión — calendario de una semana con navegación:**
+- Se muestra la semana actual (de lunes a domingo, 7 columnas) con botones de semana anterior, "Hoy" y semana siguiente, y el rango como título ("21–27 sept 2026").
+- Cada cabecera lleva el nombre del día y la fecha, y la columna de hoy se resalta en naranja.
+- Nombres de días, fechas y horas salen de `Intl`/`toLocale*` con el idioma activo, en vez de claves de traducción fijas: así se ven bien en los 4 idiomas sin mantener 28 cadenas (se eliminaron `calendar.mon`…`calendar.sat`), y el rango usa `Intl.DateTimeFormat.formatRange` cuando el navegador lo tiene.
+- La semana visible se guarda fuera de `render()`, así que al cambiar de idioma no se vuelve a la semana actual.
+- **Semana vacía:** se dice ("No hay entrevistas esta semana") y, si hay alguna entrevista más adelante, un botón salta a su semana. Así la candidata no tiene que ir pulsando "›" a ciegas.
+- **Tras agendar** una entrevista, se salta a la semana de esa entrevista y solo entonces se muestra el aviso.
+- **Borrar** pide confirmación con un diálogo propio (fecha, hora y candidato, y que también desaparecerá del calendario del candidato), y muestra los errores dentro del diálogo.
+- **Móvil (≤ 640px):** los días van en lista, uno debajo de otro, y se ocultan los días vacíos salvo hoy, para no obligar a hacer scroll de siete bloques con un guion.
+- La pantalla tiene su propio contenedor (`.calendar-screen`, máx. 1040px) en vez de `.list-slot` (720px, pensado para listas de tarjetas), que dejaba 7 columnas demasiado estrechas y la barra de semana desalineada.
+
+**Backend:** `getInterviewsByUser` (vista del candidato) devuelve también `job_title` y `company_name` con `LEFT JOIN` (la postulación puede no tener oferta). Antes el candidato veía en su calendario solo la hora y el lugar, sin saber de qué oferta era la entrevista.
+
+**Verificación** (Playwright contra `hireflow_demo`):
+- La candidata ve la semana actual con fechas en cada día, el jueves de hoy resaltado y sus 3 entrevistas con oferta y empresa ("Full Stack Node.js · Brisa Software").
+- La semana siguiente sale vacía con su mensaje; "Hoy" vuelve a la actual, y al pasar a inglés se mantiene la semana con los días traducidos.
+- En la empresa, cancelar el diálogo de borrar no toca nada.
+- Una entrevista agendada para dentro de 10 días (que cae en **domingo**) salta a su semana y aparece; en una semana pasada vacía, "Ir a la próxima" lleva a la siguiente entrevista; la entrevista de prueba se borró confirmando el diálogo.
+- En móvil (390px) solo se ven los 3 días con entrevistas y no hay desbordamiento horizontal.
+- Cero errores de consola.
+
+`hireflow_demo` se volvió a rellenar con `hireflow-datos.js`. El guion de la demo (`hireflow.js`) sigue funcionando: espera "Videollamada" en el calendario, y los datos de demo ponen las entrevistas en la semana actual.
+
+**Archivos afectados:** `frontend/js/screens/calendar.js`, `frontend/style/components.css`, `frontend/js/i18n.js` (claves nuevas `calendar.prevWeek`, `nextWeek`, `today`, `emptyWeek`, `goToNext`, `deleteTitle`, `deleteText`, `deleteConfirm` en los 4 idiomas; eliminadas `calendar.mon`…`sat`), `backend/models/interview.js`, `docs/api.md`, `docs/changeLog.md`.

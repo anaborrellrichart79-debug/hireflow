@@ -144,8 +144,11 @@ export const deleteInterviewForRecruiter = async (id, recruiterId) => {
 export const getInterviewsByUser = async (userId) => {
     const [rows] = await db.execute(
         `
-        SELECT i.* FROM interviews i
+        SELECT i.*, a.job_offer_id, j.title AS job_title, c.name AS company_name
+        FROM interviews i
         JOIN applications a ON i.application_id = a.id
+        LEFT JOIN job_offers j ON a.job_offer_id = j.id
+        LEFT JOIN companies c ON j.company_id = c.id
         WHERE a.user_id = ?
         ORDER BY i.scheduled_date ASC
         `,

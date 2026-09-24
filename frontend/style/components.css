@@ -242,9 +242,38 @@
 .pill.active { background: var(--hf-orange); border-color: var(--hf-orange-dark); font-weight: 700; }
 
 /* --- Calendario semanal --- */
+.calendar-screen { max-width: 1040px; margin: 0 auto; }
+
+.week-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+}
+
+.week-title {
+    margin: 0 0 0 8px;
+    font-size: 16px;
+}
+
+.week-empty-message {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    background: var(--hf-cream);
+    border-radius: var(--hf-radius);
+}
+
+.week-empty-message p { margin: 0; }
+
 .week-calendar {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 1px;
     background: #ebd9b8;
     border: 1px solid #ebd9b8;
@@ -252,16 +281,25 @@
     overflow: hidden;
 }
 
-.week-column { background: #fff; display: flex; flex-direction: column; }
+.week-column { background: #fff; display: flex; flex-direction: column; min-height: 120px; }
 
 .week-header {
     background: var(--hf-cream);
-    font-weight: 700;
     font-size: 12px;
     text-align: center;
-    padding: 10px 4px;
-    text-transform: capitalize;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
+
+.week-header-day { font-weight: 700; text-transform: capitalize; }
+.week-header-date { color: #7a6a4f; }
+
+/* Hoy: cabecera naranja y columna algo más cálida */
+.week-column--today { background: #fffaf2; }
+.week-column--today .week-header { background: var(--hf-orange); }
+.week-column--today .week-header-date { color: #000; font-weight: 700; }
 
 .week-event {
     font-size: 11px;
@@ -270,12 +308,22 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    overflow-wrap: anywhere;
 }
+
+.week-event-time { font-size: 13px; }
+.week-event-title { font-weight: 700; }
+.week-event-delete { margin-top: 4px; align-self: flex-start; font-size: 11px; padding: 4px 10px; }
 
 .week-empty { color: #ccc; text-align: center; padding: 10px 0; font-size: 12px; }
 
+/* Móvil: los días en lista, uno debajo de otro, y sin los días vacíos
+   (salvo hoy, como referencia) para no obligar a hacer scroll de más. */
 @media (max-width: 640px) {
-    .week-calendar { grid-template-columns: repeat(2, 1fr); }
+    .week-calendar { grid-template-columns: 1fr; }
+    .week-column { min-height: 0; }
+    .week-column--empty:not(.week-column--today) { display: none; }
+    .week-header { flex-direction: row; justify-content: space-between; padding: 8px 12px; }
 }
 
 /* --- Asistente IA --- */

@@ -556,6 +556,8 @@ Errores
 Autenticación
 Requerida (verifyToken)
 
+**`GET /interviews`** devuelve, para el candidato, además `job_offer_id`, `job_title` y `company_name` de cada entrevista (`null` si la postulación no tiene oferta); para el recruiter, `job_offer_id`, `job_title` y `candidate_name`.
+
 **Cuando la agenda la empresa** (recruiter), la postulación pasa además a `"interview"` si estaba en `"wishlist"` o `"applied"`, y se avisa al candidato igual que con un cambio de estado manual. Si ya estaba en `"offer"` o `"rejected"` no se toca. Las dos cosas van en una transacción. La respuesta incluye `"application_status_changed": true|false` (ver `docs/decisions.md`, entrada 023).
 
 ---

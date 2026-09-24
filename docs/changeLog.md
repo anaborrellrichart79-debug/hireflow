@@ -29,16 +29,20 @@ Formato basado en Keep a Changelog.
 - Guardar una nota borraba el aviso de "¡Actualizado por la empresa!". Ahora las notas y el estado se actualizan por separado (`PUT /applications/:id` es parcial).
 - Agendar una entrevista no cambiaba el estado: la empresa tenía que ponerlo a mano. Ahora pasa a "En entrevista" automáticamente (si estaba en "Interesa" o "Postulado") y se avisa al candidato.
 - En Postulantes, tras agendar una entrevista no se refrescaba la tarjeta; ahora se ve el estado nuevo.
+- El calendario no tenía semanas: agrupaba todas las entrevistas de la historia por día de la semana, sin fechas (una del lunes 1 y otra del lunes 22 salían juntas), las pasadas no desaparecían nunca y las del domingo no se mostraban.
+- Borrar una entrevista no pedía confirmación ni mostraba los errores.
 
 ## Añadido
 - Botón "Retirar postulación" en Mis postulaciones, con un diálogo de confirmación propio (no el `confirm()` del navegador) que explica que la empresa dejará de verla.
 - `aria-label` en los desplegables de estado (candidato y empresa).
+- Calendario por semanas: botones de semana anterior, "Hoy" y semana siguiente, el rango de fechas como título, fecha en cada día, el día de hoy resaltado y el domingo incluido. Si la semana está vacía lo dice y ofrece saltar a la próxima entrevista. Tras agendar una entrevista se salta a su semana. En móvil, los días van en lista y se ocultan los vacíos.
+- El candidato ve en cada entrevista del calendario la oferta y la empresa (antes solo la hora y el lugar).
 - Favicon (`frontend/assets/icons/favicon.svg`): la "H" naranja del logo. Antes el navegador pedía `/favicon.ico` en cada carga y la consola mostraba un 404.
 
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 
-Detalle en `docs/decisions.md`, entradas 018 a 023.
+Detalle en `docs/decisions.md`, entradas 018 a 024.
 
 ---
 
