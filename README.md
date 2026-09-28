@@ -49,7 +49,7 @@
 - **4 idiomas.** Español, inglés, francés e italiano, también en los mensajes del servidor, el asistente y la política.
 - **Calidad.** 127 pruebas automáticas (API e interfaz, con Playwright) que se ejecutan en cada cambio con GitHub Actions, sobre una base de datos creada desde cero.
 - **App instalable (PWA)** y responsive hasta 320 px de ancho.
-- **Documentada.** [Arquitectura](docs/architecture.md) con diagramas, [API](docs/api.md), [base de datos](docs/Database.md), [roadmap](docs/roadmap.md) y **44 decisiones técnicas** explicadas en [`decisions.md`](docs/decisions.md): el problema, las alternativas, qué se eligió y cómo se comprobó.
+- **Documentada.** [Arquitectura](docs/architecture.md) con diagramas, [API](docs/api.md), [base de datos](docs/Database.md), [roadmap](docs/roadmap.md) y **45 decisiones técnicas** explicadas en [`decisions.md`](docs/decisions.md): el problema, las alternativas, qué se eligió y cómo se comprobó.
 
 ## Tecnologías
 

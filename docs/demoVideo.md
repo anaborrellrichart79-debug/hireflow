@@ -4,6 +4,22 @@ Guion de un vídeo de **75–90 segundos** que enseña HireFlow desde los dos la
 
 ---
 
+## 0. El vídeo ya hecho (automático)
+
+Hay un vídeo de **~90 segundos a 1080p**, con subtítulos, cursor, portada y cierre, grabado automáticamente con este mismo guion:
+
+```
+npm run demo:data                      # datos frescos (entrevistas a partir de hoy)
+FFMPEG_PATH=/ruta/a/ffmpeg npm run demo:video
+npm run demo:data                      # deja los datos como estaban (la grabación los cambia)
+```
+
+Resultado: `demo-output/hireflow-demo.mp4` (MP4 H.264, el formato de LinkedIn) y `demo-output/hireflow-portada.png` (miniatura). Hace falta un ffmpeg con libx264 (por ejemplo, el del paquete `ffmpeg-static`); sin `FFMPEG_PATH` se queda en WebM, que LinkedIn no acepta. En PowerShell: `$env:FFMPEG_PATH="C:\ruta\ffmpeg.exe"; npm run demo:video`.
+
+Si prefieres grabarlo tú (con tu voz, o a tu ritmo), sigue los apartados de abajo.
+
+---
+
 ## 1. Preparación (5 minutos)
 
 1. **Genera los datos** el mismo día que vayas a grabar, **mejor de lunes a jueves**: las entrevistas se programan a partir de hoy, y así el panel muestra "Entrevistas esta semana".

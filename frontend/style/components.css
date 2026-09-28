@@ -505,6 +505,27 @@
 }
 
 .hf-dialog-content h2 { margin-top: 0; }
+
+/* Etiquetas y campos de los diálogos (agendar entrevista, eliminar la
+   cuenta...): uno debajo de otro, como en los formularios. Sin estas reglas
+   salían en línea, todos seguidos. Ver docs/decisions.md, entrada 045. */
+.hf-dialog-content label:not(.checkbox-label) {
+    display: block;
+    margin: 12px 0 4px;
+    font-size: 13px;
+    font-weight: 700;
+}
+.hf-dialog-content input:not([type="checkbox"]):not([type="radio"]),
+.hf-dialog-content select,
+.hf-dialog-content textarea {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--hf-beige-dark);
+    border-radius: 10px;
+    background: #fff;
+    font: inherit;
+}
 .hf-dialog-content h3 { margin-bottom: 4px; }
 .hf-dialog-content p { line-height: 1.5; }
 

@@ -83,6 +83,10 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Añadido — Vídeo de demostración automático (entrada 045)
+- `npm run demo:video`: graba con Playwright el vídeo de demostración (~90 s, 1080p, MP4) siguiendo el guion, con subtítulos, cursor visible, portada, vista de móvil y cierre
+- Corregido: en los diálogos con campos (agendar entrevista, eliminar la cuenta), las etiquetas y los campos salían todos en una línea; ahora van uno debajo de otro
+
 ## Portfolio (entradas 043 y 044)
 - Publicación en Google Play en pausa: el proyecto queda como portfolio, porque el nombre «HireFlow» ya lo usan otros productos del mismo sector
 - `npm run demo:data`: datos de demostración creíbles y reproducibles (3 empresas, 13 ofertas, 8 candidatos con CV, todas las fases del Kanban, entrevistas esta semana), solo sobre una base `_demo`
@@ -149,7 +153,7 @@ Formato basado en Keep a Changelog.
 - `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
 - `backend/database/migrations/034_applications_consent_updated_at.sql` para bases existentes (`applications.consent_updated_at`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 044.
+Detalle en `docs/decisions.md`, entradas 018 a 045.
 
 ---
 

@@ -1316,3 +1316,31 @@ Los intentos de login fallidos siguen probándose solo contra el servidor aparte
 **Archivos afectados:** `scripts/demo-data.mjs`, `scripts/screenshots.mjs`, `scripts/demo-start.mjs`, `docs/demoVideo.md`, `docs/screenshots/*.png` (todos nuevos); `package.json` (scripts `demo:*`); `README.md`; `frontend/style/components.css`; `docs/roadmap.md`, `docs/projectStatus.md`, `docs/changeLog.md`.
 
 ---
+
+## 045 — Vídeo de demostración grabado automáticamente, y campos de los diálogos corregidos
+**Fecha:** Septiembre 2026
+
+**Problema:** la autora pidió el vídeo para LinkedIn ya hecho, de 90–100 segundos, en vez de grabarlo ella a mano con el guion de la entrada 044.
+
+**Decisión — grabarlo con Playwright** (`npm run demo:video`, `scripts/record-video.mjs`). Playwright maneja la app como una persona siguiendo el guion de `docs/demoVideo.md`: la candidata (inicio, ofertas con buscador y filtro, asistente con 100 % de encaje, tablero y diálogo de privacidad), una transición y la empresa (panel, Kanban con el CV, una tarjeta arrastrada, una entrevista agendada), los cambios de idioma, el móvil, la 404 y una pantalla final. Encima de la app se inyecta una capa solo para el vídeo:
+- **Subtítulos**, porque en LinkedIn casi todo se ve sin sonido.
+- **Un cursor visible con efecto al hacer clic**, porque el vídeo de Playwright no graba el ratón.
+- **Portada, transición y cierre**, con la mascota y los colores de la marca.
+- **La vista de móvil**: la propia app dentro de un marco de teléfono, en un iframe.
+
+Resultado: `demo-output/hireflow-demo.mp4`, 1920×1080, H.264, 30 fps, **90,8 s** y 10 MB, con una imagen de portada (`hireflow-portada.png`). No se sube al repositorio (`demo-output/` está en `.gitignore`), porque se regenera con dos comandos.
+
+**Detalles técnicos que salieron al hacerlo:**
+- **Encuadre:** Playwright graba al tamaño de la ventana; pedirle un vídeo de 1080p con una ventana de 1280×720 dejaba la app en una esquina y el resto gris. Se graba a 1280×720 y ffmpeg lo escala a 1080p con el filtro Lanczos.
+- **Diálogos:** un `<dialog>` abierto se dibuja en la capa superior del navegador, por encima de cualquier `z-index`, y los subtítulos y el cursor quedaban detrás del fondo oscurecido. Mientras hay un diálogo abierto, esos elementos se meten dentro de él.
+- **CSP:** la capa usa CSS en línea, así que **solo el contexto de grabación** se salta la CSP (`bypassCSP`). La app no cambia.
+- **Formato:** LinkedIn no acepta WebM, que es lo que graba Playwright. La conversión a MP4 usa un ffmpeg con libx264, indicado con `FFMPEG_PATH` (por ejemplo, el del paquete `ffmpeg-static`); no es una dependencia del proyecto.
+- **Datos:** la grabación cambia los datos de demostración (mueve una tarjeta y agenda una entrevista). Después hay que volver a ejecutar `npm run demo:data`.
+
+**Fallo real encontrado al revisar el vídeo — campos de los diálogos en línea.** En los diálogos con campos (agendar entrevista desde el calendario y desde Postulantes, y eliminar la cuenta), las etiquetas y los campos salían todos seguidos en una línea («Postulante [desplegable] Fecha y hora [campo]…»), porque `.hf-dialog-content` no tenía estilos para ellos. Las pruebas no lo detectaban: comprueban que los campos existan y funcionen, no cómo se ven. Ahora las etiquetas van en bloque, encima de su campo, y los campos ocupan todo el ancho con el estilo de los formularios de la app. Las casillas (`.checkbox-label`) no cambian.
+
+**Verificación:** fotogramas revisados cada 5–6 segundos (encuadre, subtítulos legibles y por encima de los diálogos, cursor, móvil sin tapar, portada y cierre) y duración comprobada con ffmpeg. Las 127 pruebas siguen pasando con el CSS nuevo de los diálogos.
+
+**Archivos afectados:** `scripts/record-video.mjs` (nuevo), `package.json` (`demo:video`), `.gitignore` (`demo-output/`), `frontend/style/components.css` (campos de los diálogos), `docs/demoVideo.md`, `docs/changeLog.md`.
+
+---

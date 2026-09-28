@@ -11,3 +11,6 @@ node_modules/
 # Resultados de las pruebas (Playwright)
 test-results/
 playwright-report/
+
+# Vídeo de demostración generado (npm run demo:video)
+demo-output/
