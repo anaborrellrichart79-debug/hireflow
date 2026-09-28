@@ -1,5 +1,16 @@
 {
+  "name": "hireflow",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test tests/api",
+    "test:e2e": "playwright test tests/e2e",
+    "test:report": "playwright show-report"
+  },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "nodemon": "^3.1.14"
   }
 }

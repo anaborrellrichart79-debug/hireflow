@@ -165,6 +165,18 @@ El objetivo del proyecto es crear una herramienta realista que combine gestión 
     4. Arranca el servidor:  npm start  (o  npm run dev  para que se reinicie al guardar cambios).
     5. Abre http://localhost:3000
 
+## Cómo ejecutar las pruebas
+
+    Con la base de datos creada y backend/.env configurado (pasos de arriba):
+
+    1. Instala las dependencias de la raíz:  npm install  (y la primera vez:  npx playwright install chromium)
+    2. Ejecuta:  npm test   (arranca la app si no está en marcha)
+
+    npm run test:api   solo la API
+    npm run test:e2e   solo la interfaz (navegador y accesibilidad)
+
+    Se ejecutan también solas en GitHub en cada push (pestaña Actions). Detalle en docs/architecture.md.
+
 ## Tecnologías aplicadas
 
     ### Frontend

@@ -196,6 +196,8 @@ Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
 🟢 Probado en tablet (768px), móvil (390px) y móvil pequeño (320px), en ambos roles: sin desbordamiento horizontal en ninguna pantalla, topbar adaptada (logo con tamaño fluido, iconos/selector más compactos por debajo de 480px), mascota global sin tapar contenido en ningún ancho. Ver `docs/decisions.md`, entrada 016.
 ---
 # Testing
+Automáticas (en el repositorio)
+🟢 66 pruebas con Playwright Test en `tests/` (API + interfaz + axe-core), `npm test`; integración continua en GitHub Actions con una MySQL creada desde cero en cada push. Cubren la seguridad de la API y todo lo hecho desde la entrada 033; ampliarlas a las pantallas anteriores está en el roadmap. Ver `docs/decisions.md`, entrada 040.
 Backend
 🟢 Postman
 Frontend

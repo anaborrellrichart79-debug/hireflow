@@ -1,0 +1,94 @@
+# Pruebas automáticas en cada push y pull request a main (ver
+# docs/decisions.md, entrada 040). Crea una MySQL limpia SOLO con schema.sql y
+# los seed, arranca la app y ejecuta todas las pruebas de Playwright (API +
+# interfaz + accesibilidad). De paso comprueba que una instalación desde cero
+# funciona.
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci-root-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      CI: true
+      MYSQL_PWD: ci-root-password
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+
+      - name: Instalar dependencias
+        run: |
+          npm ci
+          npm ci --prefix backend
+
+      - name: Crear la base de datos desde cero
+        run: |
+          mysql -h 127.0.0.1 -uroot --default-character-set=utf8mb4 < backend/database/schema.sql
+          mysql -h 127.0.0.1 -uroot --default-character-set=utf8mb4 < backend/database/seed.sql
+          # seed_ai_translations.sql no hace USE: se le indica la base
+          mysql -h 127.0.0.1 -uroot --default-character-set=utf8mb4 hireflow < backend/database/seed_ai_translations.sql
+          mysql -h 127.0.0.1 -uroot -e "SELECT COUNT(*) AS tablas FROM information_schema.tables WHERE table_schema = 'hireflow'"
+
+      - name: Configurar backend/.env
+        run: |
+          cat > backend/.env <<EOF
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_USER=root
+          DB_PASSWORD=${MYSQL_PWD}
+          DB_NAME=hireflow
+          JWT_SECRET=$(openssl rand -hex 32)
+          PORT=3000
+          EOF
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar las pruebas
+        run: npx playwright test
+
+      - name: Guardar el informe si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-playwright
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14

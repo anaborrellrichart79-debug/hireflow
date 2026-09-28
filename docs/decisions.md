@@ -1183,3 +1183,35 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 **Archivos afectados:** `frontend/privacy.html`, `frontend/js/privacyPage.js`, `frontend/style/privacy.css`, `.github/workflows/privacy-page.yml`, `docs/changeLog.md`.
 
 ---
+
+## 040 — Pruebas automáticas en el repositorio e integración continua
+**Fecha:** Septiembre 2026
+
+**Problema:** cada cambio se verificaba a fondo (API, navegador, accesibilidad, 4 idiomas), pero con scripts sueltos fuera del repositorio. Nadie podía volver a ejecutarlos, y nada impedía que un cambio futuro rompiera algo ya probado. Era el primer punto técnico del `roadmap.md`.
+
+**Decisión 1 — un solo ejecutor, Playwright Test, para la API y la interfaz.** Ya se usaba Playwright para el navegador; con `@playwright/test` la API se prueba en el mismo ejecutor (con `fetch`), con un solo comando, un solo informe y un `webServer` que arranca la app si no está en marcha. Se descartó `node:test` para la API porque habría dado dos ejecutores y dos formas de arrancar el servidor. La accesibilidad se audita con `@axe-core/playwright`. Misma versión de Playwright (1.63) que la ya instalada en el equipo, para reutilizar sus navegadores.
+
+**Decisión 2 — contra el servidor y la MySQL reales, sin mocks.** Lo que más importa probar (que nadie vea ni toque lo de otro, que los consentimientos se respeten) vive en la SQL; un mock no lo comprobaría. Cada archivo crea sus propios usuarios (`pw_…@test.local`) con `TestData` y los borra en `afterAll` (borrar la cuenta borra en cascada sus postulaciones y su CV). Los archivos corren en paralelo y las pruebas de un mismo archivo en orden, porque cada archivo es un flujo.
+
+**Decisión 3 — el límite de intentos de login, en un servidor aparte.** Cada intento fallido cuenta para el límite de 10 por IP cada 15 minutos (entrada 020). Si esas pruebas usaran el servidor compartido, bloquearían el login del resto de pruebas, y de la siguiente ejecución. `login-rate-limit.spec.js` arranca su propia instancia en un puerto libre (memoria propia, contador a cero) y es el único archivo que hace logins fallidos. No se ha tocado el límite ni se ha añadido ninguna "puerta trasera" para las pruebas.
+
+**Decisión 4 — GitHub Pages, con el mismo paso del workflow.** Las pruebas de la política y de la 404 generan el paquete de Pages ejecutando el paso "Preparar" del propio `privacy-page.yml` y lo sirven como Pages (bajo `/hireflow/`, con `404.html` para lo desconocido). Así se prueba exactamente lo que se publica, incluido qué archivos salen y cuáles no.
+
+**Decisión 5 — integración continua con una base creada desde cero.** `.github/workflows/tests.yml`, en cada push y pull request a `main`: MySQL 8.0 como servicio, base creada solo con `schema.sql` + `seed.sql` + `seed_ai_translations.sql`, `backend/.env` generado (con un `JWT_SECRET` aleatorio por ejecución), Chromium y `npx playwright test`. Si algo falla, guarda el informe y las trazas. De paso comprueba que una instalación nueva, siguiendo el README, funciona. Antes de subirlo se simuló en local: base nueva solo con esos tres archivos (14 tablas, 51 preguntas, 459 traducciones, 14 tipos de entrevista) y las 66 pruebas pasando contra ella. Detalle: `seed_ai_translations.sql` no hace `USE`, así que el workflow le indica la base.
+
+**Qué cubren (66 pruebas):**
+- **API — seguridad** (nuevo, antes solo se había comprobado a mano): 401 sin token; `GET /users` eliminado; IDOR en postulaciones; postulación a oferta como `applied` y sin duplicados; el candidato no mueve el estado que gestiona la empresa; solo recruiters crean empresas y ofertas; un recruiter no toca ofertas, empresas ni postulantes de otro; no se borra una empresa con ofertas; la empresa no ve las notas privadas; entrevistas solo sobre postulaciones propias o de ofertas propias; `/users/me` sin `password_hash`.
+- **API** — CV (033), consentimientos (034), idiomas (038, incluida la coherencia del diccionario) y login con límite de intentos (020, 038).
+- **Interfaz** — CV, consentimientos, Política de Privacidad en 4 idiomas y paquete de Pages, 404 en app, Express y Pages, y errores del backend traducidos. En cada pantalla y diálogo probados: axe-core (WCAG 2.1 A/AA) y cero errores de consola; varias también a 320px.
+- Quedan fuera, por ahora, las pantallas anteriores a la entrada 033 (ofertas, calendario, Kanban, panel de la empresa, asistente): anotado en el roadmap.
+
+**Hallazgos al montarlo:**
+- **Fallo real, corregido:** la página `404.html` independiente no tenía ningún `<h1>`. El título del componente es un `<h2>` porque dentro de la app el `<h1>` es el logo; `lostMascot` recibe ahora el nivel del encabezado y la página estática usa `h1`.
+- **Del propio montaje:** `AxeBuilder.options()` sustituye todas las opciones, así que llamado después de `withTags()` borraba el filtro WCAG y activaba también las reglas de "buenas prácticas". Con `preload: true` (por defecto), axe intentaba descargar las hojas de Google Fonts y la CSP de la app lo bloqueaba (con razón), lo que aparecía como error de consola. Se usa `options({ preload: false })` antes de `withTags()`.
+- **Anotado, no corregido:** axe marca como buena práctica (no WCAG) el orden de encabezados del Kanban (columnas en `<h3>` sin `<h2>` antes). Queda en el roadmap.
+
+**Verificación:** 66 pruebas pasando tres veces seguidas contra la base de desarrollo (sin inestabilidad y sin dejar datos) y una vez contra una base creada desde cero; y el workflow de GitHub Actions en verde tras subirlo.
+
+**Archivos afectados:** `playwright.config.js`, `tests/helpers.js`, `tests/api/*.spec.js` (5), `tests/e2e/*.spec.js` (5), `.github/workflows/tests.yml` (todos nuevos); `package.json` y `package-lock.json` de la raíz (`"type": "module"`, scripts `test`, `test:api`, `test:e2e`, `test:report`, dependencias de desarrollo); `.gitignore`; `frontend/js/components/lostMascot.js`, `frontend/js/notFoundPage.js` (el `<h1>` de la 404); `README.md`, `docs/architecture.md`, `docs/roadmap.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
+
+---

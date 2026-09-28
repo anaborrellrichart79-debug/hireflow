@@ -19,7 +19,9 @@ const node = (tag, props = {}, children = []) => {
 // carga...), el bocadillo aparece igualmente pasado este tiempo.
 const BUBBLE_FALLBACK_MS = 3200;
 
-export const lostMascot = ({ homeHref }) => {
+// headingLevel: 2 dentro de la app (el <h1> es el logo de la cabecera); 1 en
+// la página estática 404.html, que no tiene otro encabezado principal.
+export const lostMascot = ({ homeHref, headingLevel = 2 }) => {
     const bubble = node("p", { class: "lost-bubble", text: t("notFound.bubble") });
     const mascot = node("img", { class: "lost-mascot", src: "assets/mascota-soporte.svg", alt: "" });
 
@@ -41,7 +43,7 @@ export const lostMascot = ({ homeHref }) => {
     return node("section", { class: "lost", "aria-labelledby": "lost-title" }, [
         node("div", { class: "lost-stage" }, [bubble, mascot]),
         node("p", { class: "lost-code", "aria-hidden": "true", text: "404" }),
-        node("h2", { id: "lost-title", class: "lost-title", text: t("notFound.title") }),
+        node(`h${headingLevel}`, { id: "lost-title", class: "lost-title", text: t("notFound.title") }),
         node("p", { class: "lost-text", text: t("notFound.text") }),
         node("a", { class: "lost-home", href: homeHref, text: t("notFound.home") })
     ]);

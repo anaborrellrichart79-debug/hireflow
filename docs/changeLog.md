@@ -83,6 +83,11 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Añadido — Pruebas automáticas e integración continua (entrada 040)
+- 66 pruebas con Playwright Test en `tests/`: API (seguridad de propiedad y roles, CV, consentimientos, idiomas, login y límite de intentos) e interfaz (CV, consentimientos, Política de Privacidad, 404, idiomas), con axe-core y sin errores de consola. `npm test` arranca la app y las ejecuta
+- GitHub Actions (`.github/workflows/tests.yml`): en cada push y pull request a `main` crea una MySQL limpia solo con `schema.sql` y los `seed` y pasa todas las pruebas
+- Corregido: la página `404.html` independiente no tenía ningún `<h1>` (el título era un `<h2>`, pensado para ir dentro de la app)
+
 ## Documentación
 - `docs/architecture.md`: cómo encajan las piezas (diagramas de componentes, recorrido de una petición y modelo de datos en Mermaid), capas del backend, seguridad, idiomas, publicación, pruebas y convenciones
 - `docs/roadmap.md`: pendientes priorizados (antes de publicar en Google Play, cuenta y seguridad, calidad, funcionalidad, asistente, interfaz), cada uno con su origen en la documentación
@@ -122,7 +127,7 @@ Formato basado en Keep a Changelog.
 - `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
 - `backend/database/migrations/034_applications_consent_updated_at.sql` para bases existentes (`applications.consent_updated_at`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 038.
+Detalle en `docs/decisions.md`, entradas 018 a 040.
 
 ---
 

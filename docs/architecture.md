@@ -158,9 +158,22 @@ erDiagram
 
 ## 6. Pruebas
 
-- **API**: colección de Postman (`postman/`) y pruebas con `curl`/scripts contra el servidor real, con dos usuarios por rol para comprobar los límites de propiedad.
-- **Interfaz**: Playwright (Chromium) contra el servidor real, en escritorio, tablet y móvil (320 px), en los 4 idiomas, con axe-core para accesibilidad y comprobando que no haya errores de consola.
-- Estas pruebas se ejecutan en cada cambio y su resultado queda descrito en la entrada correspondiente de `decisions.md`, pero **los scripts no están en el repositorio ni hay integración continua**: es el primer punto técnico del `roadmap.md`.
+Pruebas automáticas con **Playwright Test** en `tests/` (entrada 040), contra el servidor real y una MySQL real:
+
+```
+tests/
+  helpers.js     usuarios de prueba que se borran solos, axe-core, paquete de Pages, servidor aparte
+  api/           seguridad (propiedad y roles), CV, consentimientos, idiomas, login y límite de intentos
+  e2e/           CV, consentimientos, Política de Privacidad, 404, idiomas (navegador + accesibilidad)
+```
+
+- `npm test` arranca la app si no está en marcha y ejecuta todo (`npm run test:api`, `npm run test:e2e` por separado).
+- Cada archivo crea sus propios usuarios (`pw_…@test.local`) y los borra al terminar.
+- **Accesibilidad**: axe-core (WCAG 2.1 A/AA) en cada pantalla y diálogo probados. **Consola**: cualquier error de JavaScript o de consola hace fallar la prueba.
+- **GitHub Pages**: el paquete se genera con el mismo paso del workflow de publicación y se sirve como lo haría Pages.
+- **Límite de intentos de login**: se prueba contra una instancia aparte del servidor, para no bloquear el login del resto de pruebas.
+- **Integración continua** (`.github/workflows/tests.yml`): en cada push y pull request a `main`, crea una MySQL limpia solo con `schema.sql` y los `seed`, y pasa todas las pruebas. Así también se comprueba que una instalación desde cero funciona.
+- La colección de Postman (`postman/`) sigue sirviendo para probar la API a mano.
 
 ---
 

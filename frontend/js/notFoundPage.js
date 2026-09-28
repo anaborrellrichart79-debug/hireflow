@@ -10,4 +10,4 @@ document.title = `${t("notFound.title")} · HireFlow`;
 const root = document.getElementById("lost-root");
 root.innerHTML = "";
 // "./" respeta el <base>: la app en local, la Política de Privacidad en Pages
-root.append(lostMascot({ homeHref: "./" }));
+root.append(lostMascot({ homeHref: "./", headingLevel: 1 }));

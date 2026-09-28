@@ -7,3 +7,7 @@ node_modules/
 # se quedan en local, no en el repo. Ver docs/decisions.md, entrada 029.
 *.vsix
 *.ai
+
+# Resultados de las pruebas (Playwright)
+test-results/
+playwright-report/

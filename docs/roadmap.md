@@ -40,8 +40,8 @@ Prioridades: 🔴 bloquea publicar la app · 🟠 importante · 🟢 mejora.
 
 | | Tarea | Detalle | Origen |
 |---|---|---|---|
-| 🟠 | **Pruebas automáticas en el repositorio** | Las pruebas de API (scripts) y de interfaz (Playwright + axe-core) se ejecutan en cada cambio pero no están guardadas en el repo | `architecture.md`, sección 6 |
-| 🟠 | **Integración continua** (GitHub Actions) | Ejecutar esas pruebas en cada push, con una MySQL de prueba | — |
+| ✅ | ~~Pruebas automáticas en el repositorio e integración continua~~ | Hecho: `tests/` + `.github/workflows/tests.yml` | Entrada 040 |
+| 🟢 | **Ampliar las pruebas** a las pantallas anteriores al CV (ofertas, calendario, Kanban, panel de la empresa, asistente) | Hoy cubren la seguridad de la API y todo lo hecho desde la entrada 033 | Entrada 040 |
 | 🟢 | Actualizar las acciones del workflow de Pages cuando salgan versiones para Node 24 | GitHub avisa de que Node 20 está obsoleto | Workflow `privacy-page.yml` |
 | 🟢 | Datos de demo con fechas escalonadas | Todas las ofertas de demo salen como "Publicada hoy" | Entrada 030 |
 
@@ -94,6 +94,7 @@ Prioridades: 🔴 bloquea publicar la app · 🟠 importante · 🟢 mejora.
 |---|---|---|---|
 | 🟢 | Modo oscuro | No existe; habría que revalidar el contraste de todos los colores | Entrada 032 |
 | 🟢 | Mascota que esquive el contenido de verdad | Hoy se mueve entre posiciones fijas del borde | Entrada 014 |
+| 🟢 | **Orden de encabezados en el Kanban** | Las columnas son `<h3>` sin `<h2>` antes; axe-core lo marca como buena práctica (no es WCAG) | Entrada 040 |
 
 ---
 
