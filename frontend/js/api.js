@@ -1,3 +1,5 @@
+import { getLang, t } from "./i18n.js";
+
 const TOKEN_KEY = "hireflow_token";
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
@@ -71,7 +73,9 @@ export class ApiError extends Error {
 }
 
 export const apiFetch = async (path, { method = "GET", body } = {}) => {
-    const headers = { "Content-Type": "application/json" };
+    // Accept-Language: la API responde sus mensajes (errores, validaciones,
+    // confirmaciones) en el idioma de la app. Ver docs/decisions.md, entrada 038.
+    const headers = { "Content-Type": "application/json", "Accept-Language": getLang() };
     const token = getToken();
     if (token) {
         headers.Authorization = `Bearer ${token}`;
@@ -97,7 +101,7 @@ export const apiFetch = async (path, { method = "GET", body } = {}) => {
     }
 
     if (!response.ok) {
-        throw new ApiError(data?.message || "Error de red", response.status, data?.errors);
+        throw new ApiError(data?.message || t("common.networkError"), response.status, data?.errors);
     }
 
     return data;

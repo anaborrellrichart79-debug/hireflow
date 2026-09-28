@@ -7,7 +7,6 @@ import {
 } from "../models/calendarEvent.js";
 import { getApplicationById } from "../models/application.js";
 
-const INVALID_RELATED_APPLICATION_MESSAGE = "La postulación indicada (related_application) no existe o no te pertenece";
 
 // related_application es una FK opcional hacia applications, que ya tiene su
 // propio dueño (user_id). Se valida aquí, reutilizando getApplicationById
@@ -24,7 +23,7 @@ const isRelatedApplicationOwnedByUser = async (relatedApplicationId, userId) => 
 
 export const createNewCalendarEvent = async (req, res) => {
     if (!(await isRelatedApplicationOwnedByUser(req.body.related_application, req.user.id))) {
-        return res.status(400).json({ message: INVALID_RELATED_APPLICATION_MESSAGE });
+        return res.status(400).json({ message: req.t("calendar.invalidRelated") });
     }
 
     const event = await createCalendarEvent(req.body, req.user.id);
@@ -40,7 +39,7 @@ export const getCalendarEvent = async (req, res) => {
     const event = await getCalendarEventById(req.params.id, req.user.id);
 
     if (!event) {
-        return res.status(404).json({ message: "Evento no encontrado" });
+        return res.status(404).json({ message: req.t("calendar.notFound") });
     }
 
     res.status(200).json(event);
@@ -48,28 +47,28 @@ export const getCalendarEvent = async (req, res) => {
 
 export const updateExistingCalendarEvent = async (req, res) => {
     if (!(await isRelatedApplicationOwnedByUser(req.body.related_application, req.user.id))) {
-        return res.status(400).json({ message: INVALID_RELATED_APPLICATION_MESSAGE });
+        return res.status(400).json({ message: req.t("calendar.invalidRelated") });
     }
 
     const result = await updateCalendarEvent(req.params.id, req.user.id, req.body);
 
     if (!result) {
-        return res.status(400).json({ message: "Ningún campo válido para actualizar" });
+        return res.status(400).json({ message: req.t("common.noValidFields") });
     }
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Evento no encontrado" });
+        return res.status(404).json({ message: req.t("calendar.notFound") });
     }
 
-    res.status(200).json({ message: "Evento actualizado correctamente" });
+    res.status(200).json({ message: req.t("calendar.updated") });
 };
 
 export const removeCalendarEvent = async (req, res) => {
     const result = await deleteCalendarEvent(req.params.id, req.user.id);
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Evento no encontrado" });
+        return res.status(404).json({ message: req.t("calendar.notFound") });
     }
 
-    res.status(200).json({ message: "Evento eliminado correctamente" });
+    res.status(200).json({ message: req.t("calendar.deleted") });
 };

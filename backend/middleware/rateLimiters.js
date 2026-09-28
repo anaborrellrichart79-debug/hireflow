@@ -11,5 +11,6 @@ export const loginLimiter = rateLimit({
     skipSuccessfulRequests: true,
     standardHeaders: "draft-8",
     legacyHeaders: false,
-    message: { message: "Demasiados intentos de inicio de sesión. Vuelve a intentarlo en unos minutos." }
+    // Función y no objeto fijo: el mensaje sale en el idioma de cada petición
+    message: (req) => ({ message: req.t("auth.tooManyAttempts") })
 });

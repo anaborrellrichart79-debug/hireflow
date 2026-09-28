@@ -20,6 +20,7 @@ const dictionaries = {
         "notFound.text": "La página que buscas no existe o se ha movido.",
         "notFound.home": "Volver al inicio",
         "common.loadError": "Error al cargar la pantalla:",
+        "common.networkError": "No se pudo conectar con el servidor",
         "common.dash": "—",
 
         "nav.home": "Inicio",
@@ -301,6 +302,7 @@ const dictionaries = {
         "notFound.text": "The page you're looking for doesn't exist or has moved.",
         "notFound.home": "Back to home",
         "common.loadError": "Error loading the screen:",
+        "common.networkError": "Couldn't connect to the server",
         "common.dash": "—",
 
         "nav.home": "Home",
@@ -582,6 +584,7 @@ const dictionaries = {
         "notFound.text": "La page que vous cherchez n'existe pas ou a été déplacée.",
         "notFound.home": "Retour à l'accueil",
         "common.loadError": "Erreur lors du chargement de la page :",
+        "common.networkError": "Impossible de se connecter au serveur",
         "common.dash": "—",
 
         "nav.home": "Accueil",
@@ -863,6 +866,7 @@ const dictionaries = {
         "notFound.text": "La pagina che cerchi non esiste o è stata spostata.",
         "notFound.home": "Torna all'inizio",
         "common.loadError": "Errore nel caricamento della pagina:",
+        "common.networkError": "Impossibile connettersi al server",
         "common.dash": "—",
 
         "nav.home": "Home",

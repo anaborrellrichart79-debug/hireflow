@@ -10,6 +10,7 @@ import interviewRouter from "./routes/interviewRoutes.js";
 import calendarRouter from "./routes/calendarRoutes.js";
 import aiRouter from "./routes/aiRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import { langMiddleware } from "./i18n/index.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -43,6 +44,9 @@ app.use(helmet({
     }
 }));
 
+// Idioma de la respuesta (Accept-Language) antes que nada más: así hasta un
+// JSON mal formado recibe el error traducido. Ver docs/decisions.md, entrada 038.
+app.use(langMiddleware);
 app.use(express.json());
 
 // El frontend se sirve desde el mismo servidor Express (mismo origen que

@@ -188,7 +188,7 @@ Estado general
 **Limitación conocida:** no hace colisión real contra los elementos del DOM de cada pantalla (sería necesario remedir contenido dinámico constantemente); se apoya en posiciones fijas alejadas de la columna central de contenido, lo que funciona bien en escritorio/tablet y razonablemente en móvil. Ver `docs/decisions.md`, entrada 014.
 ---
 ## Internacionalización (i18n)
-🟢 Español (por defecto), inglés, francés e italiano. Selector de idioma fijo en la topbar, persistido en `localStorage`, redibuja la pantalla actual al cambiar sin perder la navegación. Solo interfaz — los mensajes que devuelve la API se quedan en español (decisión consultada con el usuario). Las opciones de tipo de contrato/jornada/salario del formulario de ofertas guardan un código estable independiente del idioma, para que el mismo valor se muestre traducido sin importar en qué idioma se creó la oferta.
+🟢 Español (por defecto), inglés, francés e italiano. Selector de idioma fijo en la topbar, persistido en `localStorage`, redibuja la pantalla actual al cambiar sin perder la navegación. Los mensajes que devuelve la API también salen en el idioma de la app desde la entrada 038 (antes se quedaban en español). Las opciones de tipo de contrato/jornada/salario del formulario de ofertas guardan un código estable independiente del idioma, para que el mismo valor se muestre traducido sin importar en qué idioma se creó la oferta.
 
 Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
 ---
@@ -252,8 +252,9 @@ Implementar:
 ✔ Retirar o volver a dar el consentimiento (contacto/CV) de una postulación ya enviada — completo (entrada 034)
 ✔ Política de Privacidad en una URL pública (GitHub Pages) para Google Play — completo (entrada 035)
 ✔ Política de Privacidad en francés e italiano (ya está en los 4 idiomas de la app) — completo (entrada 037)
+✔ Mensajes de la API (errores, validaciones, confirmaciones) en los 4 idiomas según `Accept-Language` — completo (entrada 038)
 
-**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), que un profesional revise la Política de Privacidad (ya publicada en https://anaborrellrichart79-debug.github.io/hireflow/, entrada 035), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), que un profesional revise la Política de Privacidad (ya publicada en https://anaborrellrichart79-debug.github.io/hireflow/, entrada 035), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:

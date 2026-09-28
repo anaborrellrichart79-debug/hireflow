@@ -1,7 +1,9 @@
+import { translate, DEFAULT_LANG } from "../i18n/index.js";
+
 // Debe registrarse en server.js DESPUÉS de todas las rutas.
 
 export const notFound = (req, res, next) => {
-    const error = new Error(`Ruta no encontrada: ${req.method} ${req.originalUrl}`);
+    const error = new Error(translate(req.lang ?? DEFAULT_LANG, "errors.routeNotFound", { method: req.method, url: req.originalUrl }));
     error.status = 404;
     next(error);
 };
@@ -17,12 +19,21 @@ export const notFound = (req, res, next) => {
 export const errorHandler = (err, req, res, next) => {
     console.error(err);
 
+    // Por si el error ocurre antes de langMiddleware
+    const t = (key) => translate(req.lang ?? DEFAULT_LANG, key);
+
     if (err.code === "ER_DUP_ENTRY") {
-        return res.status(400).json({ message: "El valor ya existe (debe ser único)" });
+        return res.status(400).json({ message: t("errors.duplicate") });
     }
 
     if (err.code === "ER_NO_REFERENCED_ROW_2" || err.code === "ER_NO_REFERENCED_ROW") {
-        return res.status(400).json({ message: "Referencia inválida: uno de los recursos relacionados no existe" });
+        return res.status(400).json({ message: t("errors.invalidReference") });
+    }
+
+    // express.json() con un cuerpo mal formado: su mensaje es técnico y en
+    // inglés ("Unexpected token..."), se sustituye por uno traducido
+    if (err.type === "entity.parse.failed") {
+        return res.status(400).json({ message: t("errors.invalidJson") });
     }
 
     const status = err.status || err.statusCode;
@@ -36,5 +47,5 @@ export const errorHandler = (err, req, res, next) => {
         return res.status(status).json({ message: err.message });
     }
 
-    res.status(500).json({ message: "Error interno del servidor" });
+    res.status(500).json({ message: t("errors.internal") });
 };

@@ -16,7 +16,7 @@ import {
 } from "../models/aiAssistant.js";
 
 export const cvReview = async (req, res) => {
-    const { industry, company_type, lang } = req.body;
+    const { industry, company_type, lang = req.lang } = req.body;
     const guides = await findResumeGuides({ industry, company_type, lang });
 
     res.status(200).json({
@@ -27,21 +27,21 @@ export const cvReview = async (req, res) => {
 };
 
 export const interviewQuestions = async (req, res) => {
-    const { category, difficulty, limit = 10, lang } = req.body;
+    const { category, difficulty, limit = 10, lang = req.lang } = req.body;
     const questions = await findInterviewQuestions({ category, difficulty, limit, lang });
 
     res.status(200).json({ count: questions.length, questions });
 };
 
 export const interviewFeedback = async (req, res) => {
-    const { skills, lang } = req.body;
+    const { skills, lang = req.lang } = req.body;
     const suggestions = await findSkillImprovementBySkillNames(skills, lang);
 
     res.status(200).json({ requested_skills: skills, suggestions });
 };
 
 export const jobMatch = async (req, res) => {
-    const { job_offer_id, lang } = req.body;
+    const { job_offer_id, lang = req.lang } = req.body;
     let { skills } = req.body;
     let skillsSource = "body";
 
@@ -53,14 +53,14 @@ export const jobMatch = async (req, res) => {
         skillsSource = "cv";
 
         if (!skills) {
-            return res.status(400).json({ message: "Envía skills en el body o guárdalas antes en tu CV" });
+            return res.status(400).json({ message: req.t("ai.skillsMissing") });
         }
     }
 
     const jobOffer = await getJobOfferById(job_offer_id);
 
     if (!jobOffer) {
-        return res.status(404).json({ message: "Oferta no encontrada" });
+        return res.status(404).json({ message: req.t("jobs.notFound") });
     }
 
     const { matched, missing, score } = matchJobSkills(jobOffer.skills_required, skills);
@@ -121,7 +121,8 @@ const MESSAGES = {
 // vez de un error -- ver docs/decisions.md, entrada 014.
 export const askAssistant = async (req, res) => {
     const { message } = req.body;
-    const lang = req.body.lang || "es";
+    // Sin "lang" en el body, el idioma de la petición (Accept-Language, entrada 038)
+    const lang = req.body.lang || req.lang;
     const texts = MESSAGES[lang];
     const classification = classifyIntent(message);
 

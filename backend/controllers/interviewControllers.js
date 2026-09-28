@@ -9,7 +9,6 @@ import {
     deleteInterviewForRecruiter
 } from "../models/interview.js";
 
-const INVALID_INTERVIEW_TYPE_MESSAGE = "El tipo de entrevista indicado (interview_type_id) no existe";
 
 // Quién puede agendar una entrevista y sobre qué postulación depende del rol:
 // el candidato solo sobre las suyas (createInterview, ownership vía user_id),
@@ -22,13 +21,13 @@ export const createNewInterview = async (req, res) => {
             : await createInterview(req.body, req.user.id);
 
         if (!interview) {
-            return res.status(404).json({ message: "Postulación no encontrada" });
+            return res.status(404).json({ message: req.t("applications.notFound") });
         }
 
         res.status(201).json(interview);
     } catch (error) {
         if (error.code === "ER_NO_REFERENCED_ROW_2") {
-            return res.status(400).json({ message: INVALID_INTERVIEW_TYPE_MESSAGE });
+            return res.status(400).json({ message: req.t("interviews.invalidType") });
         }
         throw error;
     }
@@ -45,7 +44,7 @@ export const getInterview = async (req, res) => {
     const interview = await getInterviewById(req.params.id, req.user.id);
 
     if (!interview) {
-        return res.status(404).json({ message: "Entrevista no encontrada" });
+        return res.status(404).json({ message: req.t("interviews.notFound") });
     }
 
     res.status(200).json(interview);
@@ -56,17 +55,17 @@ export const updateExistingInterview = async (req, res) => {
         const result = await updateInterview(req.params.id, req.user.id, req.body);
 
         if (!result) {
-            return res.status(400).json({ message: "Ningún campo válido para actualizar" });
+            return res.status(400).json({ message: req.t("common.noValidFields") });
         }
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Entrevista no encontrada" });
+            return res.status(404).json({ message: req.t("interviews.notFound") });
         }
 
-        res.status(200).json({ message: "Entrevista actualizada correctamente" });
+        res.status(200).json({ message: req.t("interviews.updated") });
     } catch (error) {
         if (error.code === "ER_NO_REFERENCED_ROW_2") {
-            return res.status(400).json({ message: INVALID_INTERVIEW_TYPE_MESSAGE });
+            return res.status(400).json({ message: req.t("interviews.invalidType") });
         }
         throw error;
     }
@@ -78,8 +77,8 @@ export const removeInterview = async (req, res) => {
         : await deleteInterview(req.params.id, req.user.id);
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Entrevista no encontrada" });
+        return res.status(404).json({ message: req.t("interviews.notFound") });
     }
 
-    res.status(200).json({ message: "Entrevista eliminada correctamente" });
+    res.status(200).json({ message: req.t("interviews.deleted") });
 };

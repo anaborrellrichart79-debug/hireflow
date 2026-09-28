@@ -4,7 +4,7 @@ export const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        return res.status(401).json({ message: "No se proporcionó un token de autenticación" });
+        return res.status(401).json({ message: req.t("auth.noToken") });
     }
 
     const token = authHeader.split(" ")[1];
@@ -17,9 +17,9 @@ export const verifyToken = (req, res, next) => {
         // El frontend trata cualquier 401 con token como sesión caducada
         // (ver docs/decisions.md, entrada 025).
         if (error.name === "TokenExpiredError") {
-            return res.status(401).json({ message: "La sesión ha caducado. Vuelve a iniciar sesión." });
+            return res.status(401).json({ message: req.t("auth.sessionExpired") });
         }
-        return res.status(401).json({ message: "Token de autenticación no válido" });
+        return res.status(401).json({ message: req.t("auth.invalidToken") });
     }
 
     // Fuera del try: un error de un middleware o controller posterior no debe

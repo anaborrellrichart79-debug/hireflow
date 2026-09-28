@@ -18,6 +18,17 @@ Duración del token: 1 hora (`expiresIn: "1h"` en la generación del JWT). Pasad
 
 ---
 
+# Idioma de los mensajes
+
+La API responde sus mensajes (errores, validaciones y confirmaciones) en el idioma que pida la cabecera estándar `Accept-Language`: `es`, `en`, `fr` o `it` (ver `docs/decisions.md`, entrada 038).
+- Sin cabecera, o con un idioma que no está disponible: **español**, como siempre. Los ejemplos de este documento están en español.
+- Se respeta el orden de preferencia: `Accept-Language: de-DE,de;q=0.9,it;q=0.5` → italiano.
+- El frontend envía siempre el idioma elegido en la app.
+- Solo se traduce el texto de `message`. Los nombres de campo de `errors[].field`, los valores permitidos (`applied`, `interview`...) y el resto del JSON no cambian con el idioma.
+- Los endpoints `/ai/*` ya aceptaban `lang` en el body (entrada 028); si no se envía, usan el idioma de `Accept-Language`.
+
+---
+
 # Errores
 
 Todas las respuestas de error tienen al menos `{"message": "..."}`. Manejo centralizado (`middleware/errorMiddleware.js`, ver `docs/decisions.md`, entrada 007):
@@ -43,12 +54,12 @@ Todos los endpoints con body (`POST`/`PUT`) validan la entrada antes de llegar a
 {
     "message": "Datos de entrada no válidos",
     "errors": [
-        { "field": "email", "message": "email no es válido" },
-        { "field": "password", "message": "password debe tener al menos 6 caracteres" }
+        { "field": "email", "message": "Email: no es un email válido" },
+        { "field": "password", "message": "La contraseña debe tener entre 8 y 72 caracteres" }
     ]
 }
 ```
-Las reglas de cada campo (obligatorio/opcional, tipo, longitud máxima, valores permitidos) están documentadas en cada endpoint más abajo.
+Las reglas de cada campo (obligatorio/opcional, tipo, longitud máxima, valores permitidos) están documentadas en cada endpoint más abajo. `field` es siempre el nombre técnico del campo del body; `message` usa su nombre visible en el idioma de la petición ("Nombre: este campo es obligatorio", "Name: this field is required"...).
 
 ---
 

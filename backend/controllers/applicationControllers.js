@@ -9,7 +9,6 @@ import { createApplication,
     updateApplicationConsent } from "../models/application.js";
 import { APPLICATION_STATUS } from "../constants/applicationStatus.js";
 
-const ALREADY_APPLIED_MESSAGE = "Ya te has postulado a esta oferta";
 
 export const createNewApplication = async (req, res) => {
     // Postularse a una oferta de HireFlow es postularse de verdad: la empresa
@@ -32,7 +31,7 @@ export const createNewApplication = async (req, res) => {
         // candidato a esta oferta (doble clic, dos pestañas...). Ver
         // docs/decisions.md, entrada 027.
         if (error.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({ message: ALREADY_APPLIED_MESSAGE });
+            return res.status(409).json({ message: req.t("applications.alreadyApplied") });
         }
         throw error;
     }
@@ -60,24 +59,24 @@ export const updateApplicationStatusAsRecruiter = async (req, res) => {
     const result = await updateApplicationStatusByRecruiter(req.params.id, req.user.id, req.body.status);
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Postulación no encontrada" });
+        return res.status(404).json({ message: req.t("applications.notFound") });
     }
 
-    res.status(200).json({ message: "Estado actualizado. El candidato lo verá reflejado en sus postulaciones." });
+    res.status(200).json({ message: req.t("applications.statusUpdated") });
 };
 
 // PUT /applications/mark-seen -- el candidato confirma que ha visto los
 // cambios de estado pendientes (se llama al abrir la pantalla de postulaciones).
 export const markApplicationsSeen = async (req, res) => {
     await markApplicationStatusUpdatesSeen(req.user.id);
-    res.status(200).json({ message: "Actualizaciones marcadas como vistas" });
+    res.status(200).json({ message: req.t("applications.seenMarked") });
 };
 
 export const getApplication = async (req, res) => {
     const application = await getApplicationById(req.params.id, req.user.id);
 
     if (!application) {
-        return res.status(404).json({ message: "Postulación no encontrada" });
+        return res.status(404).json({ message: req.t("applications.notFound") });
     }
 
     res.status(200).json(application);
@@ -89,7 +88,7 @@ export const updateExistingApplication = async (req, res) => {
     const result = await updateApplication(req.params.id, req.user.id, { status, notes });
 
     if (!result) {
-        return res.status(400).json({ message: "Ningún campo válido para actualizar" });
+        return res.status(400).json({ message: req.t("common.noValidFields") });
     }
 
     if (result.affectedRows === 0) {
@@ -97,12 +96,12 @@ export const updateExistingApplication = async (req, res) => {
         // estado de una postulación a una oferta de HireFlow (lo gestiona la empresa).
         const application = await getApplicationById(req.params.id, req.user.id);
         if (!application) {
-            return res.status(404).json({ message: "Postulación no encontrada" });
+            return res.status(404).json({ message: req.t("applications.notFound") });
         }
-        return res.status(403).json({ message: "El estado de una postulación a una oferta lo gestiona la empresa. Puedes retirar la postulación si ya no te interesa." });
+        return res.status(403).json({ message: req.t("applications.managedByCompany") });
     }
 
-    res.status(200).json({ message: "Postulación actualizada correctamente" });
+    res.status(200).json({ message: req.t("applications.updated") });
 };
 
 // PUT /applications/:id/consent -- el candidato retira o vuelve a dar su
@@ -116,11 +115,11 @@ export const updateConsent = async (req, res) => {
     });
 
     if (!result) {
-        return res.status(400).json({ message: "Envía consent_contact y/o consent_cv" });
+        return res.status(400).json({ message: req.t("applications.consentMissing") });
     }
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Postulación no encontrada" });
+        return res.status(404).json({ message: req.t("applications.notFound") });
     }
 
     const application = await getApplicationById(req.params.id, req.user.id);
@@ -137,8 +136,8 @@ export const removeApplication = async (req, res) => {
     const result = await deleteApplication(req.params.id, req.user.id);
 
     if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Postulación no encontrada" });
+        return res.status(404).json({ message: req.t("applications.notFound") });
     }
 
-    res.status(200).json({ message: "Postulación eliminada correctamente" });
+    res.status(200).json({ message: req.t("applications.deleted") });
 };
