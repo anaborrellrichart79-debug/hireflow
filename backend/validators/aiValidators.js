@@ -29,7 +29,8 @@ export const interviewFeedbackValidators = [
 
 export const jobMatchValidators = [
     body("job_offer_id").notEmpty().withMessage("job_offer_id es obligatorio").isInt({ min: 1 }).withMessage("job_offer_id debe ser un entero válido").toInt(),
-    body("skills").trim().notEmpty().withMessage("skills es obligatorio").isLength({ max: 2000 }),
+    // Opcional: si no se envía, el controller usa las skills del CV guardado (GET /users/me/cv)
+    body("skills").optional({ nullable: true }).isString().withMessage("skills debe ser texto").trim().notEmpty().withMessage("skills no puede estar vacío").isLength({ max: 2000 }),
     langValidator
 ];
 

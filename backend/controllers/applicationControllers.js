@@ -23,6 +23,7 @@ export const createNewApplication = async (req, res) => {
             status: req.body.job_offer_id ? APPLICATION_STATUS.APPLIED : APPLICATION_STATUS.WISHLIST,
             notes: req.body.notes,
             consent_share_contact: req.body.consent === true,
+            consent_share_cv: req.body.consent_cv === true,
             signature_name: req.body.signature
         });
     } catch (error) {

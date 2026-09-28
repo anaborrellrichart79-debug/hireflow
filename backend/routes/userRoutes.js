@@ -1,12 +1,13 @@
 // routes/userRoutes.js
 
 import express from "express";
-import { createNewUser, loginUser, getProfile, updateProfile, deleteProfile } from "../controllers/userControllers.js";
+import { createNewUser, loginUser, getProfile, updateProfile, deleteProfile, getCv, saveCv, deleteCv } from "../controllers/userControllers.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
+import { requireRole } from "../middleware/roleMiddleware.js";
 import { loginLimiter } from "../middleware/rateLimiters.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { createUserValidators, loginValidators, updateProfileValidators } from "../validators/userValidators.js";
+import { createUserValidators, loginValidators, updateProfileValidators, saveCvValidators } from "../validators/userValidators.js";
 
 const router = express.Router();
 
@@ -18,5 +19,10 @@ router.post("/login", loginLimiter, loginValidators, validate, asyncHandler(logi
 router.get("/me", verifyToken, asyncHandler(getProfile));
 router.put("/me", verifyToken, updateProfileValidators, validate, asyncHandler(updateProfile));
 router.delete("/me", verifyToken, asyncHandler(deleteProfile));
+
+// CV extendido (tabla user_profiles) -- solo candidate, ver docs/decisions.md, entrada 033
+router.get("/me/cv", verifyToken, requireRole(["candidate"]), asyncHandler(getCv));
+router.put("/me/cv", verifyToken, requireRole(["candidate"]), saveCvValidators, validate, asyncHandler(saveCv));
+router.delete("/me/cv", verifyToken, requireRole(["candidate"]), asyncHandler(deleteCv));
 
 export default router;

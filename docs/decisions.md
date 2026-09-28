@@ -1003,3 +1003,50 @@ El texto no lleva nunca el color de los datos (va en los tonos de texto de la ap
 - **axe-core:** 0 problemas. Sin errores de consola.
 
 **Archivos afectados:** `frontend/js/components/recruiterDashboard.js` (nuevo), `frontend/js/screens/home.js`, `frontend/style/components.css`, `frontend/js/i18n.js`, `docs/changeLog.md`.
+
+---
+
+## 033 — CV extendido del candidato (`user_profiles`): `/users/me/cv`, upsert atómico y uso en job-match
+**Fecha:** Septiembre 2026
+
+**Problema:**
+La tabla `user_profiles` existía en el schema desde el principio, pero no tenía modelo, endpoints ni pantalla. Era lo único que faltaba del frontend (la pantalla Mi perfil lo avisaba con una nota) y obligaba a `POST /ai/job-match` a pedir las `skills` en cada petición (entrada 010).
+
+**Decisión 1 — rutas `/users/me/cv`, no `/user-profiles/:id`:**
+Mismo criterio que `/users/me` (entrada 002): el CV se identifica siempre por el `user_id` del token, así que no hay ningún id en la URL que se pueda manipular (sin superficie IDOR). Se nombra `cv` y no `profile` porque en la API ya existe "perfil propio" (`/users/me`, datos básicos de `users`), y así no se confunden los dos recursos. Solo rol `candidate` (`requireRole`): el recruiter no tiene CV.
+
+**Decisión 2 — `PUT` como upsert, con `UNIQUE(user_id)`:**
+El schema documentaba la relación como 1:1, pero nada en la BD lo impedía. Se añade `UNIQUE(user_id)` y `PUT /users/me/cv` usa `INSERT ... ON DUPLICATE KEY UPDATE`: crea el CV la primera vez y lo actualiza las siguientes, en una sola sentencia atómica (dos peticiones simultáneas no pueden crear dos filas). Así el frontend no necesita distinguir entre "crear" y "editar" (no hay `POST`). Se usa la sintaxis `VALUES(col)`, que funciona en MySQL y en MariaDB, en vez del alias de fila de MySQL 8.0.19+. En MySQL 8.0.20+ está obsoleta pero sigue funcionando. Mismo patrón de lista blanca de columnas que `updateUser`/`updateCalendarEvent`.
+**Migración de la BD real:** antes del `ALTER TABLE user_profiles ADD CONSTRAINT uq_user_profile_user UNIQUE (user_id)` hay que comprobar que no existen filas duplicadas por `user_id`. No debería haberlas, porque hasta ahora no había código que escribiera en la tabla.
+
+**Decisión 3 — `GET` sin CV devuelve 200 con los campos a `null`, no 404:**
+La primera versión devolvía 404, pero en las pruebas con Playwright el navegador registraba ese 404 como error de consola cada vez que un candidato nuevo abría Mi perfil. No tener CV todavía es el estado normal, no un error, y el proyecto mantiene el criterio de cero errores de consola, así que ahora responde 200 con `id: null` y los campos a `null`. `DELETE` sí devuelve 404 si no había CV, y borra solo el CV, no la cuenta (para eso sigue `DELETE /users/me`).
+
+**Decisión 4 — `job-match` y `/ai/ask` leen las skills del CV:**
+Se hace el cambio sin romper el contrato que ya preveía la entrada 010: en `POST /ai/job-match`, `skills` pasa a ser opcional; si no llega, se leen del CV; si tampoco hay, responde 400. En `POST /ai/ask` (intención `job_match`) había una debilidad real: la oferta se comparaba contra las palabras del propio mensaje ("¿encajo en la oferta de Backend Developer?"), que casi nunca contiene las skills del candidato. Ahora se usan las skills del CV si existen, y el mensaje como antes si no. Ambas respuestas incluyen `skills_source` y el chat lo muestra, para que el candidato sepa contra qué se ha comparado.
+
+**Decisión 5 — la empresa ve el CV solo con un consentimiento propio al postularse (decisión del usuario):**
+El usuario eligió que la empresa pueda ver el CV solo si el candidato da permiso con una casilla de consentimiento. Se implementa así:
+- En el modal de postulación (entrada 017) hay una segunda casilla, **opcional y desmarcada por defecto**: "Acepto que la empresa vea también mi CV". Es independiente del consentimiento de contacto, que sigue siendo obligatorio. El RGPD exige un consentimiento específico por finalidad, no uno que englobe varias, y compartir el CV no es necesario para postularse.
+- Nueva columna `applications.consent_share_cv`, por postulación: el candidato decide empresa a empresa.
+- `GET /applications/recruiter` hace `LEFT JOIN user_profiles` y devuelve los campos `cv_*` solo si `consent_share_cv = 1`, con un `CASE WHEN` en la propia SQL. Es el mismo criterio que con el email y el teléfono: no depende de que el frontend respete el flag.
+- No depende de `profile_visible`: ese flag no tenía ningún efecto real hasta ahora, y el consentimiento explícito por postulación es más específico.
+- La empresa ve el CV **actual** del candidato, no una copia del momento en que se postuló. Si el candidato lo edita o lo borra, la empresa ve el cambio. Así el candidato conserva el control sobre sus datos (si borra el CV, deja de verse).
+- La Política de Privacidad (es/en) y `docs/googlePlayDataSafety.md` se actualizan: antes decían que a la empresa "solo" se le compartían nombre, email y teléfono.
+
+**Verificación:** 34 comprobaciones de API contra el servidor real y la BD migrada (MySQL 8.0.44). Cubren permisos por rol, validaciones (incluida `resume_url` con `javascript:`), upsert parcial y vaciado de campos, 5 `PUT` simultáneos sobre un CV nuevo (misma fila, sin duplicados), aislamiento entre dos candidatos, `job-match` y `/ai/ask` con y sin CV, la empresa ve el CV solo con `consent_share_cv`, un segundo recruiter no ve nada, y tras borrar el CV la empresa deja de verlo. Además, 19 comprobaciones de interfaz con Playwright: guardar, recargar y borrar el CV, 320px sin desbordamiento, chat que indica "comparado con tu CV", diálogo de postulación con la casilla desmarcada por defecto, ficha de la empresa con el CV (saltos de línea respetados, enlace con `rel="noopener"`), recruiter sin sección de CV, traducción al inglés y cero errores de consola. Hallazgo de paso: el campo "Teléfono" (`type="tel"`) nunca había tenido estilo, porque el selector de `.hireflow-form` no incluía `tel` ni `url`. Corregido.
+
+**Integración con las entradas 018–032:** este trabajo se hizo en paralelo a esas entradas y se integró después con un rebase. Numerada originalmente como 018, pasa a ser la 033. Al integrar:
+- `GET /users` sigue eliminado (entrada 018 del remoto): el rebase no lo recupera.
+- "Eliminar CV" pasa del `confirm()` nativo a un diálogo propio (`openDialog`), igual que Retirar postulación (023) y Borrar oferta (030).
+- En la tarjeta de postulante del Kanban (031), el título del CV es `h5`, porque el nombre del candidato ya es `h4`.
+- axe-core (WCAG 2.1 A/AA) daba 1 problema de contraste en Postulantes con el CV desplegado: las etiquetas del CV (`#666`, 3,94:1) y la nota de firma (`.form-note` `#5f5f5f`, 4,38:1) sobre el beige de la tarjeta. Pasan a `#4f4f4f`, como en la entrada 030. Ahora da 0 problemas en Mi perfil, el diálogo de eliminar CV, el diálogo de postulación y Postulantes.
+- Los emails largos se salían de la tarjeta en la columna estrecha del Kanban (`overflow-wrap: anywhere`).
+- Migración en `backend/database/migrations/033_user_profiles_cv.sql`, aplicada a `hireflow` y `hireflow_demo`.
+- Repetidas las 34 comprobaciones de API y las 19 de interfaz sobre el código integrado (la postulación entra ahora como `applied`, entrada 023), sin fallos ni errores de consola.
+
+**Limitación conocida:** igual que el consentimiento de contacto (entrada 017), hoy no se puede retirar el consentimiento de una postulación ya enviada, salvo borrando la postulación o el CV. Queda pendiente un control para revocarlo por postulación.
+
+**Archivos afectados:** `backend/models/userProfile.js` (nuevo), `backend/controllers/userControllers.js`, `backend/validators/userValidators.js`, `backend/routes/userRoutes.js`, `backend/controllers/aiControllers.js`, `backend/validators/aiValidators.js`, `backend/models/application.js`, `backend/controllers/applicationControllers.js`, `backend/validators/applicationValidators.js`, `backend/database/schema.sql` (`UNIQUE` + `consent_share_cv`), `backend/database/migrations/033_user_profiles_cv.sql` (nuevo), `frontend/js/screens/profileForm.js`, `frontend/js/screens/ai.js`, `frontend/js/screens/jobs.js`, `frontend/js/screens/applicants.js`, `frontend/js/privacyPolicyContent.js`, `frontend/style/components.css` (`.applicant-cv*`), `frontend/js/i18n.js` (claves `profile.cv*`, `ai.matchSource*`, `jobs.cvConsentCheckboxLabel` y `applicants.cv*` en los 4 idiomas), `docs/api.md`, `docs/Database.md`, `docs/googlePlayDataSafety.md`.
+
+---

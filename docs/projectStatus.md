@@ -1,6 +1,6 @@
 # HireFlow Project Status
 Última actualización
-Agosto 2026
+Septiembre 2026
 ---
 # Backend
 ## Configuración
@@ -96,6 +96,17 @@ Estado
 ✔ Fix: `createApplication` ya no falla si se omiten `job_offer_id`/`notes` del body (ver `docs/decisions.md` entrada 006)
 ✔ Consentimiento + firma obligatorios al postularse (`consent_share_contact`, `signature_name`), vista de la empresa (`GET /applications/recruiter`, email/teléfono solo si hubo consentimiento), cambio de estado por la empresa (`PUT /applications/:id/status`) con aviso in-app al candidato (`status_seen_by_candidate`, `PUT /applications/mark-seen`) — ver `docs/decisions.md`, entrada 017
 ---
+## CV del candidato (user_profiles)
+Estado
+🟢 CRUD Completo
+✔ `GET/PUT/DELETE /users/me/cv` (solo `candidate`, siempre sobre el usuario del token)
+✔ `PUT` como upsert atómico sobre `UNIQUE(user_id)` (migrado en la BD real)
+✔ `POST /ai/job-match` y `POST /ai/ask` usan las skills del CV si existen
+✔ La empresa ve el CV en Postulantes solo si el candidato marcó la casilla opcional al postularse (`applications.consent_share_cv`, filtrado en la SQL)
+✔ Tests verificados (34 de API + 19 de interfaz con Playwright)
+
+Decisión de arquitectura: ver `docs/decisions.md`, entrada 033.
+---
 ## Interviews
 Estado
 🟢 CRUD Completo
@@ -130,7 +141,7 @@ Estado
 ✔ `POST /ai/cv-review` — recomendaciones de `ai_resume_guides` por industria (con fallback genérico)
 ✔ `POST /ai/interview-questions` — preguntas de `ai_interview_questions` filtradas y aleatorias
 ✔ `POST /ai/interview-feedback` — consejos de `ai_skill_improvement` por skill
-✔ `POST /ai/job-match` — compara `skills_required` de una oferta contra las skills del candidato (texto libre en el body, no lee `user_profiles` porque ese CRUD no existe aún)
+✔ `POST /ai/job-match` — compara `skills_required` de una oferta contra las skills del candidato (del body o, si no se envían, del CV guardado — entrada 033)
 ✔ Fix: `ai_resume_guides` y `ai_skill_improvement` estaban vacías en la BD real (mismo tipo de fallo que `interview_types`), pobladas correctamente
 ✔ `POST /ai/ask` — endpoint conversacional: clasifica la intención de un mensaje libre por palabras clave, pide aclaración si falta info, rechaza fuera de tema (ver `docs/decisions.md`, entrada 014)
 ✔ Catálogo ampliado: `ai_resume_guides` 7→12 filas, `ai_skill_improvement` 12→20 filas
@@ -153,7 +164,7 @@ Estado general
 🟢 Evolucionada respecto al mockup original (que la preveía como estado vacío puro) por petición del usuario tras probar la app: ahora incluye resumen (postulaciones/entrevistas o ofertas publicadas, según rol) y accesos rápidos a las demás pantallas. Ver `docs/decisions.md`, entrada 013.
 ---
 ## 2. Formulario (perfil candidate)
-🟢 — CV extendido (skills/experiencia) pendiente de `user_profiles`
+🟢 Perfil básico + sección "Mi CV" (sobre mí, habilidades, experiencia, formación, enlace a CV externo), con guardar y eliminar CV. Ver `docs/decisions.md`, entrada 033.
 ---
 ## 2. Formulario (oferta company)
 🟢 — adaptado a selector de empresa real + pills de selección única (ver decisión 011)
@@ -236,8 +247,9 @@ Implementar:
 ✔ Iconos SVG en el chat del Asistente IA (nueva conversación, adjuntar, enviar) — completo
 ✔ Responsive (tablet/móvil/móvil pequeño) — completo
 ✔ Flujo de contratación: postulantes visibles para la empresa, consentimiento + firma al postularse, entrevistas agendadas por la empresa, aviso in-app de cambio de estado, Política de Privacidad — completo
+✔ CV del candidato (`user_profiles`): CRUD, uso en job-match/Asistente IA y visible para la empresa con consentimiento opcional — completo
 
-**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: CRUD de `user_profiles`, traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), traducir la Política de Privacidad a fr/it (hoy solo es/en, ver entrada 017), alojar la Política de Privacidad en una URL pública (necesario para publicar en Google Play, ver `docs/googlePlayDataSafety.md`), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: revocar un consentimiento (contacto/CV) de una postulación ya enviada (ver `docs/decisions.md` entrada 033), traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), traducir la Política de Privacidad a fr/it (hoy solo es/en, ver entrada 017), alojar la Política de Privacidad en una URL pública (necesario para publicar en Google Play, ver `docs/googlePlayDataSafety.md`), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -254,9 +266,9 @@ Un usuario podrá:
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI conversacional, errores, validaciones)
 Frontend
-████████████████████ 98% (9 pantallas + login implementadas, probadas, responsive y en 4 idiomas -- Política de Privacidad solo es/en --, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada, flujo de contratación completo con Postulantes/consentimiento/entrevistas; queda pendiente CRUD de user_profiles/CV extendido)
+████████████████████ 100% (9 pantallas + login implementadas, probadas, responsive y en 4 idiomas -- Política de Privacidad solo es/en --, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada, flujo de contratación completo con Postulantes/consentimiento/entrevistas, CV del candidato)
 Base de datos
-██████████████░░░ 75%
+███████████████░░ 80%
 Documentación
 █████████████░░░░░░░ 65% (Frontend Design creado; siguen sin existir AI Instructions, Architecture, Roadmap y Sprint Plan — ver tabla de arriba)
 Proyecto completo

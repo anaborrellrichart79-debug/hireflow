@@ -188,6 +188,77 @@ Estado
 
 ---
 
+## CV propio (perfil extendido)
+GET /users/me/cv
+Respuesta
+200 OK
+{
+    "id": 3,
+    "user_id": 1,
+    "education": "Grado en Informática, UPV (2020)",
+    "work_experience": "2 años como desarrolladora backend en...",
+    "skills": "Node.js, MySQL, Docker",
+    "resume_url": "https://example.com/cv-ana.pdf",
+    "about": "Desarrolladora backend...",
+    "created_at": "...",
+    "updated_at": "..."
+}
+Si el candidato todavía no ha creado su CV, devuelve también 200, con `id` y todos los campos a `null` (no es un error, es el estado normal de un candidato nuevo).
+Errores
+403 — el usuario no es `candidate`
+Autenticación
+Requerida (verifyToken) + rol `candidate`. Siempre el CV del usuario del token, no admite `:id`.
+Estado
+🟢 Implementado
+
+---
+
+## Crear / actualizar CV propio
+PUT /users/me/cv
+Body (todos los campos opcionales, se guardan solo los enviados; `null` vacía un campo)
+{
+    "education": "Grado en Informática, UPV (2020)",
+    "work_experience": "2 años como desarrolladora backend en...",
+    "skills": "Node.js, MySQL, Docker",
+    "resume_url": "https://example.com/cv-ana.pdf",
+    "about": "Desarrolladora backend..."
+}
+Crea el CV si no existe y lo actualiza si ya existe (upsert atómico sobre `UNIQUE(user_id)`, ver `docs/decisions.md`, entrada 033).
+
+Validación
+`education`, `work_experience` y `about`: texto, máx. 5000 caracteres. `skills`: texto, máx. 2000 (mismo límite que `skills` en `/ai/job-match`). `resume_url`: URL `http`/`https` con protocolo, máx. 255.
+
+Respuesta
+200 OK — el CV completo tras guardar (mismo formato que `GET /users/me/cv`)
+Errores
+400 — validación (ver sección "Errores de validación")
+400 — ningún campo válido enviado
+403 — el usuario no es `candidate`
+Autenticación
+Requerida (verifyToken) + rol `candidate`.
+Estado
+🟢 Implementado
+
+---
+
+## Eliminar CV propio
+DELETE /users/me/cv
+Borra solo el CV (`user_profiles`), no la cuenta.
+Respuesta
+200 OK
+{
+    "message": "CV eliminado correctamente"
+}
+Errores
+404 — no había CV guardado
+403 — el usuario no es `candidate`
+Autenticación
+Requerida (verifyToken) + rol `candidate`.
+Estado
+🟢 Implementado
+
+---
+
 # APPLICATIONS
 
 Todas las rutas protegidas mediante `verifyToken`. Todas las operaciones sobre un recurso concreto (`GET/PUT/DELETE /applications/:id`) filtran internamente por `id` **y** por el `user_id` del usuario autenticado — un usuario nunca puede leer, modificar ni eliminar una postulación que no sea suya (fix de seguridad aplicado agosto 2026, antes existía una vulnerabilidad IDOR).
@@ -199,16 +270,17 @@ Body
     "job_offer_id": 1,
     "notes": "Oferta interesante",
     "consent": true,
+    "consent_cv": false,
     "signature": "Lucía Navarro"
 }
-`consent` (tiene que ser `true`) y `signature` (el nombre completo del candidato) son obligatorios: al postularse, la empresa recibe su nombre, email y teléfono (ver `docs/decisions.md`, entrada 017). `job_offer_id` y `notes` son opcionales.
+`consent` (tiene que ser `true`) y `signature` (el nombre completo del candidato) son obligatorios: al postularse, la empresa recibe su nombre, email y teléfono (ver `docs/decisions.md`, entrada 017). `job_offer_id` y `notes` son opcionales. `consent_cv` es opcional (por defecto `false`): si es `true`, la empresa podrá ver además el CV del candidato (ver entrada 033).
 
 **`status` no se acepta en la creación**; lo fija el controller (ver `docs/decisions.md`, entrada 023):
 - **con `job_offer_id`** (postularse a una oferta de HireFlow): `"applied"`, con `applied_date` = hoy. La empresa la ve al momento en `/applications/recruiter`.
 - **sin `job_offer_id`** (seguimiento personal de una oferta de fuera): `"wishlist"`, sin `applied_date`.
 
 Validación
-`job_offer_id` opcional, si se envía debe ser un entero válido. `notes` opcional, texto libre. `consent` debe ser `true`. `signature` obligatorio (máx. 150).
+`job_offer_id` opcional, si se envía debe ser un entero válido. `notes` opcional, texto libre. `consent` debe ser `true`. `consent_cv` opcional, `true`/`false` (booleano JSON, no texto). `signature` obligatorio (máx. 150).
 
 Respuesta
 201 Created
@@ -220,6 +292,7 @@ Respuesta
     "notes": "Oferta interesante",
     "applied_date": "2026-09-24T18:56:05.420Z",
     "consent_share_contact": true,
+    "consent_share_cv": false,
     "signature_name": "Lucía Navarro",
     "consent_at": "2026-09-24T18:56:05.420Z"
 }
@@ -227,6 +300,18 @@ Errores
 400 — validación (ver sección "Errores de validación"), incluido no aceptar el consentimiento o no firmar
 400 — `job_offer_id` no existe (constraint FK)
 409 — el candidato ya tiene una postulación a esa oferta: `{"message":"Ya te has postulado a esta oferta"}` (restricción `uq_application_user_job`; ver `docs/decisions.md`, entrada 027). Los seguimientos personales, sin `job_offer_id`, se pueden repetir.
+
+---
+
+## Postulaciones recibidas (empresa)
+GET /applications/recruiter?jobOfferId=10
+Solo rol `recruiter`. Devuelve las postulaciones recibidas en las ofertas propias (`job_offers.created_by_user`), nunca las de otro recruiter. `jobOfferId` es opcional y filtra por una oferta.
+Cada elemento incluye `job_title`, `candidate_name`, `candidate_sector` y `candidate_location`, y además:
+- `candidate_email` y `candidate_phone`: `null` salvo que `consent_share_contact = 1`.
+- `cv_about`, `cv_skills`, `cv_work_experience`, `cv_education` y `cv_resume_url`: `null` salvo que `consent_share_cv = 1`. Es el CV actual del candidato, no una copia de cuando se postuló.
+Las notas privadas del candidato (`notes`) nunca se incluyen. El filtrado se hace en la propia SQL.
+Errores
+403 — el usuario no es `recruiter`
 
 ---
 
@@ -845,27 +930,29 @@ Body
     "job_offer_id": 10,
     "skills": "Node.js, MySQL, Docker"
 }
-Compara el texto de `skills_required` de la oferta indicada contra las `skills` que envía el candidato (texto libre), por solapamiento de palabras — no lee de un perfil guardado, ver nota abajo.
+Compara el texto de `skills_required` de la oferta indicada contra las `skills` del candidato (texto libre), por solapamiento de palabras.
 
-**Nota:** no se compara contra `user_profiles` porque ese recurso todavía no tiene CRUD implementado (ver `docs/decisions.md`, entrada 010) — las `skills` se envían siempre en el body. Cuando exista el CRUD de perfil, este endpoint podrá leerlas de ahí.
+`skills` es opcional: si no se envía, se usan las `skills` del CV guardado (`GET /users/me/cv`). Si no llega en el body y tampoco hay skills en el CV, devuelve 400 (ver `docs/decisions.md`, entrada 033).
 
 **Limitación conocida:** el matching es solo solapamiento de palabras, sin detectar negación ni contexto — escribir "no tengo experiencia en Docker" cuenta "docker" como coincidencia igualmente. Es una primera versión a ampliar más adelante.
 
 Validación
-`job_offer_id` obligatorio, entero válido. `skills` obligatorio, texto (máx. 2000 caracteres).
+`job_offer_id` obligatorio, entero válido. `skills` opcional, pero si se envía debe ser texto no vacío (máx. 2000 caracteres).
 
 Respuesta
 200 OK
 {
     "job_offer_id": 10,
+    "skills_source": "body",
     "score": 75,
     "matched_skills": ["node.js", "mysql", "docker"],
     "missing_skills": ["liderazgo"],
     "improvement_suggestions": [ { "id": 6, "skill_name": "Liderazgo e Influencia", "...": "..." } ]
 }
-`score` es el porcentaje (0-100) de palabras de `skills_required` encontradas en las `skills` del candidato; `null` si la oferta no tiene `skills_required`.
+`score` es el porcentaje (0-100) de palabras de `skills_required` encontradas en las `skills` del candidato; `null` si la oferta no tiene `skills_required`. `skills_source` es `"body"` o `"cv"` según de dónde salieron las skills comparadas.
 Errores
 400 — validación (ver sección "Errores de validación")
+400 — sin `skills` en el body ni en el CV: `{"message":"Envía skills en el body o guárdalas antes en tu CV"}`
 404 — oferta no encontrada: `{"message":"Oferta no encontrada"}`
 Autenticación
 Requerida (verifyToken)

@@ -7,6 +7,7 @@ export const createApplication = async (applicationData) => {
         status = "wishlist",
         notes = null,
         consent_share_contact = false,
+        consent_share_cv = false,
         signature_name = null
     } = applicationData;
 
@@ -22,12 +23,13 @@ export const createApplication = async (applicationData) => {
         notes,
         applied_date,
         consent_share_contact,
+        consent_share_cv,
         signature_name,
         consent_at
         )
-        VALUES (?,?,?,?,?,?,?,?)
+        VALUES (?,?,?,?,?,?,?,?,?)
         `,
-        [user_id, job_offer_id, status, notes, appliedDate, consent_share_contact, signature_name, consentAt]
+        [user_id, job_offer_id, status, notes, appliedDate, consent_share_contact, consent_share_cv, signature_name, consentAt]
     );
     return {
         id: result.insertId,
@@ -37,6 +39,7 @@ export const createApplication = async (applicationData) => {
         notes,
         applied_date: appliedDate,
         consent_share_contact,
+        consent_share_cv,
         signature_name,
         consent_at: consentAt
     };
@@ -149,6 +152,9 @@ export const updateApplicationStatusByRecruiter = async (id, recruiterId, status
 // email/phone del candidato solo se exponen si dio su consentimiento al
 // postularse (consent_share_contact) -- comprobado aquí, no solo en el
 // frontend, para que no dependa de que el cliente respete el flag.
+// Mismo criterio para el CV (user_profiles): solo si consent_share_cv = 1,
+// consentimiento aparte y opcional (ver decisions.md, entrada 033). Es el CV
+// actual del candidato, no una copia del momento en que se postuló.
 // Las notas privadas del candidato (a.notes) nunca se incluyen.
 export const getApplicationsForRecruiter = async (recruiterId, jobOfferId = null) => {
     const params = [recruiterId];
@@ -175,10 +181,17 @@ export const getApplicationsForRecruiter = async (recruiterId, jobOfferId = null
             u.sector AS candidate_sector,
             u.location AS candidate_location,
             CASE WHEN a.consent_share_contact = 1 THEN u.email ELSE NULL END AS candidate_email,
-            CASE WHEN a.consent_share_contact = 1 THEN u.phone ELSE NULL END AS candidate_phone
+            CASE WHEN a.consent_share_contact = 1 THEN u.phone ELSE NULL END AS candidate_phone,
+            a.consent_share_cv,
+            CASE WHEN a.consent_share_cv = 1 THEN p.about ELSE NULL END AS cv_about,
+            CASE WHEN a.consent_share_cv = 1 THEN p.skills ELSE NULL END AS cv_skills,
+            CASE WHEN a.consent_share_cv = 1 THEN p.work_experience ELSE NULL END AS cv_work_experience,
+            CASE WHEN a.consent_share_cv = 1 THEN p.education ELSE NULL END AS cv_education,
+            CASE WHEN a.consent_share_cv = 1 THEN p.resume_url ELSE NULL END AS cv_resume_url
         FROM applications a
         JOIN job_offers j ON a.job_offer_id = j.id
         JOIN users u ON a.user_id = u.id
+        LEFT JOIN user_profiles p ON p.user_id = u.id
         WHERE j.created_by_user = ? ${jobFilter}
         ORDER BY a.created_at DESC
         `,

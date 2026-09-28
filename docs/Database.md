@@ -74,7 +74,7 @@ muchas postulaciones (applications)
 Campos
 ```
 id
-user_id          -- FK → users(id), ON DELETE CASCADE
+user_id          -- FK → users(id), ON DELETE CASCADE, UNIQUE (uq_user_profile_user)
 education
 work_experience
 skills
@@ -91,7 +91,7 @@ Relaciones
 1 perfil extendido (CV)
 ```
 
-Corresponde a la pantalla "Formulario" (modo `profile`) de `FRONTEND_DESIGN.md`.
+Corresponde a la pantalla "Formulario" (modo `profile`) de `FRONTEND_DESIGN.md`. Se gestiona con `GET/PUT/DELETE /users/me/cv` (solo candidate). El `UNIQUE(user_id)` garantiza el 1:1 en la propia BD y permite el upsert atómico del `PUT` (ver `docs/decisions.md`, entrada 033).
 
 ---
 

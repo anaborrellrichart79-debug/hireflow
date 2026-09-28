@@ -186,6 +186,16 @@
 .card-desc { font-size: 13px; margin: 0 0 10px; }
 .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
+/* CV del candidato en la ficha de Postulantes */
+.applicant-cv { margin: 8px 0; padding-top: 8px; border-top: 1px solid #eee; }
+.applicant-cv h5 { margin: 0 0 6px; font-size: 14px; }
+.applicant-cv-label { margin: 6px 0 2px; font-size: 12px; font-weight: bold; color: #4f4f4f; } /* #666 daba 3,94:1 sobre el beige de las tarjetas */
+/* Notas dentro de la tarjeta de postulante (firma, sin consentimiento...): #5f5f5f daba 4,38:1 sobre el beige */
+.applicant-card .form-note { color: #4f4f4f; }
+/* Emails largos: en la columna estrecha del Kanban se salían de la tarjeta */
+.applicant-card p { overflow-wrap: anywhere; }
+.applicant-cv-text { margin: 0; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+
 .status-badge {
     display: block;
     width: fit-content;
@@ -212,11 +222,16 @@
 
 .hireflow-form h2, .auth-form h2 { margin-top: 0; }
 
+/* Dos formularios seguidos en la misma pantalla (Mi perfil + Mi CV) */
+.hireflow-form + .hireflow-form { margin-top: 24px; }
+
 .hireflow-form label { display: block; font-size: 13px; font-weight: 700; margin: 12px 0 4px; }
 
 .hireflow-form input[type="text"],
 .hireflow-form input[type="email"],
 .hireflow-form input[type="password"],
+.hireflow-form input[type="tel"],
+.hireflow-form input[type="url"],
 .hireflow-form textarea,
 .hireflow-form select,
 .auth-form input,

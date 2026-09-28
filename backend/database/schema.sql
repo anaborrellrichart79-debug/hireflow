@@ -29,6 +29,10 @@ CREATE table user_profiles (
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp on update current_timestamp,
 
+-- 1:1 con users: el UNIQUE lo garantiza en la BD y permite el upsert atómico
+-- (INSERT ... ON DUPLICATE KEY UPDATE) de PUT /users/me/cv
+constraint uq_user_profile_user unique (user_id),
+
 constraint fk_user_profile
 	foreign key (user_id)
 	references users(id)
@@ -89,6 +93,8 @@ CREATE table applications (
     applied_date date,
     notes Text,
     consent_share_contact tinyint(1) NOT NULL default 0,
+    -- consentimiento aparte y opcional para que la empresa vea el CV (user_profiles)
+    consent_share_cv tinyint(1) NOT NULL default 0,
     signature_name varchar(150) NULL,
     consent_at timestamp NULL,
     created_at timestamp default current_timestamp,

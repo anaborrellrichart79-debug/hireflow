@@ -72,10 +72,22 @@ Formato basado en Keep a Changelog.
 - `frontend/style/layaut.css` → `layout.css` y `backend/database/shema.sql` → `schema.sql` (erratas). Las entradas antiguas de este changelog y de `decisions.md` mantienen el nombre que tenía el archivo en su momento.
 - Favicon (`frontend/assets/icons/favicon.svg`): la "H" naranja del logo. Antes el navegador pedía `/favicon.ico` en cada carga y la consola mostraba un 404.
 
+## Añadido — CV del candidato (entrada 033)
+- `GET/PUT/DELETE /users/me/cv` (solo candidate): CV extendido con "sobre mí", habilidades, experiencia laboral, formación y enlace a un CV externo. `PUT` crea el CV la primera vez y lo actualiza las siguientes
+- Sección "Mi CV" en la pantalla Mi perfil (solo candidate), con guardar y eliminar CV (eliminar el CV no borra la cuenta; la confirmación usa un diálogo propio)
+- `POST /ai/job-match`: `skills` pasa a ser opcional; si no se envía, se usan las habilidades del CV guardado. La respuesta indica el origen en `skills_source`
+- `POST /ai/ask` (intención "encaje con una oferta"): si el candidato tiene habilidades en su CV, se comparan esas en vez de las palabras del mensaje; el chat indica cuál de las dos se usó
+- Casilla opcional al postularse, "Acepto que la empresa vea también mi CV" (`consent_cv`), desmarcada por defecto
+- La empresa ve el CV del postulante en Postulantes ("Ver perfil"), solo si este marcó esa casilla (filtrado en la propia SQL)
+- `user_profiles.user_id` pasa a ser `UNIQUE` y nueva columna `applications.consent_share_cv`
+- Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
+- Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
+
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
+- `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 032.
+Detalle en `docs/decisions.md`, entradas 018 a 033.
 
 ---
 

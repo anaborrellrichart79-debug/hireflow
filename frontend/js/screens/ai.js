@@ -64,7 +64,8 @@ const renderSkillTips = (suggestions) =>
 
 const renderJobMatch = (data) => {
     const parts = [
-        el("p", { text: `${data.job_title} — ${t("ai.labelMatchScore")} ${data.score ?? "?"}%` })
+        el("p", { text: `${data.job_title} — ${t("ai.labelMatchScore")} ${data.score ?? "?"}%` }),
+        el("p", { class: "form-note", text: t(data.skills_source === "cv" ? "ai.matchSourceCv" : "ai.matchSourceMessage") })
     ];
 
     if (data.matched_skills?.length) {

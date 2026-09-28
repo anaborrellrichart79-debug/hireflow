@@ -5,6 +5,7 @@ import {
     matchJobSkills
 } from "../models/ai.js";
 import { getJobOfferById } from "../models/jobOffer.js";
+import { getUserProfileByUserId } from "../models/userProfile.js";
 import {
     classifyIntent,
     extractIndustry,
@@ -40,7 +41,21 @@ export const interviewFeedback = async (req, res) => {
 };
 
 export const jobMatch = async (req, res) => {
-    const { job_offer_id, skills, lang } = req.body;
+    const { job_offer_id, lang } = req.body;
+    let { skills } = req.body;
+    let skillsSource = "body";
+
+    // Sin skills en el body, se usan las del CV guardado del candidato
+    // (ver docs/decisions.md, entradas 010 y 033)
+    if (!skills) {
+        const cv = await getUserProfileByUserId(req.user.id);
+        skills = cv?.skills?.trim();
+        skillsSource = "cv";
+
+        if (!skills) {
+            return res.status(400).json({ message: "Envía skills en el body o guárdalas antes en tu CV" });
+        }
+    }
 
     const jobOffer = await getJobOfferById(job_offer_id);
 
@@ -55,6 +70,7 @@ export const jobMatch = async (req, res) => {
 
     res.status(200).json({
         job_offer_id,
+        skills_source: skillsSource,
         score,
         matched_skills: matched,
         missing_skills: missing,
@@ -163,7 +179,11 @@ export const askAssistant = async (req, res) => {
     }
 
     const job = jobs[0];
-    const { matched, missing, score } = matchJobSkills(job.skills_required, message);
+    // Si el candidato tiene skills en su CV se comparan esas; si no, las
+    // palabras del propio mensaje (comportamiento original, entrada 014)
+    const cv = await getUserProfileByUserId(req.user.id);
+    const cvSkills = cv?.skills?.trim();
+    const { matched, missing, score } = matchJobSkills(job.skills_required, cvSkills || message);
     const improvementSuggestions = missing.length > 0
         ? await findSkillImprovementBySkillNames(missing, lang)
         : [];
@@ -173,6 +193,7 @@ export const askAssistant = async (req, res) => {
         intent: "job_match",
         job_offer_id: job.id,
         job_title: job.title,
+        skills_source: cvSkills ? "cv" : "message",
         score,
         matched_skills: matched,
         missing_skills: missing,

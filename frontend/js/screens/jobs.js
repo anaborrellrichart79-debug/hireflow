@@ -15,6 +15,8 @@ import { setApplicantsJobFilter } from "./applicants.js";
 const openApplyConsentDialog = (candidateName, onConfirm) => {
     const errorSlot = el("div", {});
     const consentCheckbox = el("input", { type: "checkbox" });
+    // Opcional y desmarcada por defecto: compartir el CV no es requisito para postularse
+    const cvConsentCheckbox = el("input", { type: "checkbox" });
     const signatureInput = el("input", { type: "text", autocomplete: "name", value: candidateName || "", placeholder: t("jobs.signaturePlaceholder") });
 
     const cancelButton = el("button", { type: "button", class: "secondary-button", text: t("jobs.consentCancel") });
@@ -25,6 +27,7 @@ const openApplyConsentDialog = (candidateName, onConfirm) => {
         errorSlot,
         el("p", { text: t("jobs.consentIntro") }),
         el("label", { class: "checkbox-label" }, [consentCheckbox, ` ${t("jobs.consentCheckboxLabel")}`]),
+        el("label", { class: "checkbox-label" }, [cvConsentCheckbox, ` ${t("jobs.cvConsentCheckboxLabel")}`]),
         el("label", { text: t("jobs.signatureLabel") }),
         signatureInput,
         el("div", { class: "hf-dialog-actions" }, [cancelButton, confirmButton])
@@ -46,7 +49,7 @@ const openApplyConsentDialog = (candidateName, onConfirm) => {
         // Se desactiva mientras se envía: un doble clic creaba dos postulaciones.
         confirmButton.disabled = true;
         try {
-            await onConfirm(signatureInput.value.trim());
+            await onConfirm(signatureInput.value.trim(), cvConsentCheckbox.checked);
             dialog.close();
         } catch (error) {
             // 409: ya había una postulación a esta oferta (por ejemplo, desde
@@ -243,10 +246,10 @@ export const render = async (container) => {
                 const onApply = (jobOfferId) => {
                     // El JWT solo trae id/email/role (ver api.js getCurrentUser), no el
                     // nombre -- el candidato escribe su firma desde cero, no se prerrellena.
-                    openApplyConsentDialog(null, async (signature) => {
+                    openApplyConsentDialog(null, async (signature, consentCv) => {
                         await apiFetch("/applications", {
                             method: "POST",
-                            body: { job_offer_id: jobOfferId, consent: true, signature }
+                            body: { job_offer_id: jobOfferId, consent: true, consent_cv: consentCv, signature }
                         });
                         draw();
                     });

@@ -13,6 +13,8 @@ export const createApplicationValidators = [
     // email y teléfono del candidato con la empresa al postularse (nunca datos
     // bancarios ni sensibles) y necesita constancia explícita de que lo acepta.
     body("consent").custom((value) => value === true).withMessage("Debes aceptar compartir tus datos de contacto con la empresa para postularte"),
+    // Compartir el CV es un consentimiento aparte y opcional (desmarcado por defecto)
+    body("consent_cv").optional().isBoolean({ strict: true }).withMessage("consent_cv debe ser true o false"),
     body("signature").trim().notEmpty().withMessage("Debes escribir tu nombre para firmar la postulación").isLength({ max: 150 }).withMessage("La firma no puede superar 150 caracteres")
 ];
 

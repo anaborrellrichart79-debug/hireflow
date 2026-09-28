@@ -25,3 +25,15 @@ export const updateProfileValidators = [
     body("location").optional({ nullable: true }).isString().isLength({ max: 120 }),
     body("profile_visible").optional().isBoolean().withMessage("profile_visible debe ser true o false")
 ];
+
+// Columnas TEXT (máx. real 65535 bytes); se limita bastante por debajo para
+// dejar margen a caracteres multibyte de utf8mb4.
+const CV_TEXT_MAX = 5000;
+
+export const saveCvValidators = [
+    body("education").optional({ nullable: true }).isString().withMessage("education debe ser texto").isLength({ max: CV_TEXT_MAX }).withMessage(`education no puede superar ${CV_TEXT_MAX} caracteres`),
+    body("work_experience").optional({ nullable: true }).isString().withMessage("work_experience debe ser texto").isLength({ max: CV_TEXT_MAX }).withMessage(`work_experience no puede superar ${CV_TEXT_MAX} caracteres`),
+    body("skills").optional({ nullable: true }).isString().withMessage("skills debe ser texto").isLength({ max: 2000 }).withMessage("skills no puede superar 2000 caracteres"),
+    body("about").optional({ nullable: true }).isString().withMessage("about debe ser texto").isLength({ max: CV_TEXT_MAX }).withMessage(`about no puede superar ${CV_TEXT_MAX} caracteres`),
+    body("resume_url").optional({ nullable: true }).isURL({ protocols: ["http", "https"], require_protocol: true }).withMessage("resume_url debe ser una URL http(s) válida").isLength({ max: 255 }).withMessage("resume_url no puede superar 255 caracteres")
+];

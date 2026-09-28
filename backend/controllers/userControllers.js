@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { findUserByEmail, createUser, getUserById, updateUser, deleteUser } from "../models/User.js";
+import { getUserProfileByUserId, upsertUserProfile, deleteUserProfile } from "../models/userProfile.js";
 
 export const createNewUser = async (req, res) => {
     try {
@@ -69,4 +70,45 @@ export const updateProfile = async (req, res) => {
 export const deleteProfile = async (req, res) => {
     await deleteUser(req.user.id);
     res.json({ message: "Cuenta eliminada correctamente" });
+};
+
+// GET /users/me/cv -- sin CV guardado devuelve 200 con los campos a null (no
+// 404): no tener CV todavía es el estado normal de un candidato nuevo, no un error
+export const getCv = async (req, res) => {
+    const cv = await getUserProfileByUserId(req.user.id);
+
+    res.json(cv ?? {
+        id: null,
+        user_id: req.user.id,
+        education: null,
+        work_experience: null,
+        skills: null,
+        resume_url: null,
+        about: null,
+        created_at: null,
+        updated_at: null
+    });
+};
+
+// PUT /users/me/cv -- crea el CV la primera vez, lo actualiza las siguientes
+export const saveCv = async (req, res) => {
+    const result = await upsertUserProfile(req.user.id, req.body);
+
+    if (!result) {
+        return res.status(400).json({ message: "Ningún campo válido para guardar" });
+    }
+
+    const cv = await getUserProfileByUserId(req.user.id);
+    res.json(cv);
+};
+
+// DELETE /users/me/cv -- borra solo el CV, no la cuenta
+export const deleteCv = async (req, res) => {
+    const result = await deleteUserProfile(req.user.id);
+
+    if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Todavía no has creado tu CV" });
+    }
+
+    res.json({ message: "CV eliminado correctamente" });
 };

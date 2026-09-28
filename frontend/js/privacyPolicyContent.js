@@ -20,11 +20,11 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "2. Qué datos recogemos",
-                body: "Al registrarte: nombre, email y contraseña (guardada siempre cifrada, nunca en texto plano). De forma opcional, en tu perfil: sector, teléfono y ubicación. Nunca te pedimos datos bancarios, número de tarjeta ni otros datos especialmente sensibles (salud, ideología, etc.)."
+                body: "Al registrarte: nombre, email y contraseña (guardada siempre cifrada, nunca en texto plano). De forma opcional, en tu perfil: sector, teléfono y ubicación; y, si eres candidato, tu CV (sobre ti, habilidades, experiencia laboral, formación y un enlace a un CV externo). Nunca te pedimos datos bancarios, número de tarjeta ni otros datos especialmente sensibles (salud, ideología, etc.)."
             },
             {
                 heading: "3. Para qué usamos tus datos",
-                body: "Para crear y gestionar tu cuenta, mostrarte ofertas de empleo o candidatos según tu rol, gestionar tus postulaciones y entrevistas, y —solo con tu consentimiento expreso en cada postulación— compartir tu nombre, email y teléfono con la empresa a la que te postulas, para que pueda contactarte."
+                body: "Para crear y gestionar tu cuenta, mostrarte ofertas de empleo o candidatos según tu rol, gestionar tus postulaciones y entrevistas, y —solo con tu consentimiento expreso en cada postulación— compartir tu nombre, email y teléfono con la empresa a la que te postulas, para que pueda contactarte, y tu CV si además marcas la casilla opcional para compartirlo. Las habilidades de tu CV también se usan dentro de la app para calcular tu encaje con una oferta."
             },
             {
                 heading: "4. Base legal",
@@ -32,7 +32,7 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "5. Con quién compartimos tus datos",
-                body: "Solo con la empresa a la que te postulas, y solo tu nombre, email y teléfono, y solo si has marcado la casilla de consentimiento al postularte. No vendemos ni cedemos tus datos a terceros con fines publicitarios ni de ningún otro tipo."
+                body: "Solo con la empresa a la que te postulas: tu nombre, email y teléfono si has marcado la casilla de consentimiento al postularte, y tu CV solo si has marcado además la casilla opcional para compartirlo. No vendemos ni cedemos tus datos a terceros con fines publicitarios ni de ningún otro tipo."
             },
             {
                 heading: "6. Cuánto tiempo conservamos tus datos",
@@ -71,11 +71,11 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "2. What data we collect",
-                body: "When you register: name, email and password (always stored encrypted, never in plain text). Optionally, in your profile: sector, phone number and location. We will never ask you for bank details, card numbers or other especially sensitive data (health, beliefs, etc.)."
+                body: "When you register: name, email and password (always stored encrypted, never in plain text). Optionally, in your profile: sector, phone number and location; and, if you're a candidate, your CV (about you, skills, work experience, education and a link to an external CV). We will never ask you for bank details, card numbers or other especially sensitive data (health, beliefs, etc.)."
             },
             {
                 heading: "3. What we use your data for",
-                body: "To create and manage your account, show you job offers or candidates depending on your role, manage your applications and interviews, and — only with your explicit consent given on each application — share your name, email and phone number with the company you're applying to, so they can contact you."
+                body: "To create and manage your account, show you job offers or candidates depending on your role, manage your applications and interviews, and — only with your explicit consent given on each application — share your name, email and phone number with the company you're applying to, so they can contact you, and your CV if you also check the optional box to share it. The skills in your CV are also used within the app to calculate how well you match a job offer."
             },
             {
                 heading: "4. Legal basis",
@@ -83,7 +83,7 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "5. Who we share your data with",
-                body: "Only the company you apply to, and only your name, email and phone number, and only if you checked the consent box when applying. We do not sell or share your data with third parties for advertising or any other purpose."
+                body: "Only the company you apply to: your name, email and phone number if you checked the consent box when applying, and your CV only if you also checked the optional box to share it. We do not sell or share your data with third parties for advertising or any other purpose."
             },
             {
                 heading: "6. How long we keep your data",

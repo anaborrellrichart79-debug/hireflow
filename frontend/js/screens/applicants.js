@@ -63,6 +63,38 @@ const formatShortDate = (value) => {
     return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString(getLang(), { day: "numeric", month: "short" });
 };
 
+// CV del candidato: el backend solo lo envía si marcó "compartir mi CV" al
+// postularse (consent_share_cv, ver decisions.md entrada 033).
+const CV_FIELDS = [
+    ["cv_about", "profile.cvAboutLabel"],
+    ["cv_skills", "profile.cvSkillsLabel"],
+    ["cv_work_experience", "profile.cvExperienceLabel"],
+    ["cv_education", "profile.cvEducationLabel"]
+];
+
+const renderCv = (application) => {
+    if (!application.consent_share_cv) {
+        return el("p", { class: "form-note", text: t("applicants.noCvConsent") });
+    }
+
+    const filled = CV_FIELDS.filter(([field]) => application[field]);
+    if (filled.length === 0 && !application.cv_resume_url) {
+        return el("p", { class: "form-note", text: t("applicants.cvEmpty") });
+    }
+
+    return el("div", { class: "applicant-cv" }, [
+        el("h5", { text: t("applicants.cvTitle") }),
+        ...filled.flatMap(([field, labelKey]) => [
+            el("p", { class: "applicant-cv-label", text: t(labelKey) }),
+            el("p", { class: "applicant-cv-text", text: application[field] })
+        ]),
+        // Solo se enlazan URLs http(s) (el backend ya lo valida al guardar el CV)
+        /^https?:\/\//i.test(application.cv_resume_url || "")
+            ? el("a", { href: application.cv_resume_url, target: "_blank", rel: "noopener noreferrer", text: t("applicants.cvResumeLink") })
+            : null
+    ]);
+};
+
 const applicantCard = (application, onStatusChange, onScheduleInterview) => {
     const detailsSlot = el("div", {});
     let expanded = false;
@@ -72,7 +104,7 @@ const applicantCard = (application, onStatusChange, onScheduleInterview) => {
         if (!expanded) return;
 
         if (!application.consent_share_contact) {
-            detailsSlot.append(el("p", { class: "form-note", text: t("applicants.noContactConsent") }));
+            detailsSlot.append(el("p", { class: "form-note", text: t("applicants.noContactConsent") }), renderCv(application));
             return;
         }
 
@@ -81,7 +113,8 @@ const applicantCard = (application, onStatusChange, onScheduleInterview) => {
             el("p", { text: `${t("applicants.contactPhone")} ${application.candidate_phone || t("common.dash")}` }),
             el("p", { text: `${t("applicants.sectorLabel")} ${application.candidate_sector || t("common.dash")}` }),
             el("p", { text: `${t("applicants.locationLabel")} ${application.candidate_location || t("common.dash")}` }),
-            application.signature_name ? el("p", { class: "form-note", text: `${t("applicants.signedLabel")} ${application.signature_name}` }) : null
+            application.signature_name ? el("p", { class: "form-note", text: `${t("applicants.signedLabel")} ${application.signature_name}` }) : null,
+            renderCv(application)
         );
     };
 
