@@ -33,7 +33,24 @@ body {
 /* El naranja de marca no llega a 4,5:1 sobre crema: se oscurece para texto */
 .privacy-logo .accent { color: #a8621a; }
 
-.privacy-lang { display: flex; gap: 12px; }
+/* "← Volver a HireFlow": empuja el selector de idioma a la derecha */
+.privacy-back { margin-left: auto; color: var(--hf-text); font-weight: 700; }
+
+/* Botón del final: mismo aspecto que .primary-button de la app */
+.privacy-back-bottom { margin-top: 32px; text-align: center; }
+.privacy-back-button {
+    display: inline-block;
+    padding: 14px 32px;
+    background: var(--hf-orange);
+    border: 1px solid #000;
+    border-radius: 999px;
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+}
+.privacy-back-button:hover { background: #d98f3f; }
+
+.privacy-lang { display: flex; gap: 12px; flex-wrap: wrap; }
 .privacy-lang a { color: var(--hf-text); }
 .privacy-lang a[aria-current="page"] { font-weight: 700; text-decoration: none; }
 

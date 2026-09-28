@@ -49,6 +49,19 @@ AVAILABLE.forEach((code) => {
     langNav.append(link);
 });
 
+// "Volver a HireFlow": solo si la página se sirve junto a la app (la
+// <meta name="hireflow-app"> no existe en la copia de GitHub Pages).
+const BACK_LABEL = { es: "Volver a HireFlow", en: "Back to HireFlow", fr: "Retour à HireFlow", it: "Torna a HireFlow" };
+const appUrl = document.querySelector('meta[name="hireflow-app"]')?.content;
+const backLink = (className, text) => {
+    const link = node("a", text, className);
+    link.href = appUrl;
+    return link;
+};
+if (appUrl) {
+    langNav.before(backLink("privacy-back", `← ${BACK_LABEL[lang]}`));
+}
+
 const content = document.getElementById("privacy-content");
 content.innerHTML = "";
 content.append(
@@ -57,3 +70,8 @@ content.append(
     ...policy.sections.flatMap((section) => [node("h2", section.heading), node("p", section.body)]),
     node("p", policy.disclaimer, "privacy-disclaimer")
 );
+// Al final del texto también, que es donde llega quien lo ha leído entero
+if (appUrl) {
+    content.append(node("p", "", "privacy-back-bottom"));
+    content.lastChild.append(backLink("privacy-back-button", BACK_LABEL[lang]));
+}

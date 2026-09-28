@@ -42,9 +42,12 @@ jobs:
       - name: Preparar solo los archivos de la política y la página 404
         run: |
           mkdir -p _site/js/components _site/style _site/assets/icons
-          cp frontend/privacy.html _site/privacy.html
+          # Sin la <meta name="hireflow-app">: en Pages no hay app a la que
+          # volver, así que la página no muestra "Volver a HireFlow"
+          sed '/<meta name="hireflow-app"/d' frontend/privacy.html > _site/privacy.html
+          ! grep -q 'name="hireflow-app"' _site/privacy.html
           # La raíz de la web también muestra la política
-          cp frontend/privacy.html _site/index.html
+          cp _site/privacy.html _site/index.html
           cp frontend/js/privacyPage.js frontend/js/privacyPolicyContent.js _site/js/
           cp frontend/style/privacy.css _site/style/
           cp frontend/assets/icons/favicon.svg _site/assets/icons/

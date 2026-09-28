@@ -1141,3 +1141,45 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 **Archivos afectados:** `frontend/js/privacyPolicyContent.js` (fr, it y comentario de cabecera), `frontend/js/privacyPage.js` (nombres y etiqueta del selector en los 4 idiomas), `docs/changeLog.md`, `docs/projectStatus.md`, `docs/googlePlayDataSafety.md`.
 
 ---
+
+## 038 — Mensajes de la API en los 4 idiomas (Accept-Language)
+**Fecha:** Septiembre 2026
+
+**Problema:** desde la entrada 012 la interfaz está en 4 idiomas, pero los mensajes que devuelve la API (errores, validaciones y confirmaciones) salían siempre en español. El frontend los muestra tal cual en todas las pantallas, así que con la app en inglés, francés o italiano los errores aparecían en español. Además, 33 reglas de validación no tenían mensaje propio y respondían el texto por defecto de `express-validator`, "Invalid value", en inglés; y un JSON mal formado devolvía el mensaje técnico del parser ("Unexpected token…").
+
+**Alternativas consideradas:**
+- (a) Traducir en el frontend a partir de un código de error estable en cada respuesta: habría obligado a tocar las ~30 llamadas que muestran `error.message`, y los mensajes con datos (longitud máxima, valores permitidos) se complican.
+- (b) Traducir en el backend según el idioma de la petición.
+
+**Decisión: (b).** El frontend ya muestra `message` directamente, así que casi no hay que tocarlo.
+- `api.js` envía la cabecera estándar `Accept-Language` con el idioma de la app.
+- `backend/i18n/index.js`: `langMiddleware` (registrado el primero en `server.js`, para que hasta un error de JSON salga traducido) fija `req.lang` y `req.t(clave, params)`. Respeta el orden de preferencia (`q=`) y, si no hay cabecera o el idioma no está disponible, usa el **español**: Postman, curl y cualquier cliente que ya existiera siguen recibiendo exactamente el idioma de antes.
+- `backend/i18n/messages.js`: 69 mensajes en los 4 idiomas, con `{marcadores}` para los datos (longitud máxima, valores permitidos, ruta…). Si falta una clave en un idioma se usa la española, y si tampoco existe, la propia clave.
+- **Validación:** los validadores usan `msg("v.maxLength", { max: 150 })`, que genera el mensaje al validar, con el idioma de esa petición. Los mensajes siguen el formato "Campo: problema" ("Nombre: este campo es obligatorio"), para no tener que concordar género y número con cada campo en cada idioma, y usan el nombre visible del campo (41 nombres por idioma en `FIELD_LABELS`) en vez del técnico ("name"). `errors[].field` sigue siendo el nombre técnico, así que el contrato de la API no cambia. Las reglas que no tenían mensaje ahora lo tienen, y `validate.js` traduce igualmente "Invalid value" por si alguna regla nueva se queda sin él.
+- **Límite de intentos de login:** el mensaje de `express-rate-limit` pasa a ser una función, para traducirse por petición.
+- **Asistente IA:** si no recibe `lang` en el body (entrada 028), usa el idioma de la petición. Si lo recibe, sigue mandando el del body.
+- `Vary: Accept-Language` en las respuestas de la API (no en los archivos estáticos), para que ninguna caché mezcle idiomas.
+- El frontend traduce también su propio "Error de red" (ahora `common.networkError`).
+
+**Lo que no se traduce, a propósito:** los nombres técnicos de campo en `errors[].field`, los valores permitidos (`applied`, `interview`…) y los códigos de la API: son contrato, no texto para el usuario. Los mensajes que citan un campo técnico entre paréntesis ("(company_id)") lo mantienen, porque son para quien usa la API directamente.
+
+**Verificación:** comprobación estática del diccionario (mismas 69 claves y 41 campos en los 4 idiomas, mismos `{marcadores}`, ningún texto igual al español sin traducir, todas las claves usadas en el código existen y ninguna sobra, todos los campos validados tienen nombre, ningún mensaje fijo en controllers/middleware/validators). 59 comprobaciones de API: detección de idioma (sin cabecera, variantes regionales, `q=`, idioma no disponible, `*`, cabecera basura), y en los 4 idiomas 401, 403, ruta inexistente, JSON mal formado, validación con nombres de campo, plantillas con `{max}` y `{values}`, credenciales incorrectas, 404 de recurso y mensaje de éxito; `Vary` solo en la API; el asistente IA con y sin `lang`; sin cabecera todo sigue en español; y el 429 del límite de login traducido. En el navegador (Playwright): la app envía `Accept-Language` con su idioma y el error del backend sale traducido en los 4. Repetidas sin fallos todas las pruebas de las entradas 033 a 037.
+
+**Archivos afectados:** `backend/i18n/index.js` (nuevo), `backend/i18n/messages.js` (nuevo), `backend/server.js`, `backend/middleware/authMiddleware.js`, `roleMiddleware.js`, `validate.js`, `rateLimiters.js`, `errorMiddleware.js`, los 7 controllers y los 7 validators, `frontend/js/api.js`, `frontend/js/i18n.js` (`common.networkError`), `docs/api.md` (sección "Idioma de los mensajes"), `docs/FRONTEND_DESIGN.md`, `docs/projectStatus.md`, `docs/changeLog.md`. Sustituye a lo decidido en la entrada 012 sobre los mensajes de la API.
+
+---
+
+## 039 — Botón "Volver a HireFlow" en la página de la política
+**Fecha:** Septiembre 2026
+
+**Problema (señalado por el usuario):** la página pública de la política (entrada 035) no tenía forma de volver a la app.
+
+**Decisión:** un enlace "← Volver a HireFlow" en la cabecera y un botón con el estilo de `.primary-button` al final del texto, que es donde llega quien lo ha leído entero. Los dos, en el idioma de la página.
+
+**Matiz — la misma página se publica en GitHub Pages, donde no hay app:** allí "Volver a HireFlow" solo recargaría la propia política. Por eso `privacy.html` declara la dirección de la app en `<meta name="hireflow-app" content="./">`, el script solo pinta los botones si esa etiqueta existe, y el workflow la quita al copiar la página a Pages (y falla si no ha podido quitarla). Se descartó detectar el dominio (`*.github.io`) en el script: dependería de dónde se aloje, y la etiqueta deja explícito qué copia tiene app y cuál no.
+
+**Verificación** (Playwright + axe-core): en la app, enlace y botón en los 4 idiomas, los dos llevan a la raíz de la app y la abren; 320px sin desbordamiento; axe-core 0 problemas; en el paquete de Pages generado con el mismo paso del workflow, la `<meta>` desaparece de `privacy.html` e `index.html` y no se muestra ningún botón. Repetidas sin fallos las pruebas de las entradas 035 a 037.
+
+**Archivos afectados:** `frontend/privacy.html`, `frontend/js/privacyPage.js`, `frontend/style/privacy.css`, `.github/workflows/privacy-page.yml`, `docs/changeLog.md`.
+
+---
