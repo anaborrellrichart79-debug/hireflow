@@ -205,9 +205,9 @@ Frontend
 README
 🟢
 Architecture
-🔴 Referenciado como `architecture.md` (ver `docs/decisions.md`), pero no existe en el repositorio (comprobado agosto 2026)
+🟢 (creado septiembre 2026: `docs/architecture.md`, con diagramas de componentes, recorrido de una petición y modelo de datos)
 Roadmap
-🔴 Referenciado como `roadmap.md` (ver `docs/api.md`), pero no existe en el repositorio (comprobado agosto 2026)
+🟢 (creado septiembre 2026: `docs/roadmap.md`, pendientes priorizados a partir de lo anotado en el resto de documentos)
 Changelog
 🟢
 API
@@ -254,7 +254,7 @@ Implementar:
 ✔ Política de Privacidad en francés e italiano (ya está en los 4 idiomas de la app) — completo (entrada 037)
 ✔ Mensajes de la API (errores, validaciones, confirmaciones) en los 4 idiomas según `Accept-Language` — completo (entrada 038)
 
-**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), que un profesional revise la Política de Privacidad (ya publicada en https://anaborrellrichart79-debug.github.io/hireflow/, entrada 035), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), que un profesional revise la Política de Privacidad (ya publicada en https://anaborrellrichart79-debug.github.io/hireflow/, entrada 035), y los dos documentos referenciados que aún no existen (`AI_INSTRUCTIONS.md`, `SPRINT_PLAN_2MESES.md`, que tiene que definir la autora). El resto de pendientes, priorizados, están en `docs/roadmap.md`.
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -275,6 +275,6 @@ Frontend
 Base de datos
 ███████████████░░ 80%
 Documentación
-█████████████░░░░░░░ 65% (Frontend Design creado; siguen sin existir AI Instructions, Architecture, Roadmap y Sprint Plan — ver tabla de arriba)
+█████████████████░░░ 85% (Architecture y Roadmap creados; siguen sin existir AI Instructions y Sprint Plan, que tiene que definir la autora — ver tabla de arriba)
 Proyecto completo
 ███████████████████░ 92% (backend y frontend funcionales, multilingües y con asistente conversacional para el MVP; quedan pulidos menores y documentación de proceso pendiente)

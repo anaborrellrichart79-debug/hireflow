@@ -83,6 +83,11 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Documentación
+- `docs/architecture.md`: cómo encajan las piezas (diagramas de componentes, recorrido de una petición y modelo de datos en Mermaid), capas del backend, seguridad, idiomas, publicación, pruebas y convenciones
+- `docs/roadmap.md`: pendientes priorizados (antes de publicar en Google Play, cuenta y seguridad, calidad, funcionalidad, asistente, interfaz), cada uno con su origen en la documentación
+- Siguen sin existir `AI_INSTRUCTIONS.md` y `SPRINT_PLAN_2MESES.md`: los tiene que definir la autora
+
 ## Añadido — Mensajes de la API en 4 idiomas (entrada 038)
 - Los mensajes de la API (errores, validaciones y confirmaciones: 69 textos) salen en el idioma de la app. El frontend envía `Accept-Language`; sin cabecera, la API sigue respondiendo en español
 - Los errores de validación usan el nombre visible del campo en cada idioma ("Nombre: este campo es obligatorio" en vez de "name es obligatorio")

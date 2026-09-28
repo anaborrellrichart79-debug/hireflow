@@ -202,7 +202,8 @@ El objetivo del proyecto es crear una herramienta realista que combine gestión 
 
 ## Diagrama del proyecto
 
-    Próximamente...
+    Ver docs/architecture.md: diagrama de componentes, recorrido de una petición y modelo de datos.
+    Lo que falta por hacer, priorizado, está en docs/roadmap.md.
 
 ## Autora
 
