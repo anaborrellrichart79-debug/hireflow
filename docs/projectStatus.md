@@ -197,7 +197,7 @@ Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
 ---
 # Testing
 Automáticas (en el repositorio)
-🟢 66 pruebas con Playwright Test en `tests/` (API + interfaz + axe-core), `npm test`; integración continua en GitHub Actions con una MySQL creada desde cero en cada push. Cubren la seguridad de la API y todo lo hecho desde la entrada 033; ampliarlas a las pantallas anteriores está en el roadmap. Ver `docs/decisions.md`, entrada 040.
+🟢 104 pruebas con Playwright Test en `tests/` (API + todas las pantallas + axe-core), `npm test`; integración continua en GitHub Actions con una MySQL creada desde cero en cada push. Ver `docs/decisions.md`, entradas 040 y 041.
 Backend
 🟢 Postman
 Frontend

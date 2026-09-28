@@ -1215,3 +1215,28 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 **Archivos afectados:** `playwright.config.js`, `tests/helpers.js`, `tests/api/*.spec.js` (5), `tests/e2e/*.spec.js` (5), `.github/workflows/tests.yml` (todos nuevos); `package.json` y `package-lock.json` de la raíz (`"type": "module"`, scripts `test`, `test:api`, `test:e2e`, `test:report`, dependencias de desarrollo); `.gitignore`; `frontend/js/components/lostMascot.js`, `frontend/js/notFoundPage.js` (el `<h1>` de la 404); `README.md`, `docs/architecture.md`, `docs/roadmap.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
 
 ---
+
+## 041 — Pruebas automáticas de todas las pantallas
+**Fecha:** Septiembre 2026
+
+**Problema:** las pruebas de la entrada 040 cubrían la seguridad de la API y lo hecho desde la entrada 033, pero no las pantallas anteriores: registro y login, Inicio, ofertas, Kanban, calendario y asistente.
+
+**Decisión:** 38 pruebas nuevas de interfaz (104 en total), con los mismos criterios que la entrada 040 (servidor y MySQL reales, datos propios que se borran solos, axe-core WCAG 2.1 A/AA y cero errores de consola en cada pantalla y diálogo, 320px en todas):
+- `auth.spec.js`: política obligatoria y reglas de contraseña antes de enviar, email repetido, login, menú según el rol (foco al abrir, Escape lo cierra y devuelve el foco), cerrar sesión, redirección al login sin sesión, sesión caducada con aviso y vuelta a la pantalla donde se estaba (con un JWT caducado de verdad, sin tocar el servidor), y el selector de idioma sin perder la ruta.
+- `home.spec.js`: panel de la empresa (métricas, embudo con tooltip por teclado, tabla que lleva a Postulantes filtrado), empresa sin ofertas, resumen y accesos rápidos de la candidata.
+- `jobs.spec.js`: crear oferta con empresa nueva desde el formulario, editar, tarjetas completas (empresa, salario, "+1" en habilidades), buscador sin tildes que no pierde el foco, filtros de ciudad y contrato, "Quitar filtros", postularse (casilla y firma obligatorias, "Ya postulado"), recuento de postulantes que lleva al Kanban filtrado, borrar con diálogo propio, y "Mis ofertas" solo con las propias.
+- `kanban.spec.js`: columnas y recuentos, filtro por oferta, cambio de estado por desplegable (sin "Interesa" para la empresa) y **arrastrando** (y que se guarda), aviso "Actualizaciones sin ver" y "¡Actualizado por la empresa!" en la candidata, tablero de solo lectura, notas privadas que la empresa no ve, y retirar una postulación.
+- `calendar.spec.js`: navegación entre semanas, agendar desde el diálogo (y que pase a "En entrevista"), la candidata la ve sin poder borrarla y salta a la próxima semana con entrevistas, borrar con confirmación, y empresa sin postulantes.
+- `assistant.spec.js`: sugerencias, preguntas sin plantillas ni códigos internos, aclaración y respuesta, fuera de tema, nueva conversación, adjunto (solo su nombre), y sugerencias propias en inglés, francés e italiano.
+
+Los intentos de login fallidos siguen probándose solo contra el servidor aparte de `login-rate-limit.spec.js` (entrada 040): la interfaz no hace ninguno, para no gastar el límite de intentos del servidor compartido.
+
+**Fallo real encontrado y corregido:** el desplegable de tipo de cuenta del registro ("Busco empleo / Publico ofertas") no tenía nombre accesible: sin `<label>` ni `aria-label`, un lector de pantalla lo anunciaba como un desplegable sin nombre (WCAG 4.1.2). La auditoría de la entrada 029 había revisado el login, no el formulario de registro. Ahora lleva `aria-label` con la clave nueva `auth.roleLabel` ("Tipo de cuenta") en los 4 idiomas.
+
+**Datos ajenos encontrados:** al comprobar que las pruebas no dejan restos aparecieron 2 empresas de prueba de una sesión anterior (12 de agosto, `pwco_…@test.com`, sin dueño). No las crean estas pruebas; se dejan como están, a falta de que la autora decida.
+
+**Verificación:** 104 pruebas pasando tres veces seguidas contra la base de desarrollo (sin inestabilidad y sin dejar datos) y una vez contra una base creada desde cero; GitHub Actions en verde tras subirlo.
+
+**Archivos afectados:** `tests/e2e/auth.spec.js`, `home.spec.js`, `jobs.spec.js`, `kanban.spec.js`, `calendar.spec.js`, `assistant.spec.js` (nuevos); `frontend/js/screens/login.js`, `frontend/js/i18n.js` (`auth.roleLabel`); `docs/architecture.md`, `docs/roadmap.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
+
+---

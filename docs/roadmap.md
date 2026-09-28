@@ -41,7 +41,7 @@ Prioridades: 🔴 bloquea publicar la app · 🟠 importante · 🟢 mejora.
 | | Tarea | Detalle | Origen |
 |---|---|---|---|
 | ✅ | ~~Pruebas automáticas en el repositorio e integración continua~~ | Hecho: `tests/` + `.github/workflows/tests.yml` | Entrada 040 |
-| 🟢 | **Ampliar las pruebas** a las pantallas anteriores al CV (ofertas, calendario, Kanban, panel de la empresa, asistente) | Hoy cubren la seguridad de la API y todo lo hecho desde la entrada 033 | Entrada 040 |
+| ✅ | ~~Ampliar las pruebas a las pantallas anteriores al CV~~ | Hecho: 104 pruebas, todas las pantallas | Entrada 041 |
 | 🟢 | Actualizar las acciones del workflow de Pages cuando salgan versiones para Node 24 | GitHub avisa de que Node 20 está obsoleto | Workflow `privacy-page.yml` |
 | 🟢 | Datos de demo con fechas escalonadas | Todas las ofertas de demo salen como "Publicada hoy" | Entrada 030 |
 

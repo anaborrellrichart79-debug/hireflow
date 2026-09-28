@@ -164,7 +164,8 @@ Pruebas automáticas con **Playwright Test** en `tests/` (entrada 040), contra e
 tests/
   helpers.js     usuarios de prueba que se borran solos, axe-core, paquete de Pages, servidor aparte
   api/           seguridad (propiedad y roles), CV, consentimientos, idiomas, login y límite de intentos
-  e2e/           CV, consentimientos, Política de Privacidad, 404, idiomas (navegador + accesibilidad)
+  e2e/           registro y login, Inicio, ofertas, Kanban, calendario, asistente, CV, consentimientos,
+                 Política de Privacidad, 404 e idiomas (navegador + accesibilidad)
 ```
 
 - `npm test` arranca la app si no está en marcha y ejecuta todo (`npm run test:api`, `npm run test:e2e` por separado).

@@ -32,7 +32,8 @@ export const render = (container) => {
         const extraFields = mode === "register"
             ? [
                 el("input", { type: "text", name: "name", placeholder: t("auth.namePlaceholder"), autocomplete: "name", required: "true" }),
-                el("select", { name: "role" }, [
+                // Sin <label> visible: el nombre accesible va en aria-label (entrada 041)
+                el("select", { name: "role", "aria-label": t("auth.roleLabel") }, [
                     el("option", { value: "candidate", text: t("auth.roleCandidate") }),
                     el("option", { value: "recruiter", text: t("auth.roleRecruiter") })
                 ])
