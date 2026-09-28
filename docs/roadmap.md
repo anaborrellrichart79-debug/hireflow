@@ -8,6 +8,8 @@ Estado de partida: el MVP está completo (ver `projectStatus.md`). Candidatos y 
 
 Prioridades: 🔴 bloquea publicar la app · 🟠 importante · 🟢 mejora.
 
+> **Publicación en pausa (septiembre 2026).** El proyecto queda como portfolio: el nombre «HireFlow» ya lo usan otros productos del mismo sector, incluida una app en Google Play (entrada 043). Si se retoma, el primer paso es **elegir un nombre propio** y comprobarlo en TMview; después, lo del apartado 1.
+
 ---
 
 ## 1. Antes de publicar en Google Play

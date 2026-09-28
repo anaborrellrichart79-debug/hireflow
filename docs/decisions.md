@@ -1268,3 +1268,51 @@ Los intentos de login fallidos siguen probándose solo contra el servidor aparte
 **Archivos afectados:** `backend/models/User.js`, `backend/controllers/userControllers.js`, `backend/validators/userValidators.js`, `backend/routes/userRoutes.js`, `backend/i18n/messages.js` (`users.wrongPassword`), `backend/server.js`, `backend/.env.example`, `backend/package-lock.json`; `frontend/js/screens/profileForm.js`, `frontend/js/screens/login.js`, `frontend/js/i18n.js`, `frontend/js/app.js`, `frontend/index.html`; nuevos `frontend/delete-account.html`, `frontend/js/deleteAccountContent.js`, `frontend/js/deleteAccountPage.js`, `frontend/js/publicPage.js`, `frontend/manifest.webmanifest`, `frontend/sw.js`, `frontend/offline.html`, `frontend/js/offlinePage.js`, `frontend/.well-known/security.txt`, `frontend/assets/icons/app-icon-*.png` y `apple-touch-icon.png`; `frontend/js/privacyPage.js` (usa `publicPage.js`), `frontend/style/privacy.css`, `frontend/style/notfound.css`; `.github/workflows/privacy-page.yml`; `package-lock.json`; `tests/helpers.js` y 5 archivos de pruebas nuevos; `docs/api.md`, `docs/googlePlayDataSafety.md`, `docs/changeLog.md`, `docs/roadmap.md`, `docs/architecture.md`, `docs/projectStatus.md`.
 
 ---
+
+## 043 — Publicación en Google Play en pausa: el proyecto queda como portfolio
+**Fecha:** Septiembre 2026
+
+**Contexto:** con la fase 1 del plan de publicación terminada (entrada 042), el siguiente paso era desplegar la app en un servidor y comprar un dominio. Al buscar dominios apareció el problema: casi todas las extensiones de «hireflow» están registradas (.com, .net, .org, .app, .dev, .io y .eu; `.es` parecía libre), y hay varios productos con ese nombre en el **mismo sector**:
+- **Hireflow** (hireflow.com), de *Neatly Technologies, Inc.*: software de reclutamiento con IA, con presencia en LinkedIn, Crunchbase y G2. Sus condiciones de uso dicen que «Hireflow» y su logo son marcas suyas, registradas o no.
+- Una app **«HireFlow» en Google Play** (`com.hireflow.android`), de gestión de recursos humanos que incluye reclutamiento.
+- Un **«HireFlow» para candidatos** (hireflow.app, hireflow.net): revisor de CV y asistente de carrera, muy parecido al asistente de esta app.
+- Otros proyectos y extensiones con el mismo nombre.
+
+**Decisión (de la autora):** dejar HireFlow como **proyecto de portfolio**, sin publicarlo por ahora. Como portfolio el nombre no es un problema, porque no compite comercialmente. Publicarlo en Google Play con ese nombre supondría chocar con una app que ya está en la tienda, arriesgarse a una reclamación de marca y quedar escondida tras los otros productos en las búsquedas.
+
+**Qué queda hecho, por si se retoma:**
+- **La fase 1 completa** (entrada 042): borrado de la cuenta en la app y por web, PWA, `TRUST_PROXY`, `/.well-known/` y dependencias sin vulnerabilidades.
+- **La Política de Privacidad y la página de borrado**, publicadas en GitHub Pages.
+- **El análisis del servidor**: el de Hetzner Cloud de la autora (Ubuntu, Nginx, MySQL y Node ya instalados, con firewall) puede alojar la app, con su propia base de datos y usuario, sin tocar las webs que ya tiene.
+- **Si se retoma:** elegir primero un **nombre propio**, comprobado en TMview, el buscador de marcas de la UE. Después, comprar el dominio y crear el paquete de Android, porque el identificador del paquete no se puede cambiar nunca después. Los pasos están en `roadmap.md`.
+
+**Visto de paso en el servidor, sin tocar nada:** el backend de otra web de la autora se ejecuta como `root`, y había 14 actualizaciones del sistema pendientes. Se lo comentó a la autora; no forma parte de este proyecto.
+
+---
+
+## 044 — Datos de demostración, guion del vídeo y README como carta de presentación
+**Fecha:** Septiembre 2026
+
+**Problema:** para enseñar el proyecto (un vídeo para LinkedIn y el README) faltaban datos creíbles. La base `hireflow_demo` tenía una sola empresa, 3 candidatos sin CV y todo creado en el mismo segundo, así que todas las ofertas salían como «Publicada hoy» (ya estaba anotado en la entrada 030). Además, el README describía funciones que la app no tiene (importar de LinkedIn, contactos, historial de chats…), no enseñaba ninguna captura, y casi todo estaba sangrado con espacios, lo que GitHub muestra como bloque de código.
+
+**Decisión 1 — datos de demostración reproducibles** (`npm run demo:data`, `scripts/demo-data.mjs`). El script vacía la base de demostración y crea un escenario completo: 3 empresas de sectores distintos (tecnología, sanidad, diseño y comercio), 13 ofertas publicadas en días distintos y 8 candidatos (7 con CV). Hay 20 postulaciones en todas las columnas del Kanban, 6 entrevistas (4 esta semana) y consentimientos variados: una candidata no comparte el CV y otra retiró el contacto. Criterios:
+- **Todo a través de la API**, para que se cumplan las reglas de la app (estados, avisos, consentimientos). Solo las fechas se ajustan directamente en la base.
+- **Solo funciona sobre una base cuyo nombre acabe en `_demo`**: nunca puede vaciar la de desarrollo.
+- **Datos claramente ficticios:** emails `@example.com` (un dominio reservado para ejemplos), teléfonos del tipo 600 000 0xx y empresas inventadas. Así el vídeo no enseña datos que puedan ser de alguien real.
+- **Las entrevistas se calculan a partir de hoy**, en días hábiles, para que el panel y el calendario tengan contenido siempre que se ejecute.
+- **Se conservan los personajes de la demo anterior** (Marta Gil, Lucía Navarro, Pablo Ortega e Irene Soler, con Nexa Digital, Brisa Software…), para que no se pierda nada de lo que ya se conocía.
+- Al revisar las capturas se corrigió el propio escenario. El aviso «¡Actualizado por la empresa!» salía también en rechazos antiguos; ahora sale solo en las entrevistas recién programadas. Y un seguimiento personal añadía una quinta columna que no cabía en el tablero, así que se quitó.
+
+**Decisión 2 — capturas automáticas** (`npm run demo:screenshots`, `scripts/screenshots.mjs`). Arranca la app contra la base de demostración y genera 8 capturas en `docs/screenshots/`: panel y Kanban de la empresa, calendario, ofertas, postulaciones, asistente, móvil en inglés y 404. La mascota global se oculta durante la captura (se mueve al azar), con `element.style` y no inyectando CSS, porque la CSP de la app bloquea el CSS en línea y no hace falta saltársela. `npm run demo:start` arranca la app con esos datos para grabar.
+
+**Decisión 3 — guion del vídeo** (`docs/demoVideo.md`): preparación, un guion de 75–90 segundos plano a plano con subtítulos (en LinkedIn casi todo se ve sin sonido), una versión corta de 30–40 segundos, consejos de formato y un texto para el post. Las afirmaciones se ajustan a lo que está comprobado: dice «auditada con axe-core (WCAG 2.1 AA)» y no «accesible», porque una auditoría automática no cubre todos los criterios de WCAG.
+
+**Decisión 4 — README como carta de presentación.** Cuenta qué hace la app para cada rol, con capturas; resume lo que hay detrás (seguridad, privacidad, accesibilidad, idiomas, pruebas y documentación), con enlaces a los documentos; incluye cómo arrancarla, cómo usar los datos de demostración y cómo lanzar las pruebas; y explica el estado actual (portfolio, entrada 043). La insignia de GitHub Actions muestra si las pruebas pasan. El apartado «Autora» se mantiene con el texto original de la autora.
+
+**Mejora visual de paso:** en la tarjeta de postulante desplegada, el email, el teléfono, el sector y la ubicación salían con el tamaño de letra por defecto, mucho más grandes que el CV de debajo. Ahora usan 14 px, como el resto de la tarjeta.
+
+**Verificación:** el script de datos se ejecutó varias veces seguidas y siempre deja el mismo escenario; las 8 capturas se revisaron una a una; la batería completa de pruebas sigue pasando.
+
+**Archivos afectados:** `scripts/demo-data.mjs`, `scripts/screenshots.mjs`, `scripts/demo-start.mjs`, `docs/demoVideo.md`, `docs/screenshots/*.png` (todos nuevos); `package.json` (scripts `demo:*`); `README.md`; `frontend/style/components.css`; `docs/roadmap.md`, `docs/projectStatus.md`, `docs/changeLog.md`.
+
+---

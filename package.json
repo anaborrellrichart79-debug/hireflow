@@ -6,7 +6,10 @@
     "test": "playwright test",
     "test:api": "playwright test tests/api",
     "test:e2e": "playwright test tests/e2e",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "demo:data": "node scripts/demo-data.mjs",
+    "demo:screenshots": "node scripts/screenshots.mjs",
+    "demo:start": "node scripts/demo-start.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

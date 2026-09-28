@@ -194,6 +194,9 @@
 .applicant-card .form-note { color: #4f4f4f; }
 /* Emails largos: en la columna estrecha del Kanban se salían de la tarjeta */
 .applicant-card p { overflow-wrap: anywhere; }
+/* Datos de contacto de "Ver perfil": mismo tamaño que el resto de la tarjeta
+   (salían con el tamaño por defecto, mucho más grandes que el CV de debajo) */
+.applicant-card p:not([class]) { margin: 4px 0; font-size: 14px; }
 .applicant-cv-text { margin: 0; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .status-badge {

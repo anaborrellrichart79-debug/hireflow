@@ -83,6 +83,14 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Portfolio (entradas 043 y 044)
+- Publicación en Google Play en pausa: el proyecto queda como portfolio, porque el nombre «HireFlow» ya lo usan otros productos del mismo sector
+- `npm run demo:data`: datos de demostración creíbles y reproducibles (3 empresas, 13 ofertas, 8 candidatos con CV, todas las fases del Kanban, entrevistas esta semana), solo sobre una base `_demo`
+- `npm run demo:start` y `npm run demo:screenshots`: la app con esos datos y 8 capturas para el README
+- `docs/demoVideo.md`: guion del vídeo de demostración para LinkedIn y texto del post
+- README reescrito como carta de presentación, con capturas y la insignia de las pruebas
+- Corregido: en la tarjeta de postulante desplegada, los datos de contacto salían mucho más grandes que el resto
+
 ## Añadido — Preparar la app para publicarla (entrada 042)
 - "Eliminar mi cuenta" en Mi perfil (los dos roles), con la contraseña en un diálogo propio; el login avisa de que la cuenta se ha eliminado
 - `DELETE /users/me` exige `{ password }` (400 sin ella, 403 si no es correcta)
@@ -141,7 +149,7 @@ Formato basado en Keep a Changelog.
 - `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
 - `backend/database/migrations/034_applications_consent_updated_at.sql` para bases existentes (`applications.consent_updated_at`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 042.
+Detalle en `docs/decisions.md`, entradas 018 a 044.
 
 ---
 

@@ -270,6 +270,9 @@ Un usuario podrá:
 ✔ Gestionar entrevistas (la empresa las crea/cancela desde el Calendario semanal sobre sus postulantes; el candidato las ve en modo lectura)
 🟡 Ver estadísticas (resumen básico en Home desde v1.1.1: nº de postulaciones/ofertas y desglose por estado; no es un dashboard completo)
 ---
+# Estado de la publicación
+⏸️ **En pausa: el proyecto queda como portfolio** (entrada 043). La preparación para Google Play está hecha (entrada 042), pero el nombre «HireFlow» ya lo usan otros productos del mismo sector. Datos de demostración, guion del vídeo y README como carta de presentación: entrada 044.
+---
 # Estado global
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI conversacional, errores, validaciones)

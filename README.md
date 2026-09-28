@@ -1,227 +1,120 @@
 # HireFlow
 
-HireFlow es una aplicación web diseñada para organizar y optimizar el proceso de búsqueda de empleo.
-Permite a los usuarios gestionar ofertas de empleo (postulaciones), entrevistas, contectos profesionales y seguimiento de oportunidades laborales desde un único lugar.
+**Organiza la búsqueda de empleo desde los dos lados: candidatos que buscan trabajo y empresas que seleccionan.**
 
-La aplicación también incluye un módulo Curriculum IA, que ofrece información y recursos para mejorar curriculums, preparar entrevistas y desarrollar habilidades profesionales.
+[![Pruebas](https://github.com/anaborrellrichart79-debug/hireflow/actions/workflows/tests.yml/badge.svg)](https://github.com/anaborrellrichart79-debug/hireflow/actions/workflows/tests.yml)
+![Node.js](https://img.shields.io/badge/Node.js-Express-3c873a)
+![MySQL](https://img.shields.io/badge/MySQL-8-00758f)
+![JavaScript](https://img.shields.io/badge/JavaScript-sin%20frameworks-f7df1e)
+![Idiomas](https://img.shields.io/badge/idiomas-ES%20·%20EN%20·%20FR%20·%20IT-ebad64)
 
-El objetivo del proyecto es crear una herramienta realista que combine gestión de empleo, visualización de progreso y organización personal, con una arquitectura preparada para futuras ampliaciones.
+![Tablero Kanban de la empresa con el CV de una candidata desplegado](docs/screenshots/empresa-kanban.png)
 
-## Funcionalidades principales
+> Proyecto de portfolio. La publicación en Google Play está en pausa (ver [Estado](#estado)).
 
-    ### Gestión de ofertas de trabajo (postulaciones)
+---
 
-    Los usuarios pueden:
-        - Crear, editar y eliminar ofertas de trabajo.
-        - guardar información sobre empresas y ofertas de trabajo.
-        - añadir notas y realizar seguimiento del proceso de gestión.
-  
-    Estados posibles de las ofertas de trabajo:
-        - Wishlist
-        - Applied
-        - Interview
-        - Offer
-        - Rejected
+## Qué hace
 
-    Cada oferta laboral incluye:
-        - Empresa
-        - Puesto
-        - Ubicación
-        - Fecha de aplicación (entrada)
-        - Notas
-  
-    ### Sistema de usuarios
+**Para quien busca empleo**
+- Busca ofertas por puesto, empresa o habilidad, con filtros por ciudad y tipo de contrato.
+- Se postula dando su consentimiento para compartir el contacto y, si quiere, su CV. Puede retirar cualquiera de los dos cuando quiera.
+- Sigue sus procesos en un tablero y recibe avisos cuando la empresa los mueve.
+- Un asistente le dice si su CV encaja con una oferta, le propone preguntas de entrevista y le da consejos para mejorar su CV y sus habilidades.
 
-    La aplicación contempla dos tipos de usuarios:
+**Para las empresas**
+- Publican ofertas y ven un panel con cómo avanza cada proceso.
+- Mueven a los candidatos por las fases arrastrando tarjetas en un tablero Kanban.
+- Ven el contacto y el CV de cada candidato, solo si este lo ha compartido.
+- Agendan entrevistas en un calendario semanal, que el candidato ve al momento.
 
-        Candidate --> Personas en busca de empleo.
-            Datos principales:
-                - Nombre
-                - Email
-                - Contraseña
-                - Sector profesional
-            Datos opcionales:
-                - Teléfono
-                - Estudios
-                - Aptitudes
-                - Ubicación
-                - Visibilidad para el perfil de empresas.
+| | |
+|---|---|
+| ![Panel de la empresa](docs/screenshots/empresa-panel.png) | ![Ofertas con buscador y filtros](docs/screenshots/candidata-ofertas.png) |
+| **Panel de la empresa**: métricas, embudo y postulantes por oferta | **Ofertas**: buscador sin tildes, filtros y tarjetas completas |
+| ![Asistente IA](docs/screenshots/candidata-asistente.png) | ![Calendario semanal](docs/screenshots/empresa-calendario.png) |
+| **Asistente**: compara el CV con la oferta | **Calendario** por semanas |
+| ![Mis postulaciones](docs/screenshots/candidata-postulaciones.png) | ![Página 404](docs/screenshots/pagina-404.png) |
+| **Mis postulaciones**: el estado lo mueve la empresa | **404**: la mascota da tres vueltas buscando la página |
 
-        Company/recruiter --> Empresas o reclutadores interesados en encontrar candidatos.
-            Datos principales:
-                - Nombre empresa
-                - email
-                - Contraseña
-            Datos opcionales:
-                - Descripción
-                - Tipo de entrevista
-                - Ubicación
-                - Teléfono
-  
-    ### Gestión de entrevistas
+<p align="center"><img src="docs/screenshots/candidata-movil-en.png" alt="Inicio de la candidata en el móvil, en inglés" width="260"></p>
 
-    Permite registrar entrevistas asociadas a una oferta de trabajo:
+---
 
-        Tipos de entrevistas incluiidos:
-            - Estructurada
-            - no estructurada
-            - técnica
-            - telefónica
-            - online
-            - presencial
-            - panel
-            - dinámica de grupo
+## Qué hay detrás
 
-    ### Calendario de eventos
+- **Seguridad.** Nadie puede ver ni tocar los datos de otro usuario: la comprobación va dentro de cada consulta SQL. Hay permisos por rol, contraseñas con bcrypt, límite de intentos de login, cabeceras de seguridad y CSP con helmet, y borrar la cuenta pide la contraseña.
+- **Privacidad (RGPD).** Consentimientos separados para contacto y CV, oferta a oferta, que se pueden retirar. Borrado de la cuenta desde la app y por web. [Política de Privacidad](https://anaborrellrichart79-debug.github.io/hireflow/) pública en 4 idiomas.
+- **Accesibilidad.** Auditada con axe-core (WCAG 2.1 A y AA) en cada pantalla y diálogo, usable con teclado, con foco visible y respeto por `prefers-reduced-motion`.
+- **4 idiomas.** Español, inglés, francés e italiano, también en los mensajes del servidor, el asistente y la política.
+- **Calidad.** 127 pruebas automáticas (API e interfaz, con Playwright) que se ejecutan en cada cambio con GitHub Actions, sobre una base de datos creada desde cero.
+- **App instalable (PWA)** y responsive hasta 320 px de ancho.
+- **Documentada.** [Arquitectura](docs/architecture.md) con diagramas, [API](docs/api.md), [base de datos](docs/Database.md), [roadmap](docs/roadmap.md) y **44 decisiones técnicas** explicadas en [`decisions.md`](docs/decisions.md): el problema, las alternativas, qué se eligió y cómo se comprobó.
 
-        Los usuarios pueden organizar:
-            - Entrevistas
-            - búsqueda de empleo
-            - recordatorios
-            - reuniones
+## Tecnologías
 
-    El sistema se va a preparar para poder integrar google calendar en un futuro.
+| | |
+|---|---|
+| **Frontend** | HTML, CSS y JavaScript con módulos ES, sin frameworks: router propio, componentes y traducciones |
+| **Backend** | Node.js, Express, express-validator, JWT, bcrypt, helmet, express-rate-limit |
+| **Base de datos** | MySQL 8 |
+| **Pruebas** | Playwright Test y axe-core; GitHub Actions |
+| **Publicación** | GitHub Pages (política, borrado de cuenta y 404) |
 
-    ### Seguimiento de oportunidades
-
-    Permite eliminar o actualizar oportunidades fácilmente.
-
-        Panel donde se muestran:
-            - postulaciones activas
-            - estado del proceso
-            - Empresas en seguimiento
-
-    ### Importación de ofertas de empleo
-
-    Esto permite centralizar oportunidades laborales en un único panel.
-
-        Se puede importar ofertas desde:
-            - linkedin
-            - APIs de empleo externas
-  
-    ### Curriculum IA
-
-    Este módulo proporciona información útil para la búsqueda de empleo mediante una base de conocimientos almacenada en SQL.
-
-        Incluye:
-            - tipos de entrevista laboral
-            - preguntas frecuentes en entrevisatas
-            - guías para crear currículums según tipo de empresa
-            - Técnicas para mejorar habilidades profesionales.+
-  
-        La interfaz incluye:
-            - historial de chats
-            - documentos enviados por el usuario
-            - panel de respuestas
-            - adjuntar archivos pdf.
-            - envio de preguntas o adjuntos.
-  
-## Arquitectura del proyecto
-
-    El proyecto está dividido en frontend (JavaScript sin framework, módulos ES) y backend (Node.js + Express + MySQL).
-    El propio servidor Express sirve el frontend, así que todo funciona en http://localhost:3000.
-
-        hireflow/
-        |
-        |--- frontend/
-        |       |---- index.html
-        |       |---- style/            main.css, layout.css, components.css, mascot.css
-        |       |---- assets/           iconos SVG, favicon y mascota
-        |       |---- js/
-        |               |---- app.js            arranque: rutas, cabecera, idioma, mascota
-        |               |---- router.js         rutas por hash (#/jobs, #/calendar...)
-        |               |---- api.js            fetch a /api, token JWT, sesión caducada
-        |               |---- auth.js           login, registro, cierre de sesión
-        |               |---- i18n.js           textos en español, inglés, francés e italiano
-        |               |---- mascot.js         mascota animada
-        |               |---- components/       ui.js (el(), diálogos, avisos), header, cardGrid...
-        |               |---- screens/          una por pantalla: login, home, jobs, jobForm,
-        |                                       applications, applicants, calendar, profileForm, ai
-        |
-        |--- backend/
-        |       |---- server.js         Express, cabeceras de seguridad (helmet), rutas /api
-        |       |---- .env.example      variables de entorno necesarias (copiar a .env)
-        |       |---- config/           conexión a MySQL
-        |       |---- routes/           users, jobs, companies, applications, interviews, calendar, ai
-        |       |---- controllers/      lógica de cada ruta
-        |       |---- models/           consultas SQL (con comprobación de propiedad en la propia query)
-        |       |---- validators/       validación de entrada (express-validator)
-        |       |---- middleware/       token JWT, roles, límite de intentos de login, errores
-        |       |---- constants/        estados de una postulación
-        |       |---- database/
-        |               |---- schema.sql                estructura de todas las tablas
-        |               |---- seed.sql                  contenido del asistente IA (en español)
-        |               |---- seed_ai_translations.sql  su traducción a inglés, francés e italiano
-        |               |---- migrations/               cambios para bases ya creadas, en orden
-        |
-        |--- docs/          API, base de datos, decisiones técnicas, changelog, estado del proyecto
-        |--- postman/       colección de Postman para probar la API
+---
 
 ## Cómo arrancarlo
 
-    1. Instala las dependencias:  cd backend  y  npm install
-    2. Crea la base de datos (ver "Instalación de la Base de Datos", más abajo).
-    3. Copia backend/.env.example a backend/.env y rellena tus datos de MySQL y un JWT_SECRET largo y aleatorio.
-    4. Arranca el servidor:  npm start  (o  npm run dev  para que se reinicie al guardar cambios).
-    5. Abre http://localhost:3000
+Necesitas **Node.js 20 o posterior** y **MySQL 8**.
 
-## Cómo ejecutar las pruebas
+1. **Base de datos**: ejecuta en orden `backend/database/schema.sql`, `seed.sql` y `seed_ai_translations.sql`, con `--default-character-set=utf8mb4` para que las tildes se guarden bien. Crean todas las tablas y el contenido del asistente en los 4 idiomas.
+   Si ya tenías una base de una versión anterior, aplica en orden los archivos de `backend/database/migrations/` que te falten.
+2. **Configuración**: copia `backend/.env.example` a `backend/.env` y rellena tus datos de MySQL y un `JWT_SECRET` largo y aleatorio.
+3. **Dependencias**: `npm install` en la raíz y en `backend/`.
+4. **Arrancar**: `npm start` en `backend/` (o `npm run dev` para que se reinicie al guardar) y abre http://localhost:3000.
 
-    Con la base de datos creada y backend/.env configurado (pasos de arriba):
+### Datos de demostración
 
-    1. Instala las dependencias de la raíz:  npm install  (y la primera vez:  npx playwright install chromium)
-    2. Ejecuta:  npm test   (arranca la app si no está en marcha)
+```bash
+npm run demo:data         # rellena la base hireflow_demo con un escenario completo
+npm run demo:start        # arranca la app con esos datos
+npm run demo:screenshots  # regenera las capturas de este README
+```
 
-    npm run test:api   solo la API
-    npm run test:e2e   solo la interfaz (navegador y accesibilidad)
+Cuentas: `lucia.navarro@example.com` (candidata) y `marta.gil@example.com` (empresa), con contraseña `Demo2026!`. Todos los datos son ficticios. Guion del vídeo de demostración: [`docs/demoVideo.md`](docs/demoVideo.md).
 
-    Se ejecutan también solas en GitHub en cada push (pestaña Actions). Detalle en docs/architecture.md.
+### Pruebas
 
-## Tecnologías aplicadas
+```bash
+npx playwright install chromium   # solo la primera vez
+npm test                          # todas (arranca la app si no está en marcha)
+npm run test:api                  # solo la API
+npm run test:e2e                  # solo la interfaz
+```
 
-    ### Frontend
-        - HTML
-        - CSS
-        - Vanilla JavaScript (ES6 Modules)
-  
-    ### Backend
-        - node.js
-        - Express.js
+---
 
-    ### Base de Datos
-        - MySQL
-  
-    ### Arquitectura (Resumen)
-        - API REST
-        - Modular JavaScript
-        - Separación frontend / backend
+## Estructura
 
-## Instalación de la Base de Datos
+```
+hireflow/
+├── frontend/            app (index.html), páginas públicas, estilos, iconos, service worker
+│   └── js/              app.js, router.js, api.js, i18n.js, components/, screens/
+├── backend/
+│   ├── server.js        Express, seguridad, rutas /api
+│   ├── routes/ controllers/ models/ validators/ middleware/
+│   ├── i18n/            mensajes de la API en 4 idiomas
+│   └── database/        schema.sql, seed*.sql, migrations/
+├── tests/               pruebas de la API y de la interfaz (Playwright)
+├── scripts/             datos de demostración y capturas
+├── docs/                arquitectura, API, base de datos, decisiones, roadmap, changelog
+└── .github/workflows/   pruebas y publicación en GitHub Pages
+```
 
-    1. Crear la base de datos ejecutando el archivo --> backend/database/schema.sql
-    2. Insertar los datos iniciales --> backend/database/seed.sql
-    3. Insertar las traducciones del asistente IA (inglés, francés, italiano) --> backend/database/seed_ai_translations.sql
+## Estado
 
-    Esto creará la estructura completa de las tablas y el contenido del asistente IA: tipos de entrevista, preguntas, guías de currículum y técnicas de mejora, en los 4 idiomas de la app.
-    Ejecuta los archivos con --default-character-set=utf8mb4 para que se guarden bien las tildes.
-
-    Si ya tienes una base creada con una versión anterior, aplica en orden los archivos de backend/database/migrations/ que te falten (cada uno explica qué cambia).
-
-## Estado del proyecto
-
-    HireFlow se está desarrollando de forma incremental dentro del repositorio portafolio-2026.
-    El proyecto se sube progresivamente para mostrar la evolución del desarrollo, la arquitectura del sistema, valorar la organización y el manejo de Git.
-
-## Diagrama del proyecto
-
-    Ver docs/architecture.md: diagrama de componentes, recorrido de una petición y modelo de datos.
-    Lo que falta por hacer, priorizado, está en docs/roadmap.md.
+**Proyecto de portfolio.** La app está completa y probada, y la preparación para publicarla en Google Play está hecha: borrado de la cuenta, PWA y ajustes para desplegarla detrás de un proxy. La publicación está en pausa porque el nombre «HireFlow» ya lo usan otros productos del mismo sector. El detalle está en [`decisions.md`, entrada 043](docs/decisions.md), y lo que falta, en el [roadmap](docs/roadmap.md).
 
 ## Autora
 
-    ¡Hola! Soy Ana Borrell, desarrolladora frontend junior en formación, apasionada por
-    crear experiencias web interactivas y funcionales. Este portfolio contiene los 
-    proyectos que he desarrollado para demostrar mis habilidades en **HTML5, CSS3, 
-    JavaScript y React**, y sirve como carta de presentación para oportunidades 
-    profesionales. En este caso en concreto, una aplicación para organizar el caótico 
-    mundo de la busqueda de empleo.
+¡Hola! Soy Ana Borrell, desarrolladora frontend junior en formación, apasionada por crear experiencias web interactivas y funcionales. Este portfolio contiene los proyectos que he desarrollado para demostrar mis habilidades en **HTML5, CSS3, JavaScript y React**, y sirve como carta de presentación para oportunidades profesionales. En este caso en concreto, una aplicación para organizar el caótico mundo de la busqueda de empleo.
