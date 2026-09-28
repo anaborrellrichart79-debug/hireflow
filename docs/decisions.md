@@ -1121,3 +1121,23 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 **Archivos afectados:** `frontend/js/components/lostMascot.js` (nuevo), `frontend/style/notfound.css` (nuevo), `frontend/404.html` (nuevo), `frontend/js/notFoundPage.js` (nuevo), `frontend/js/app.js`, `frontend/js/router.js`, `frontend/index.html`, `frontend/js/i18n.js` (`common.notFound` sustituida por `notFound.*` en los 4 idiomas), `backend/server.js`, `.github/workflows/privacy-page.yml`.
 
 ---
+
+## 037 — Política de Privacidad en francés e italiano
+**Fecha:** Septiembre 2026
+
+**Problema:** la app está en 4 idiomas (entrada 012), pero la Política de Privacidad solo tenía texto completo en español e inglés (entrada 017). Con la app en francés o italiano, el modal del registro caía al español, y desde la entrada 035 la página pública también.
+
+**Decisión:** traducir las 11 secciones, el título, la fecha y el aviso de borrador al francés y al italiano, con el mismo contenido que la versión en español. Criterios:
+- **Mismo trato que el resto de la app en cada idioma:** «vous» en francés e «tu» en italiano, como en `i18n.js`.
+- **Nombres reales de la interfaz:** donde la política cita un botón o una pantalla, usa el texto que ve el usuario en ese idioma («Confidentialité» y «Mes candidatures»; «Privacy» y «Le mie candidature»). Si cambia un texto de la interfaz que cita la política, hay que cambiarlo también aquí.
+- **Autoridad de control:** la versión inglesa ya remitía a «la autoridad de tu país (en España, la AEPD)». En francés e italiano se nombra además la del país del idioma (CNIL, cnil.fr; Garante per la protezione dei dati personali, garanteprivacy.it). Es una concreción de lo mismo, no un cambio de contenido.
+- **Terminología del RGPD** en cada idioma («responsable du traitement», «titolare del trattamento», «licéité», «liceità», «portabilité», «portabilità»...).
+- La página pública muestra los 4 idiomas en su selector, con su nombre accesible traducido («Langue», «Lingua»). La elección de idioma de la entrada 035 (URL > app > navegador) funciona igual con fr/it.
+
+**Sigue pendiente, y ahora con más motivo:** la política es un borrador. Las traducciones al francés y al italiano también tienen que revisarlas profesionales (idealmente, un jurista de cada idioma) antes de publicar en Play Store. Las cuatro versiones tienen que decir lo mismo: si cambia una, cambian todas (lo dice también el comentario de `privacyPolicyContent.js`).
+
+**Verificación:** comprobación estructural (4 idiomas, 11 secciones cada uno, misma numeración, contacto en las secciones 1 y 7, sin campos vacíos). Con Playwright y axe-core: página en fr e it con título, `lang` del documento, título de pestaña, fecha, contacto, botón y pantalla con sus nombres reales, autoridad de cada país y ningún resto del texto en español; navegador en francés sin idioma elegido → francés; cambio de francés a italiano con el selector; 320px sin desbordamiento con los 4 enlaces; el modal del registro con la app en fr/it muestra la política en ese idioma y enlaza a la página en ese idioma. axe-core: 0 problemas en las 4 vistas. Sin errores de consola. Repetidas sin fallos las pruebas de las entradas 033, 035 y 036.
+
+**Archivos afectados:** `frontend/js/privacyPolicyContent.js` (fr, it y comentario de cabecera), `frontend/js/privacyPage.js` (nombres y etiqueta del selector en los 4 idiomas), `docs/changeLog.md`, `docs/projectStatus.md`, `docs/googlePlayDataSafety.md`.
+
+---

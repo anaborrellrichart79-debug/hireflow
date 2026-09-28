@@ -4,10 +4,10 @@
 // una app en desarrollo -- no es asesoría legal. Antes de publicar la app
 // debe revisarlo un abogado o un delegado de protección de datos.
 //
-// Solo hay contenido completo en es/en (ver docs/decisions.md, entrada 017,
-// para el porqué). La estructura por secciones está pensada para poder añadir
-// fr/it más adelante sin tocar el resto del código -- basta con añadir esas
-// claves a este objeto.
+// En los 4 idiomas de la app (es/en desde la entrada 017, fr/it desde la
+// 037). Las cuatro versiones tienen que decir lo mismo: si cambia una,
+// cambian todas. La usan el modal del registro y la página pública
+// privacy.html (entrada 035).
 
 export const PRIVACY_POLICY_CONTENT = {
     es: {
@@ -111,6 +111,108 @@ export const PRIVACY_POLICY_CONTENT = {
             }
         ],
         disclaimer: "Notice: this is an informal draft for an app still in development, not legal advice. It must be reviewed by a data protection professional before the app is published."
+    },
+    fr: {
+        title: "Politique de Confidentialité",
+        updated: "Dernière mise à jour : septembre 2026",
+        sections: [
+            {
+                heading: "1. Responsable du traitement",
+                body: "HireFlow est une application en cours de développement qui met en relation des candidats et des entreprises. Le responsable du traitement des données est la titulaire du projet HireFlow, joignable à l'adresse ana.borrell.richart79@gmail.com."
+            },
+            {
+                heading: "2. Données que nous collectons",
+                body: "Lors de votre inscription : nom, email et mot de passe (toujours stocké chiffré, jamais en clair). De manière facultative, dans votre profil : secteur, téléphone et lieu ; et, si vous êtes candidat, votre CV (à propos de vous, compétences, expérience professionnelle, formation et un lien vers un CV externe). Nous ne vous demandons jamais de coordonnées bancaires, de numéro de carte ni d'autres données particulièrement sensibles (santé, opinions, etc.)."
+            },
+            {
+                heading: "3. À quoi servent vos données",
+                body: "À créer et gérer votre compte, à vous montrer des offres d'emploi ou des candidats selon votre rôle, à gérer vos candidatures et vos entretiens et — uniquement avec votre consentement explicite, donné pour chaque candidature — à partager votre nom, votre email et votre téléphone avec l'entreprise à laquelle vous postulez, afin qu'elle puisse vous contacter, ainsi que votre CV si vous cochez en plus la case facultative pour le partager. Les compétences de votre CV servent aussi, dans l'application, à calculer votre compatibilité avec une offre."
+            },
+            {
+                heading: "4. Base légale",
+                body: "La gestion de votre compte et du service repose sur l'exécution du contrat d'utilisation que vous acceptez lors de votre inscription (art. 6.1.b du RGPD). Le partage de vos coordonnées avec une entreprise lorsque vous postulez repose sur votre consentement explicite, demandé individuellement pour chaque candidature, que vous pouvez refuser tout en continuant à utiliser le reste de l'application."
+            },
+            {
+                heading: "5. Avec qui nous partageons vos données",
+                body: "Uniquement avec l'entreprise à laquelle vous postulez : votre nom, votre email et votre téléphone si vous avez coché la case de consentement en postulant, et votre CV seulement si vous avez coché en plus la case facultative pour le partager. Nous ne vendons ni ne cédons vos données à des tiers, à des fins publicitaires ou autres."
+            },
+            {
+                heading: "6. Durée de conservation",
+                body: "Tant que votre compte est actif. Vous pouvez le supprimer à tout moment depuis votre profil ; cela supprime aussi vos candidatures, vos notes et les entretiens associés."
+            },
+            {
+                heading: "7. Vos droits",
+                body: "Vous pouvez accéder à vos données, les rectifier, en demander l'effacement, vous opposer à leur traitement, demander la limitation du traitement ou la portabilité de vos données, en écrivant à ana.borrell.richart79@gmail.com ou en supprimant directement votre compte depuis l'écran du profil. Vous pouvez aussi retirer à tout moment l'autorisation de partager vos coordonnées ou votre CV avec une entreprise, grâce au bouton « Confidentialité » de chaque candidature dans Mes candidatures ; ce retrait ne remet pas en cause la licéité du traitement effectué auparavant. Si vous estimez que nous n'avons pas traité correctement votre demande, vous pouvez introduire une réclamation auprès de l'autorité de protection des données de votre pays (en Espagne, l'AEPD — aepd.es ; en France, la CNIL — cnil.fr)."
+            },
+            {
+                heading: "8. Utilisateurs hors d'Espagne",
+                body: "Si vous accédez depuis un autre pays, des droits équivalents prévus par votre législation locale peuvent aussi s'appliquer : le RGPD britannique et les recommandations de l'ICO si vous êtes au Royaume-Uni, la loi Informatique et Libertés et la CNIL si vous êtes en France, ou le CCPA/CPRA si vous êtes en Californie (États-Unis). Nous travaillons à compléter cette politique pour refléter plus en détail ces réglementations ; en attendant, nous appliquons toujours le niveau de protection le plus favorable pour vous."
+            },
+            {
+                heading: "9. Sécurité",
+                body: "Les mots de passe sont stockés chiffrés (jamais en clair) et l'accès à l'API nécessite une authentification. En production, tout le trafic doit circuler chiffré (HTTPS)."
+            },
+            {
+                heading: "10. Mineurs",
+                body: "HireFlow ne s'adresse pas aux personnes de moins de 16 ans. Si nous détectons un compte appartenant à une personne de moins de cet âge, nous le supprimerons."
+            },
+            {
+                heading: "11. Modifications de cette politique",
+                body: "Si nous apportons des modifications importantes à cette politique, nous vous en informerons lors de votre prochaine connexion."
+            }
+        ],
+        disclaimer: "Avertissement : ceci est un projet indicatif pour une application en cours de développement et ne constitue pas un conseil juridique. Il doit être relu par un professionnel de la protection des données avant la publication de l'application."
+    },
+    it: {
+        title: "Informativa sulla Privacy",
+        updated: "Ultimo aggiornamento: settembre 2026",
+        sections: [
+            {
+                heading: "1. Titolare del trattamento",
+                body: "HireFlow è un'applicazione in fase di sviluppo che mette in contatto candidati e aziende. Il titolare del trattamento dei dati è la titolare del progetto HireFlow, contattabile all'indirizzo ana.borrell.richart79@gmail.com."
+            },
+            {
+                heading: "2. Quali dati raccogliamo",
+                body: "Al momento della registrazione: nome, email e password (sempre salvata cifrata, mai in chiaro). Facoltativamente, nel tuo profilo: settore, telefono e località; e, se sei un candidato, il tuo CV (su di te, competenze, esperienza lavorativa, formazione e un link a un CV esterno). Non ti chiediamo mai dati bancari, numeri di carta né altri dati particolarmente sensibili (salute, opinioni, ecc.)."
+            },
+            {
+                heading: "3. Per cosa usiamo i tuoi dati",
+                body: "Per creare e gestire il tuo account, mostrarti offerte di lavoro o candidati in base al tuo ruolo, gestire le tue candidature e i tuoi colloqui e — solo con il tuo consenso esplicito, dato per ogni candidatura — condividere il tuo nome, la tua email e il tuo telefono con l'azienda a cui ti candidi, perché possa contattarti, e il tuo CV se selezioni anche la casella facoltativa per condividerlo. Le competenze del tuo CV vengono usate anche all'interno dell'app per calcolare la tua compatibilità con un'offerta."
+            },
+            {
+                heading: "4. Base giuridica",
+                body: "La gestione del tuo account e del servizio si basa sull'esecuzione del contratto d'uso che accetti al momento della registrazione (art. 6.1.b del GDPR). La condivisione dei tuoi dati di contatto con un'azienda quando ti candidi si basa sul tuo consenso esplicito, richiesto singolarmente per ogni candidatura, che puoi negare continuando a usare il resto dell'app."
+            },
+            {
+                heading: "5. Con chi condividiamo i tuoi dati",
+                body: "Solo con l'azienda a cui ti candidi: il tuo nome, la tua email e il tuo telefono se hai selezionato la casella del consenso al momento della candidatura, e il tuo CV solo se hai selezionato anche la casella facoltativa per condividerlo. Non vendiamo né cediamo i tuoi dati a terzi, per fini pubblicitari o di altro tipo."
+            },
+            {
+                heading: "6. Per quanto tempo conserviamo i tuoi dati",
+                body: "Finché il tuo account è attivo. Puoi eliminarlo in qualsiasi momento dal tuo profilo; così vengono eliminate anche le tue candidature, le note e i colloqui associati."
+            },
+            {
+                heading: "7. I tuoi diritti",
+                body: "Puoi accedere ai tuoi dati, rettificarli, chiederne la cancellazione, opporti al loro trattamento, chiedere la limitazione del trattamento o la portabilità dei tuoi dati, scrivendo a ana.borrell.richart79@gmail.com o eliminando direttamente il tuo account dalla schermata del profilo. Puoi anche ritirare in qualsiasi momento il permesso di condividere i tuoi dati di contatto o il tuo CV con un'azienda, con il pulsante \"Privacy\" di ogni candidatura in Le mie candidature; il ritiro non pregiudica la liceità del trattamento effettuato in precedenza. Se ritieni che non abbiamo gestito correttamente la tua richiesta, puoi presentare un reclamo all'autorità per la protezione dei dati del tuo paese (in Spagna l'AEPD — aepd.es; in Italia il Garante per la protezione dei dati personali — garanteprivacy.it)."
+            },
+            {
+                heading: "8. Utenti fuori dalla Spagna",
+                body: "Se accedi da un altro paese, possono applicarsi anche diritti equivalenti previsti dalla normativa locale: il GDPR del Regno Unito e le linee guida dell'ICO se sei nel Regno Unito, la Loi Informatique et Libertés e la CNIL se sei in Francia, oppure il CCPA/CPRA se sei in California (Stati Uniti). Stiamo lavorando per ampliare questa informativa e riflettere queste normative in modo più dettagliato; nel frattempo applichiamo sempre il livello di protezione più favorevole per te."
+            },
+            {
+                heading: "9. Sicurezza",
+                body: "Le password vengono salvate cifrate (mai in chiaro) e l'accesso all'API richiede l'autenticazione. In produzione, tutto il traffico deve viaggiare cifrato (HTTPS)."
+            },
+            {
+                heading: "10. Minori",
+                body: "HireFlow non è rivolta a persone di età inferiore ai 16 anni. Se individuiamo un account appartenente a una persona di età inferiore, lo elimineremo."
+            },
+            {
+                heading: "11. Modifiche a questa informativa",
+                body: "Se apportiamo modifiche importanti a questa informativa, te lo comunicheremo al prossimo accesso."
+            }
+        ],
+        disclaimer: "Avviso: questa è una bozza indicativa per un'applicazione in fase di sviluppo e non costituisce consulenza legale. Prima della pubblicazione dell'app deve essere rivista da un professionista della protezione dei dati."
     }
 };
 

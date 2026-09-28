@@ -4,8 +4,10 @@
 // privacyPolicyContent.js. Ver docs/decisions.md, entrada 035.
 import { PRIVACY_POLICY_CONTENT, getPrivacyPolicy } from "./privacyPolicyContent.js";
 
-const AVAILABLE = Object.keys(PRIVACY_POLICY_CONTENT); // es, en
-const LANG_NAMES = { es: "Español", en: "English" };
+const AVAILABLE = Object.keys(PRIVACY_POLICY_CONTENT); // es, en, fr, it
+const LANG_NAMES = { es: "Español", en: "English", fr: "Français", it: "Italiano" };
+// Nombre accesible del selector de idioma, en el idioma de la página
+const LANG_LABEL = { es: "Idioma", en: "Language", fr: "Langue", it: "Lingua" };
 
 // Idioma: ?lang= en la URL > el que eligió en la app > el del navegador > español
 const pickLang = () => {
@@ -37,7 +39,7 @@ document.title = `${policy.title} · HireFlow`;
 // Selector de idioma: enlaces normales (?lang=xx), funcionan sin JavaScript
 // extra y se pueden compartir tal cual
 const langNav = document.getElementById("privacy-lang");
-langNav.setAttribute("aria-label", lang === "es" ? "Idioma" : "Language");
+langNav.setAttribute("aria-label", LANG_LABEL[lang] || "Language");
 AVAILABLE.forEach((code) => {
     const link = node("a", LANG_NAMES[code]);
     link.href = `?lang=${code}`;

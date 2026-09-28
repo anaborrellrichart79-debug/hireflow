@@ -41,7 +41,7 @@ No aplica: HireFlow no está dirigida a menores de 16 años (ver Política de Pr
 
 Google Play exige un enlace público a la política de privacidad completa. **URL para pegar en Play Console:**
 
-**https://anaborrellrichart79-debug.github.io/hireflow/** (en inglés: `https://anaborrellrichart79-debug.github.io/hireflow/?lang=en`)
+**https://anaborrellrichart79-debug.github.io/hireflow/** (en otros idiomas, añadir `?lang=en`, `?lang=fr` o `?lang=it`; sin parámetro usa el idioma del navegador)
 
 La publica en GitHub Pages el workflow `.github/workflows/privacy-page.yml` cada vez que cambia su contenido en `main` (ver `docs/decisions.md`, entrada 035). El texto sale de `frontend/js/privacyPolicyContent.js`, el mismo que muestra la app en el modal del registro, así que la versión pública y la de la app siempre coinciden. Dentro de la app también está en `/privacy.html`.
 

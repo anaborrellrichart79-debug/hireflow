@@ -156,7 +156,7 @@ Estado general
 🟢 Implementado (vanilla JS, sin framework, servido como estático desde el propio backend — ver `docs/decisions.md`, entrada 011). Este checklist reemplaza al anterior (Landing/Login/Dashboard/...), que no coincidía con las pantallas reales de `FRONTEND_DESIGN.md`.
 ---
 ## Login / Registro
-🟢 (no estaba en `FRONTEND_DESIGN.md`, añadido por ser necesario para autenticación). Registro exige aceptar la Política de Privacidad (checkbox + modal con el texto completo en es/en, ver `docs/decisions.md`, entrada 017); campos con `autocomplete`.
+🟢 (no estaba en `FRONTEND_DESIGN.md`, añadido por ser necesario para autenticación). Registro exige aceptar la Política de Privacidad (checkbox + modal con el texto completo en los 4 idiomas, ver `docs/decisions.md`, entrada 017); campos con `autocomplete`.
 ---
 ## Postulantes (empresa)
 🟢 Pantalla nueva (`/applicants`, solo recruiter): quién se ha postulado a las ofertas propias, con perfil de contacto (visible solo con consentimiento del candidato), cambio de estado y botón para agendar entrevista. Ver `docs/decisions.md`, entrada 017.
@@ -251,8 +251,9 @@ Implementar:
 ✔ CV del candidato (`user_profiles`): CRUD, uso en job-match/Asistente IA y visible para la empresa con consentimiento opcional — completo
 ✔ Retirar o volver a dar el consentimiento (contacto/CV) de una postulación ya enviada — completo (entrada 034)
 ✔ Política de Privacidad en una URL pública (GitHub Pages) para Google Play — completo (entrada 035)
+✔ Política de Privacidad en francés e italiano (ya está en los 4 idiomas de la app) — completo (entrada 037)
 
-**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), traducir la Política de Privacidad a fr/it (hoy solo es/en, ver entrada 017), que un profesional revise la Política de Privacidad (ya publicada en https://anaborrellrichart79-debug.github.io/hireflow/, entrada 035), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), que un profesional revise la Política de Privacidad (ya publicada en https://anaborrellrichart79-debug.github.io/hireflow/, entrada 035), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:
@@ -269,7 +270,7 @@ Un usuario podrá:
 Backend
 ████████████████████ 100% (MVP completo: Users, Companies, Job Offers, Applications, Interviews, Calendar, AI conversacional, errores, validaciones)
 Frontend
-████████████████████ 100% (9 pantallas + login implementadas, probadas, responsive y en 4 idiomas -- Política de Privacidad solo es/en --, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada, flujo de contratación completo con Postulantes/consentimiento/entrevistas, CV del candidato)
+████████████████████ 100% (9 pantallas + login implementadas, probadas, responsive y en 4 idiomas, incluida la Política de Privacidad,, Home con resumen y accesos rápidos, Asistente IA por chat, mascota animada, flujo de contratación completo con Postulantes/consentimiento/entrevistas, CV del candidato)
 Base de datos
 ███████████████░░ 80%
 Documentación
