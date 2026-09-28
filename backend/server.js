@@ -62,6 +62,16 @@ app.use("/api/ai", aiRouter);
 //user API routes
 app.use("/api/users", userRoutes);
 
+// Una URL que no existe fuera de la API, abierta en el navegador, recibe la
+// página 404 (el maletín buscando) en vez del JSON de error. La API sigue
+// respondiendo JSON. Ver docs/decisions.md, entrada 036.
+app.use((req, res, next) => {
+    if (req.method === "GET" && !req.path.startsWith("/api/") && req.accepts("html")) {
+        return res.status(404).sendFile(path.join(__dirname, "../frontend/404.html"));
+    }
+    next();
+});
+
 // Deben registrarse después de todas las rutas: notFound captura cualquier
 // ruta no definida, errorHandler es el manejador final de errores (4 params).
 app.use(notFound);

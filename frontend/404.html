@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Rutas absolutas desde la raíz de la web: esta página se sirve para
+         cualquier URL que no existe (/a/b/c), y con rutas relativas no
+         encontraría sus propios archivos. En GitHub Pages el workflow cambia
+         la base a /hireflow/. Ver docs/decisions.md, entrada 036. -->
+    <base href="/">
+    <title>HireFlow · 404</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style/notfound.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="lost-page">
+    <main id="lost-root">
+        <noscript>
+            <h1>404</h1>
+            <p>Página no encontrada. / Page not found.</p>
+        </noscript>
+    </main>
+    <script type="module" src="js/notFoundPage.js"></script>
+</body>
+</html>

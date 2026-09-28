@@ -83,6 +83,10 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Añadido — Página 404 con el maletín (entrada 036)
+- Página no encontrada con la mascota: el maletín da tres vueltas buscando y dice "Creo que no lo encuentro…", con botón "Volver al inicio", en los 4 idiomas y respetando el movimiento reducido
+- Se usa en las rutas inexistentes de la app, en las URLs inexistentes fuera de `/api` (antes devolvían el JSON de error) y en GitHub Pages
+
 ## Añadido — Política de Privacidad pública (entrada 035)
 - Página pública de la Política de Privacidad, sin sesión, en es/en: `/privacy.html` dentro de la app y https://anaborrellrichart79-debug.github.io/hireflow/ en GitHub Pages (la URL que pide Google Play)
 - Workflow `.github/workflows/privacy-page.yml`: publica solo la política (no la app ni el resto del repo) cada vez que cambia su contenido
@@ -101,7 +105,7 @@ Formato basado en Keep a Changelog.
 - `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
 - `backend/database/migrations/034_applications_consent_updated_at.sql` para bases existentes (`applications.consent_updated_at`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 035.
+Detalle en `docs/decisions.md`, entradas 018 a 036.
 
 ---
 

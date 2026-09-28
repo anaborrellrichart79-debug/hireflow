@@ -1,0 +1,123 @@
+/* Página no encontrada (404) -- ver js/components/lostMascot.js y
+   docs/decisions.md, entrada 036. Autosuficiente: la usa también la página
+   estática 404.html (Express y GitHub Pages), sin el resto de hojas. */
+
+.lost {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    text-align: center;
+    color: #2a2a2a;
+    font-family: "Lato", Roboto, sans-serif;
+}
+
+/* Hueco fijo arriba para el bocadillo: así nada salta cuando aparece */
+.lost-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 72px;
+}
+
+.lost-mascot {
+    width: 160px;
+    height: 160px;
+    filter: drop-shadow(0 6px 12px rgba(43, 29, 18, 0.25));
+    /* Tres vueltas "buscando", con el mismo giro que la mascota global */
+    animation: lost-search 2.4s ease-in-out 0.3s both;
+}
+
+@keyframes lost-search {
+    0%   { transform: rotate(0deg) translateY(0); }
+    15%  { transform: rotate(0deg) translateY(-10px); }
+    85%  { transform: rotate(1080deg) translateY(-10px); }
+    100% { transform: rotate(1080deg) translateY(0); }
+}
+
+/* Al terminar, se queda ladeado, como pensando. Es otra animación (no una
+   transition) para que no "deshaga" las tres vueltas al volver de 1080deg:
+   empieza en 0deg, que se ve igual que 1080deg. */
+@keyframes lost-tilt {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-8deg); }
+}
+
+.lost-mascot.lost-mascot-done { animation: lost-tilt 0.4s ease forwards; }
+
+.lost-bubble {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    margin: 0;
+    max-width: 240px;
+    width: max-content;
+    padding: 10px 14px;
+    background: #fff;
+    border: 1px solid #ebad64;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(43, 29, 18, 0.18);
+    font-size: 15px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translate(-50%, 6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.lost-bubble::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: #fff;
+}
+
+.lost-bubble.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* Cifra decorativa (aria-hidden): el título ya dice "no encontrada".
+   Marrón oscuro y no naranja de marca, para llegar al contraste mínimo. */
+.lost-code {
+    margin: 16px 0 0;
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 1;
+    color: #a8621a;
+}
+
+.lost-title { margin: 8px 0; font-size: 24px; }
+.lost-text { margin: 0 0 24px; line-height: 1.5; color: #4f4f4f; }
+
+/* Mismo aspecto que .primary-button de la app, sin depender de components.css */
+.lost-home {
+    display: inline-block;
+    padding: 14px 32px;
+    background: #ebad64;
+    border: 1px solid #000;
+    border-radius: 999px;
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.lost-home:hover { background: #d98f3f; }
+.lost-home:focus-visible { outline: 3px solid #2a2a2a; outline-offset: 2px; }
+
+/* En la 404 de la app, el maletín grande es el protagonista: se oculta la
+   mascota global para que no haya dos (ver router.js). */
+.route-not-found .mascot-root { display: none; }
+
+@media (max-width: 480px) {
+    .lost-mascot { width: 120px; height: 120px; }
+    .lost-code { font-size: 44px; }
+}
+
+/* Sin movimiento si el sistema lo pide: el maletín no gira y el bocadillo sale ya */
+@media (prefers-reduced-motion: reduce) {
+    .lost-mascot, .lost-mascot.lost-mascot-done { animation: none; }
+    .lost-bubble { transition: none; }
+}

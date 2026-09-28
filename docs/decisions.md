@@ -1099,3 +1099,25 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 **Archivos afectados:** `frontend/privacy.html` (nuevo), `frontend/js/privacyPage.js` (nuevo), `frontend/style/privacy.css` (nuevo), `.github/workflows/privacy-page.yml` (nuevo), `frontend/js/privacyPolicyContent.js` (contacto y fecha), `frontend/js/components/privacyPolicyDialog.js` (enlace), `frontend/js/i18n.js` (`auth.privacyOpenPage` en los 4 idiomas), `docs/googlePlayDataSafety.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
 
 ---
+
+## 036 — Página 404: el maletín buscando
+**Fecha:** Septiembre 2026
+
+**Problema:** una ruta inexistente de la app (`#/lo-que-sea`) mostraba solo el texto "Pantalla no encontrada.", y una URL inexistente fuera de la API (`/lo-que-sea`) devolvía el JSON de error del backend. Con la Política de Privacidad ya en GitHub Pages (entrada 035), una ruta mal escrita allí mostraba la 404 genérica de GitHub.
+
+**Decisión (pedida por el usuario):** una 404 con la mascota: el maletín da tres vueltas "buscando", se queda ladeado, y le sale un bocadillo que dice "Creo que no lo encuentro…". Debajo, un "404" decorativo, el título "Página no encontrada", una frase y el botón "Volver al inicio". Mismo estilo que el resto de la app: el giro reutiliza la idea de la voltereta de la mascota global (entrada 014), y el bocadillo y el botón copian los suyos.
+
+**Un solo componente para los tres sitios** (`js/components/lostMascot.js` + `style/notfound.css`), que solo depende de `i18n.js`, así que los textos salen en los 4 idiomas:
+- **App:** la ruta `/404` del router. En esa ruta se oculta la mascota global (clase `route-not-found` en el `body`), para que no haya dos maletines.
+- **Express:** para un `GET` que acepta HTML y no empieza por `/api/`, se sirve `404.html` con estado 404. La API sigue respondiendo JSON.
+- **GitHub Pages:** el workflow de la entrada 035 publica también `404.html`, que Pages sirve para cualquier ruta desconocida.
+
+**Rutas absolutas con `<base>`:** `404.html` se sirve en cualquier ruta (`/a/b/c`), y con rutas relativas no encontraría su CSS ni sus scripts. Por eso lleva `<base href="/">`, y el workflow lo cambia a `/hireflow/` para Pages (y comprueba que el cambio se ha hecho). "Volver al inicio" lleva a la app en local y a la política en Pages.
+
+**Animación:** las tres vueltas son una animación CSS (2,4 s). El ladeo final es una segunda animación y no una `transition`, para que el navegador no "deshaga" las 1080° girando hacia atrás. El bocadillo aparece con `animationend`, con un temporizador de respaldo por si la animación no llega a ejecutarse. Con `prefers-reduced-motion` no gira y el bocadillo sale enseguida. El "404" usa el marrón `#a8621a` y no el naranja de marca, por contraste.
+
+**Verificación** (Playwright + axe-core): la animación corre y el bocadillo no se ve mientras gira; al terminar dice el texto correcto; la mascota global se oculta y vuelve al salir de la 404; inglés; movimiento reducido; Express devuelve 404 con HTML en `/no-existe` y `/a/b/c/d` (con estilos y maletín cargados) y JSON en `/api/...`; las páginas existentes no cambian; Pages simulado con el mismo paso del workflow, ruta profunda con estado 404 y "Volver al inicio" a la política; 320px sin desbordamiento y con el bocadillo dentro de la pantalla. axe-core: 0 problemas. Sin errores de consola, salvo el propio 404 que el navegador registra al cargar la página.
+
+**Archivos afectados:** `frontend/js/components/lostMascot.js` (nuevo), `frontend/style/notfound.css` (nuevo), `frontend/404.html` (nuevo), `frontend/js/notFoundPage.js` (nuevo), `frontend/js/app.js`, `frontend/js/router.js`, `frontend/index.html`, `frontend/js/i18n.js` (`common.notFound` sustituida por `notFound.*` en los 4 idiomas), `backend/server.js`, `.github/workflows/privacy-page.yml`.
+
+---

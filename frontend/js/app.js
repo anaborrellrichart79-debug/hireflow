@@ -1,8 +1,9 @@
 import { registerRoute, initRouter, refresh } from "./router.js";
 import { initHeader } from "./components/header.js";
 import { el } from "./components/ui.js";
-import { t, getLang, setLang, getLangName, onLangChange, SUPPORTED_LANGS } from "./i18n.js";
+import { getLang, setLang, getLangName, onLangChange, SUPPORTED_LANGS } from "./i18n.js";
 import { initMascot } from "./mascot.js";
+import { lostMascot } from "./components/lostMascot.js";
 
 import * as loginScreen from "./screens/login.js";
 import * as homeScreen from "./screens/home.js";
@@ -24,8 +25,9 @@ registerRoute("/applicants", { render: applicantsScreen.render });
 registerRoute("/profile", { render: profileFormScreen.render });
 registerRoute("/calendar", { render: calendarScreen.render });
 registerRoute("/ai", { render: aiScreen.render });
+// El maletín buscando (ver components/lostMascot.js, decisions.md entrada 036)
 registerRoute("/404", {
-    render: (container) => container.append(el("p", { text: t("common.notFound") })),
+    render: (container) => container.append(lostMascot({ homeHref: "#/" })),
     public: true
 });
 

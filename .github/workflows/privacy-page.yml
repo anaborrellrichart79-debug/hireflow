@@ -12,6 +12,12 @@ on:
       - frontend/js/privacyPage.js
       - frontend/js/privacyPolicyContent.js
       - frontend/style/privacy.css
+      - frontend/404.html
+      - frontend/js/notFoundPage.js
+      - frontend/js/components/lostMascot.js
+      - frontend/js/i18n.js
+      - frontend/style/notfound.css
+      - frontend/assets/mascota-soporte.svg
       - .github/workflows/privacy-page.yml
   workflow_dispatch:
 
@@ -33,15 +39,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Preparar solo los archivos de la política
+      - name: Preparar solo los archivos de la política y la página 404
         run: |
-          mkdir -p _site/js _site/style _site/assets/icons
+          mkdir -p _site/js/components _site/style _site/assets/icons
           cp frontend/privacy.html _site/privacy.html
           # La raíz de la web también muestra la política
           cp frontend/privacy.html _site/index.html
           cp frontend/js/privacyPage.js frontend/js/privacyPolicyContent.js _site/js/
           cp frontend/style/privacy.css _site/style/
           cp frontend/assets/icons/favicon.svg _site/assets/icons/
+          # 404: GitHub Pages la sirve para cualquier ruta desconocida. Sus
+          # rutas cuelgan de <base href="/">; aquí la web vive en /hireflow/
+          sed 's#<base href="/">#<base href="/hireflow/">#' frontend/404.html > _site/404.html
+          grep -q '<base href="/hireflow/">' _site/404.html
+          cp frontend/js/notFoundPage.js frontend/js/i18n.js _site/js/
+          cp frontend/js/components/lostMascot.js _site/js/components/
+          cp frontend/style/notfound.css _site/style/
+          cp frontend/assets/mascota-soporte.svg _site/assets/
           find _site -type f
 
       - uses: actions/configure-pages@v5

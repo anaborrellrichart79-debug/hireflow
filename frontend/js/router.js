@@ -51,7 +51,11 @@ const matchRoute = (path) => {
 
 const runRoute = async () => {
     const path = currentPath();
-    const matched = matchRoute(path) || matchRoute("/404");
+    const found = matchRoute(path);
+    const matched = found || matchRoute("/404");
+    // En la 404 el maletín grande es el protagonista: se oculta la mascota
+    // global (ver style/notfound.css)
+    document.body.classList.toggle("route-not-found", !found || found.route.pattern === "/404");
 
     if (!matched) {
         return;
