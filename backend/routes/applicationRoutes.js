@@ -7,14 +7,15 @@ import {
     removeApplication,
     getRecruiterApplications,
     updateApplicationStatusAsRecruiter,
-    markApplicationsSeen
+    markApplicationsSeen,
+    updateConsent
 } from "../controllers/applicationControllers.js";
 
 import { verifyToken } from "../middleware/authMiddleware.js";
 import { requireRole } from "../middleware/roleMiddleware.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { createApplicationValidators, updateApplicationValidators, updateApplicationStatusValidators } from "../validators/applicationValidators.js";
+import { createApplicationValidators, updateApplicationValidators, updateApplicationStatusValidators, updateConsentValidators } from "../validators/applicationValidators.js";
 
 const router = express.Router();
 
@@ -27,6 +28,7 @@ router.post("/", verifyToken, createApplicationValidators, validate, asyncHandle
 router.get("/:id", verifyToken, asyncHandler(getApplication));
 router.put("/:id", verifyToken, updateApplicationValidators, validate, asyncHandler(updateExistingApplication));
 router.put("/:id/status", verifyToken, requireRole(["recruiter"]), updateApplicationStatusValidators, validate, asyncHandler(updateApplicationStatusAsRecruiter));
+router.put("/:id/consent", verifyToken, requireRole(["candidate"]), updateConsentValidators, validate, asyncHandler(updateConsent));
 router.delete("/:id", verifyToken, asyncHandler(removeApplication));
 
 export default router;

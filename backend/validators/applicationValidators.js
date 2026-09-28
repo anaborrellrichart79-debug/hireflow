@@ -24,6 +24,12 @@ export const updateApplicationValidators = [
     body("notes").optional({ nullable: true }).isString()
 ];
 
+// Booleanos JSON estrictos: "false" como texto no debe contar como true
+export const updateConsentValidators = [
+    body("consent_contact").optional().isBoolean({ strict: true }).withMessage("consent_contact debe ser true o false"),
+    body("consent_cv").optional().isBoolean({ strict: true }).withMessage("consent_cv debe ser true o false")
+];
+
 export const updateApplicationStatusValidators = [
     body("status").notEmpty().withMessage("status es obligatorio").isIn(RECRUITER_STATUS_VALUES).withMessage(`status debe ser una de: ${RECRUITER_STATUS_VALUES.join(", ")}`)
 ];

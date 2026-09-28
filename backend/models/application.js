@@ -110,6 +110,46 @@ export const updateApplication = async (id, userId, { status, notes }) => {
     return result;
 };
 
+// El candidato retira o vuelve a dar sus consentimientos (contacto y CV) en
+// una postulación a una oferta de HireFlow. consent_at guarda cuándo se dio el
+// consentimiento de contacto: se renueva si se vuelve a dar, y se conserva al
+// retirarlo (constancia de que el tratamiento anterior sí estaba consentido).
+// consent_updated_at registra el último cambio de cualquiera de los dos.
+// Ver docs/decisions.md, entrada 034. Devuelve null si no se envía nada.
+export const updateApplicationConsent = async (id, userId, { consentContact, consentCv }) => {
+    const sets = [];
+    const params = [];
+
+    if (consentContact !== undefined) {
+        // El orden importa: MySQL aplica las asignaciones de izquierda a
+        // derecha, así que consent_at tiene que leer el valor ANTERIOR de
+        // consent_share_contact (solo se renueva si pasa de 0 a 1).
+        sets.push(
+            "consent_at = IF(? AND NOT consent_share_contact, NOW(), consent_at)",
+            "consent_share_contact = ?"
+        );
+        params.push(consentContact, consentContact);
+    }
+    if (consentCv !== undefined) {
+        sets.push("consent_share_cv = ?");
+        params.push(consentCv);
+    }
+
+    if (sets.length === 0) {
+        return null;
+    }
+
+    const [result] = await db.execute(
+        `
+        UPDATE applications
+        SET ${sets.join(", ")}, consent_updated_at = NOW()
+        WHERE id = ? AND user_id = ? AND job_offer_id IS NOT NULL
+        `,
+        [...params, id, userId]
+    );
+    return result;
+};
+
 export const deleteApplication = async (id, userId) => {
     const [result] = await db.execute(
         `

@@ -40,7 +40,7 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "7. Tus derechos",
-                body: "Puedes acceder a tus datos, rectificarlos, solicitar su supresión, oponerte a su tratamiento, pedir la limitación del tratamiento o la portabilidad de tus datos, escribiendo a privacy@hireflow.example o eliminando directamente tu cuenta desde la pantalla de perfil. Si consideras que no hemos atendido tu solicitud correctamente, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es)."
+                body: "Puedes acceder a tus datos, rectificarlos, solicitar su supresión, oponerte a su tratamiento, pedir la limitación del tratamiento o la portabilidad de tus datos, escribiendo a privacy@hireflow.example o eliminando directamente tu cuenta desde la pantalla de perfil. También puedes retirar en cualquier momento el permiso para compartir tu contacto o tu CV con una empresa, desde el botón \"Privacidad\" de cada postulación en Mis postulaciones; retirarlo no afecta a la licitud del tratamiento anterior. Si consideras que no hemos atendido tu solicitud correctamente, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es)."
             },
             {
                 heading: "8. Usuarios fuera de España",
@@ -91,7 +91,7 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "7. Your rights",
-                body: "You can access, rectify or request deletion of your data, object to its processing, or request restriction of processing or data portability, by writing to privacy@hireflow.example or by deleting your account directly from the profile screen. If you believe we haven't handled your request properly, you can file a complaint with your local data protection authority (in Spain, the AEPD at aepd.es)."
+                body: "You can access, rectify or request deletion of your data, object to its processing, or request restriction of processing or data portability, by writing to privacy@hireflow.example or by deleting your account directly from the profile screen. You can also withdraw, at any time, your permission to share your contact details or your CV with a company, using the \"Privacy\" button on each application in My applications; withdrawing it does not affect the lawfulness of processing carried out before. If you believe we haven't handled your request properly, you can file a complaint with your local data protection authority (in Spain, the AEPD at aepd.es)."
             },
             {
                 heading: "8. Users outside Spain",

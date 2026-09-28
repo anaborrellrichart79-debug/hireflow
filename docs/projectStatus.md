@@ -104,6 +104,7 @@ Estado
 ✔ `POST /ai/job-match` y `POST /ai/ask` usan las skills del CV si existen
 ✔ La empresa ve el CV en Postulantes solo si el candidato marcó la casilla opcional al postularse (`applications.consent_share_cv`, filtrado en la SQL)
 ✔ Tests verificados (34 de API + 19 de interfaz con Playwright)
+✔ El candidato puede retirar o volver a dar el permiso de compartir contacto y CV en cada postulación (`PUT /applications/:id/consent`, entrada 034)
 
 Decisión de arquitectura: ver `docs/decisions.md`, entrada 033.
 ---
@@ -248,8 +249,9 @@ Implementar:
 ✔ Responsive (tablet/móvil/móvil pequeño) — completo
 ✔ Flujo de contratación: postulantes visibles para la empresa, consentimiento + firma al postularse, entrevistas agendadas por la empresa, aviso in-app de cambio de estado, Política de Privacidad — completo
 ✔ CV del candidato (`user_profiles`): CRUD, uso en job-match/Asistente IA y visible para la empresa con consentimiento opcional — completo
+✔ Retirar o volver a dar el consentimiento (contacto/CV) de una postulación ya enviada — completo (entrada 034)
 
-**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: revocar un consentimiento (contacto/CV) de una postulación ya enviada (ver `docs/decisions.md` entrada 033), traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), traducir la Política de Privacidad a fr/it (hoy solo es/en, ver entrada 017), alojar la Política de Privacidad en una URL pública (necesario para publicar en Google Play, ver `docs/googlePlayDataSafety.md`), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
+**Backend y frontend cerrados, app multilingüe, con asistente conversacional, mascota y flujo de contratación completo (postulación con consentimiento → visibilidad para la empresa → entrevista → cambio de estado con aviso al candidato).** Se completa todo lo previsto para el MVP y las mejoras pedidas tras las pruebas manuales del usuario. Pendiente intencionalmente: traducir los mensajes de la API, LLM real para el Asistente IA (se descartó explícitamente, ver `docs/decisions.md` entrada 014), traducir la Política de Privacidad a fr/it (hoy solo es/en, ver entrada 017), alojar la Política de Privacidad en una URL pública (necesario para publicar en Google Play, ver `docs/googlePlayDataSafety.md`), y los documentos referenciados que nunca se crearon (`AI_INSTRUCTIONS.md`, `architecture.md`, `roadmap.md`, `SPRINT_PLAN_2MESES.md`).
 ---
 # Objetivo MVP
 Un usuario podrá:

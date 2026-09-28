@@ -391,6 +391,38 @@ Requerida (verifyToken) + role `recruiter`
 
 ---
 
+## Retirar o volver a dar consentimientos (candidato)
+PUT /applications/:id/consent
+Body (al menos uno de los dos)
+{
+    "consent_contact": false,
+    "consent_cv": true
+}
+El candidato retira o vuelve a dar su permiso para que la empresa vea su email y teléfono (`consent_contact`) y/o su CV (`consent_cv`) en esa postulación. El cambio se aplica al momento en `GET /applications/recruiter`. La postulación sigue activa: la empresa conserva el nombre y el estado. Para que deje de verla del todo: `DELETE /applications/:id`.
+
+`consent_at` se renueva solo cuando el consentimiento de contacto pasa de retirado a dado, y se conserva al retirarlo (queda constancia de cuándo se dio). `consent_updated_at` guarda el último cambio de cualquiera de los dos (ver `docs/decisions.md`, entrada 034).
+
+Validación
+`consent_contact` y `consent_cv` opcionales, booleanos JSON (`"false"` como texto se rechaza), pero hay que enviar al menos uno.
+
+Respuesta
+200 OK
+{
+    "id": 7,
+    "consent_share_contact": 0,
+    "consent_share_cv": 1,
+    "consent_at": "2026-09-24T18:56:05.000Z",
+    "consent_updated_at": "2026-09-28T10:12:40.000Z"
+}
+Errores
+400 — validación, o no se envía ninguno de los dos
+403 — autenticado pero no es `candidate`
+404 — la postulación no existe, no es suya, o es un seguimiento personal (sin `job_offer_id`, no se comparte con ninguna empresa)
+Autenticación
+Requerida (verifyToken) + role `candidate`
+
+---
+
 ## Eliminar
 DELETE /applications/:id
 Respuesta

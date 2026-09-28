@@ -31,13 +31,61 @@ const openWithdrawDialog = (onConfirm) => {
     });
 };
 
+// Retirar o volver a dar los consentimientos de una postulación (contacto y
+// CV). Retirar el contacto no retira la postulación: para eso está "Retirar
+// postulación". Ver decisions.md, entrada 034.
+const openPrivacyDialog = (app, jobTitle, onSave) => {
+    const errorSlot = el("div", {});
+    const contactCheckbox = el("input", { type: "checkbox", checked: app.consent_share_contact ? "true" : undefined });
+    const cvCheckbox = el("input", { type: "checkbox", checked: app.consent_share_cv ? "true" : undefined });
+    const cancelButton = el("button", { type: "button", class: "secondary-button", text: t("applications.withdrawCancel") });
+    const saveButton = el("button", { type: "button", class: "primary-button", text: t("common.save") });
+
+    const dialog = openDialog([
+        el("h2", { id: "privacy-dialog-title", text: t("applications.privacyTitle") }),
+        el("p", { class: "form-note", text: jobTitle }),
+        errorSlot,
+        el("p", { text: t("applications.privacyIntro") }),
+        el("label", { class: "checkbox-label" }, [contactCheckbox, ` ${t("applications.privacyContactLabel")}`]),
+        el("label", { class: "checkbox-label" }, [cvCheckbox, ` ${t("applications.privacyCvLabel")}`]),
+        el("p", { class: "form-note", text: t("applications.privacyNote") }),
+        el("div", { class: "hf-dialog-actions" }, [cancelButton, saveButton])
+    ], { labelledBy: "privacy-dialog-title" });
+
+    cancelButton.addEventListener("click", () => dialog.close());
+    saveButton.addEventListener("click", async () => {
+        errorSlot.innerHTML = "";
+        if (saveButton.disabled) return;
+        saveButton.disabled = true;
+        try {
+            await onSave({ consent_contact: contactCheckbox.checked, consent_cv: cvCheckbox.checked });
+            dialog.close();
+        } catch (error) {
+            errorSlot.append(errorBanner(error.message));
+        } finally {
+            saveButton.disabled = false;
+        }
+    });
+};
+
+// Qué comparte ahora mismo la postulación con la empresa, en una línea
+const sharingSummary = (app) => {
+    if (app.consent_share_contact && app.consent_share_cv) return t("applications.sharingContactCv");
+    if (app.consent_share_contact) return t("applications.sharingContact");
+    if (app.consent_share_cv) return t("applications.sharingCv");
+    return t("applications.sharingNothing");
+};
+
 // Tarjeta del tablero. En una postulación a una oferta de HireFlow el estado
 // lo mueve la empresa: la candidata lo ve (por la columna) y puede retirarla.
 // Solo los seguimientos personales (sin oferta) conservan el desplegable.
 // Ver decisions.md, entradas 023 y 031.
-const boardCard = (app, job, isUnseen, onStatusChange, onWithdraw) => {
+const boardCard = (app, job, isUnseen, onStatusChange, onWithdraw, onPrivacy) => {
     const controls = app.job_offer_id
-        ? el("button", { class: "secondary-button danger", type: "button", text: t("applications.withdrawButton"), onClick: () => onWithdraw(app.id) })
+        ? el("div", { class: "card-actions" }, [
+            el("button", { class: "secondary-button", type: "button", text: t("applications.privacyButton"), "aria-label": `${t("applications.privacyButton")}: ${job.title}`, onClick: () => onPrivacy(app, job.title) }),
+            el("button", { class: "secondary-button danger", type: "button", text: t("applications.withdrawButton"), onClick: () => onWithdraw(app.id) })
+        ])
         : el("select", {
             "aria-label": `${t("applications.viewStatus")}: ${job.title}`,
             onChange: (event) => onStatusChange(app.id, event.target.value)
@@ -51,6 +99,7 @@ const boardCard = (app, job, isUnseen, onStatusChange, onWithdraw) => {
         isUnseen && app.status_updated_by === "recruiter"
             ? el("span", { class: "status-badge status-badge--new", text: t("applications.recentlyUpdated") })
             : null,
+        app.job_offer_id ? el("p", { class: "card-meta sharing-summary", text: sharingSummary(app) }) : null,
         controls
     ]);
 };
@@ -88,7 +137,10 @@ export const render = async (container) => {
     };
 
     const listSlot = el("div", { class: "kanban-screen" });
-    container.append(el("div", { class: "toggle-group" }, [boardButton, notesButton]), listSlot);
+    // Fuera de listSlot: draw() lo vacía, y el mensaje de éxito se añade
+    // después de redibujar (mismo patrón que applicants.js)
+    const successSlot = el("div", {});
+    container.append(el("div", { class: "toggle-group" }, [boardButton, notesButton]), successSlot, listSlot);
 
     // Qué postulaciones tenían cambios de la empresa sin ver AL ABRIR la
     // pantalla. Se calcula una sola vez: abrir la pantalla las marca como
@@ -98,6 +150,7 @@ export const render = async (container) => {
 
     const draw = async () => {
         listSlot.innerHTML = "";
+        successSlot.innerHTML = "";
         listSlot.append(el("p", { text: t("common.loading") }));
 
         try {
@@ -142,6 +195,13 @@ export const render = async (container) => {
                 draw();
             });
 
+            const onPrivacy = (app, jobTitle) => openPrivacyDialog(app, jobTitle, async (body) => {
+                await apiFetch(`/applications/${app.id}/consent`, { method: "PUT", body });
+                await draw();
+                successSlot.innerHTML = "";
+                successSlot.append(el("p", { class: "success-text", role: "status", text: t("applications.privacySaved") }));
+            });
+
             if (mode === "notas") {
                 listSlot.append(cardGrid(applications, (app) => notesCard(app, jobOf(app), onNotesSave), t("applications.emptyMessage")));
                 return;
@@ -158,7 +218,7 @@ export const render = async (container) => {
                 columns: statuses.map((status) => ({ status, label: statusLabel(status) })),
                 items: applications,
                 getStatus: (app) => app.status,
-                renderCard: (app) => boardCard(app, jobOf(app), unseenIds.has(app.id), onStatusChange, onWithdraw),
+                renderCard: (app) => boardCard(app, jobOf(app), unseenIds.has(app.id), onStatusChange, onWithdraw, onPrivacy),
                 emptyColumnText: t("applicants.emptyColumn")
             }));
         } catch (error) {

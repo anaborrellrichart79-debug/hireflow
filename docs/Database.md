@@ -157,11 +157,22 @@ id
 user_id
 job_offer_id
 status          -- ENUM('wishlist','applied','interview','offer','rejected'), default 'wishlist'
+status_updated_by         -- ENUM('candidate','recruiter'), quién movió el estado por última vez
+status_seen_by_candidate  -- 0 si la empresa cambió el estado y el candidato aún no lo ha visto
 applied_date    -- DATE, nullable
-notes
+notes           -- privadas del candidato, la empresa nunca las ve
+consent_share_contact     -- 1 = la empresa ve email y teléfono (entrada 017)
+consent_share_cv          -- 1 = la empresa ve el CV (entrada 033)
+signature_name            -- "firma": nombre completo escrito al postularse
+consent_at                -- cuándo se dio el consentimiento de contacto (se renueva si se vuelve a dar)
+consent_updated_at        -- último cambio de cualquiera de los dos consentimientos (entrada 034)
 created_at
 updated_at
 ```
+
+UNIQUE `uq_application_user_job (user_id, job_offer_id)`: una sola postulación por candidato y oferta (entrada 027).
+
+**Consentimientos:** el candidato los puede retirar o volver a dar en cualquier momento con `PUT /applications/:id/consent`. `GET /applications/recruiter` los respeta en la propia SQL (`CASE WHEN`), así que el cambio es inmediato.
 
 ENUM status
 ```

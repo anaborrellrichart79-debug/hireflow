@@ -97,6 +97,9 @@ CREATE table applications (
     consent_share_cv tinyint(1) NOT NULL default 0,
     signature_name varchar(150) NULL,
     consent_at timestamp NULL,
+    -- último cambio de cualquiera de los dos consentimientos por el candidato
+    -- (retirarlo o volver a darlo, ver docs/decisions.md, entrada 034)
+    consent_updated_at timestamp NULL,
     created_at timestamp default current_timestamp,
     updated_at timestamp default current_timestamp on update current_timestamp,
 

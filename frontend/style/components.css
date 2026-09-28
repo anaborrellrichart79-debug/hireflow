@@ -507,10 +507,18 @@
 
 .hf-dialog-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
+    align-items: center;
     gap: 8px;
     margin-top: 16px;
 }
+
+/* .primary-button es un bloque de ancho completo con margen inferior (pensado
+   para formularios); en la fila de acciones estiraba el botón de Cancelar
+   hasta hacerlo un óvalo alto. Aquí los dos botones van a su tamaño. */
+.hf-dialog-actions .primary-button { width: auto; margin: 0; }
+.hf-dialog-actions .secondary-button { margin-right: 0; padding: 14px 24px; }
 
 @media (max-width: 480px) {
     .hf-dialog { width: 94vw; }

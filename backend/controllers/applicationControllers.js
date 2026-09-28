@@ -5,7 +5,8 @@ import { createApplication,
     deleteApplication,
     updateApplicationStatusByRecruiter,
     getApplicationsForRecruiter,
-    markApplicationStatusUpdatesSeen } from "../models/application.js";
+    markApplicationStatusUpdatesSeen,
+    updateApplicationConsent } from "../models/application.js";
 import { APPLICATION_STATUS } from "../constants/applicationStatus.js";
 
 const ALREADY_APPLIED_MESSAGE = "Ya te has postulado a esta oferta";
@@ -102,6 +103,34 @@ export const updateExistingApplication = async (req, res) => {
     }
 
     res.status(200).json({ message: "Postulación actualizada correctamente" });
+};
+
+// PUT /applications/:id/consent -- el candidato retira o vuelve a dar su
+// consentimiento de contacto y/o de CV (ver docs/decisions.md, entrada 034).
+// Solo en postulaciones propias a ofertas de HireFlow: un seguimiento
+// personal no se comparte con ninguna empresa.
+export const updateConsent = async (req, res) => {
+    const result = await updateApplicationConsent(req.params.id, req.user.id, {
+        consentContact: req.body.consent_contact,
+        consentCv: req.body.consent_cv
+    });
+
+    if (!result) {
+        return res.status(400).json({ message: "Envía consent_contact y/o consent_cv" });
+    }
+
+    if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Postulación no encontrada" });
+    }
+
+    const application = await getApplicationById(req.params.id, req.user.id);
+    res.status(200).json({
+        id: application.id,
+        consent_share_contact: application.consent_share_contact,
+        consent_share_cv: application.consent_share_cv,
+        consent_at: application.consent_at,
+        consent_updated_at: application.consent_updated_at
+    });
 };
 
 export const removeApplication = async (req, res) => {

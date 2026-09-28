@@ -1045,8 +1045,33 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 - Migración en `backend/database/migrations/033_user_profiles_cv.sql`, aplicada a `hireflow` y `hireflow_demo`.
 - Repetidas las 34 comprobaciones de API y las 19 de interfaz sobre el código integrado (la postulación entra ahora como `applied`, entrada 023), sin fallos ni errores de consola.
 
-**Limitación conocida:** igual que el consentimiento de contacto (entrada 017), hoy no se puede retirar el consentimiento de una postulación ya enviada, salvo borrando la postulación o el CV. Queda pendiente un control para revocarlo por postulación.
+**Limitación conocida:** igual que el consentimiento de contacto (entrada 017), no se podía retirar el consentimiento de una postulación ya enviada, salvo borrando la postulación o el CV. **Resuelto en la entrada 034.**
 
 **Archivos afectados:** `backend/models/userProfile.js` (nuevo), `backend/controllers/userControllers.js`, `backend/validators/userValidators.js`, `backend/routes/userRoutes.js`, `backend/controllers/aiControllers.js`, `backend/validators/aiValidators.js`, `backend/models/application.js`, `backend/controllers/applicationControllers.js`, `backend/validators/applicationValidators.js`, `backend/database/schema.sql` (`UNIQUE` + `consent_share_cv`), `backend/database/migrations/033_user_profiles_cv.sql` (nuevo), `frontend/js/screens/profileForm.js`, `frontend/js/screens/ai.js`, `frontend/js/screens/jobs.js`, `frontend/js/screens/applicants.js`, `frontend/js/privacyPolicyContent.js`, `frontend/style/components.css` (`.applicant-cv*`), `frontend/js/i18n.js` (claves `profile.cv*`, `ai.matchSource*`, `jobs.cvConsentCheckboxLabel` y `applicants.cv*` en los 4 idiomas), `docs/api.md`, `docs/Database.md`, `docs/googlePlayDataSafety.md`.
+
+---
+
+## 034 — Retirar o volver a dar el consentimiento de una postulación
+**Fecha:** Septiembre 2026
+
+**Problema:** al postularse, el candidato da dos consentimientos: compartir su contacto con la empresa (obligatorio, entrada 017) y su CV (opcional, entrada 033). Una vez enviada la postulación no había forma de retirarlos, salvo borrando la postulación entera o el CV. El RGPD (art. 7.3) exige que retirar el consentimiento sea tan fácil como darlo.
+
+**Decisión 1 — retirar un consentimiento no retira la postulación.** Son dos cosas distintas, y para la segunda ya existe "Retirar postulación" (entrada 023). Al retirar el contacto, la empresa sigue viendo el nombre, la oferta y el estado, pero ya no el email ni el teléfono. Así el candidato puede seguir en el proceso si quiere que la empresa le escriba solo por los canales que él elija. El diálogo lo explica y remite a "Retirar postulación" para quien quiera desaparecer del todo.
+
+**Decisión 2 — se puede volver a dar, sin firmar otra vez.** Las dos casillas funcionan en los dos sentidos. Volver a dar el permiso es un acto explícito del candidato (marcar la casilla y guardar), sobre una postulación que ya firmó; pedir otra firma habría añadido fricción sin aportar garantía real, porque la "firma" es una confirmación de UX, no una firma legal (entrada 017).
+
+**Decisión 3 — constancia de los cambios.** `consent_at` guarda cuándo se dio el consentimiento de contacto: se renueva solo cuando pasa de retirado a dado, y se conserva al retirarlo, porque demuestra que el tratamiento anterior sí estaba consentido (retirar no afecta a la licitud de lo anterior). La columna nueva `consent_updated_at` registra el último cambio de cualquiera de los dos. En el `UPDATE`, la asignación de `consent_at` va antes que la de `consent_share_contact`, porque MySQL evalúa las asignaciones de izquierda a derecha y tiene que leer el valor anterior.
+
+**Decisión 4 — `PUT /applications/:id/consent`, solo candidate y solo postulaciones a ofertas.** La propiedad se comprueba en la propia query (`WHERE id = ? AND user_id = ?`, mismo criterio que la entrada 001). Un seguimiento personal (sin `job_offer_id`) no se comparte con ninguna empresa y devuelve 404. Booleanos JSON estrictos: `"false"` como texto se rechaza con 400 en vez de interpretarse como verdadero.
+
+**Frontend:** botón "Privacidad" junto a "Retirar postulación" en cada tarjeta de Mis postulaciones, que abre un diálogo propio (`openDialog`) con las dos casillas marcadas según el estado actual. Cada tarjeta resume además lo que se comparte ("Compartes: contacto y CV"...), para que se vea sin abrir el diálogo. Del lado de la empresa no hace falta nada: Postulantes ya mostraba "no ha compartido datos de contacto" y "no ha compartido su CV" según los mismos campos. La Política de Privacidad (es/en) explica ahora cómo retirar el consentimiento.
+
+**Hallazgo de paso:** en todos los diálogos (postularse, retirar, borrar oferta, eliminar CV...), el botón "Cancelar" se estiraba hasta formar un óvalo alto junto a un botón de confirmar muy ancho. `.primary-button` es un bloque de ancho completo con margen inferior (pensado para formularios), y en la fila flex de acciones estiraba la altura de la fila. Se corrige solo dentro de `.hf-dialog-actions`.
+
+**Limitación conocida:** retirar el consentimiento solo controla lo que la empresa ve en HireFlow. Si ya había copiado el email o descargado el CV, la app no puede borrarlo; el diálogo lo dice y sugiere pedírselo a la empresa directamente. Tampoco se avisa a la empresa del cambio.
+
+**Verificación:** 19 comprobaciones de API (validaciones, `"false"` como texto, otro candidato 404, recruiter 403, sin token 401, seguimiento personal 404, retirar CV y luego contacto con efecto inmediato en la vista de la empresa, `consent_at` conservado al retirar y renovado al volver a dar, reenviar el mismo valor no lo renueva, estado/firma/notas intactos). 12 de interfaz con Playwright (resumen en la tarjeta, diálogo con el estado actual, cancelar no cambia nada, guardar actualiza la tarjeta y la empresa deja de ver el email pero sigue viendo el CV, 320px sin desbordamiento, inglés). axe-core: 0 problemas en el tablero y el diálogo. Sin errores de consola. Repetidas las pruebas de la entrada 033 tras el cambio de estilo de los diálogos, sin fallos. Migración aplicada a `hireflow` y `hireflow_demo`.
+
+**Archivos afectados:** `backend/database/schema.sql`, `backend/database/migrations/034_applications_consent_updated_at.sql` (nuevo), `backend/models/application.js`, `backend/controllers/applicationControllers.js`, `backend/validators/applicationValidators.js`, `backend/routes/applicationRoutes.js`, `frontend/js/screens/applications.js`, `frontend/js/i18n.js` (claves `applications.privacy*` y `applications.sharing*` en los 4 idiomas), `frontend/js/privacyPolicyContent.js`, `frontend/style/components.css` (`.hf-dialog-actions`), `docs/api.md`, `docs/Database.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
 
 ---

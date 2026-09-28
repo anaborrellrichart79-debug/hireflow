@@ -83,11 +83,19 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Añadido — Retirar el consentimiento de una postulación (entrada 034)
+- Botón "Privacidad" en cada postulación a una oferta (Mis postulaciones): un diálogo con dos casillas para retirar o volver a dar el permiso de compartir el contacto y el CV con la empresa. El cambio se aplica al momento; la postulación sigue activa
+- Cada tarjeta de Mis postulaciones resume lo que se comparte ("Compartes: contacto y CV", "No compartes contacto ni CV"...)
+- `PUT /applications/:id/consent` (solo candidate) y columna `applications.consent_updated_at`
+- La Política de Privacidad (es/en) explica cómo retirar el consentimiento
+- Corregido: en todos los diálogos, el botón "Cancelar" salía como un óvalo alto junto a un "Confirmar" muy ancho
+
 ## Migración
 - `backend/database/migrations/019_companies_created_by_user.sql` para bases existentes (añade la columna y asigna cada empresa al recruiter que publicó sus ofertas).
 - `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
+- `backend/database/migrations/034_applications_consent_updated_at.sql` para bases existentes (`applications.consent_updated_at`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 033.
+Detalle en `docs/decisions.md`, entradas 018 a 034.
 
 ---
 
