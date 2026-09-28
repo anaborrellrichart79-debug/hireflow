@@ -67,6 +67,12 @@ body {
 
 .privacy-updated, .privacy-disclaimer { font-size: 14px; color: #4f4f4f; }
 
+/* Listas (pasos para eliminar la cuenta) y enlace a la otra página pública */
+.privacy-content ol, .privacy-content ul { margin: 0 0 12px; padding-left: 24px; }
+.privacy-content li { margin-bottom: 6px; }
+.privacy-related { margin-top: 24px; font-weight: 700; }
+.privacy-related a { color: var(--hf-text); }
+
 .privacy-disclaimer {
     margin-top: 32px;
     padding: 12px 16px;

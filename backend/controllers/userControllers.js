@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { findUserByEmail, createUser, getUserById, updateUser, deleteUser } from "../models/User.js";
+import { findUserByEmail, createUser, getUserById, updateUser, deleteUser, getPasswordHashById } from "../models/User.js";
 import { getUserProfileByUserId, upsertUserProfile, deleteUserProfile } from "../models/userProfile.js";
 
 export const createNewUser = async (req, res) => {
@@ -64,8 +64,18 @@ export const updateProfile = async (req, res) => {
     res.json({ message: req.t("users.profileUpdated") });
 };
 
-// DELETE /users/me
+// DELETE /users/me -- pide la contraseña: con una sesión abierta en un equipo
+// ajeno no se puede borrar la cuenta. 403 y no 401 si no coincide: el
+// frontend trata cualquier 401 como sesión caducada y cerraría la sesión.
+// Ver docs/decisions.md, entrada 042.
 export const deleteProfile = async (req, res) => {
+    const hash = await getPasswordHashById(req.user.id);
+    if (!hash) {
+        return res.status(404).json({ message: req.t("users.notFound") });
+    }
+    if (!(await bcrypt.compare(req.body.password, hash))) {
+        return res.status(403).json({ message: req.t("users.wrongPassword") });
+    }
     await deleteUser(req.user.id);
     res.json({ message: req.t("users.accountDeleted") });
 };

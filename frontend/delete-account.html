@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Página pública "Cómo eliminar tu cuenta" (sin sesión). Google Play
+         exige un enlace web para pedir el borrado -- ver docs/decisions.md, entrada 042.
+         El texto está en js/deleteAccountContent.js (4 idiomas). -->
+    <title>Eliminar tu cuenta · HireFlow</title>
+    <meta name="description" content="Cómo eliminar tu cuenta de HireFlow y tus datos">
+    <!-- Dirección de la app para el botón "Volver a HireFlow". El workflow de
+         GitHub Pages quita esta línea: allí no hay app a la que volver. -->
+    <meta name="hireflow-app" content="./">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style/privacy.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="privacy-header">
+        <p class="privacy-logo"><span class="accent">H</span>IREFLO<span class="accent">W</span></p>
+        <nav id="privacy-lang" class="privacy-lang"></nav>
+    </header>
+    <main id="privacy-content" class="privacy-content">
+        <noscript>
+            <p>Para eliminar tu cuenta: Mi perfil → Eliminar mi cuenta, o escribe a ana.borrell.richart79@gmail.com. / To delete your account: My profile → Delete my account, or write to ana.borrell.richart79@gmail.com.</p>
+        </noscript>
+    </main>
+    <script type="module" src="js/deleteAccountPage.js"></script>
+</body>
+</html>

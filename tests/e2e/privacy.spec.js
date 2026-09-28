@@ -102,11 +102,13 @@ test.describe("paquete de GitHub Pages", () => {
     test("solo publica la política y la 404, sin la app", async () => {
         const files = fs.readdirSync(site, { recursive: true }).map((f) => f.replaceAll("\\", "/")).filter((f) => fs.statSync(path.join(site, f)).isFile()).sort();
         expect(files).toEqual([
-            "404.html", "assets/icons/favicon.svg", "assets/mascota-soporte.svg", "index.html",
-            "js/components/lostMascot.js", "js/i18n.js", "js/notFoundPage.js", "js/privacyPage.js", "js/privacyPolicyContent.js",
+            "404.html", "assets/icons/favicon.svg", "assets/mascota-soporte.svg", "delete-account.html", "index.html",
+            "js/components/lostMascot.js", "js/deleteAccountContent.js", "js/deleteAccountPage.js", "js/i18n.js", "js/notFoundPage.js",
+            "js/privacyPage.js", "js/privacyPolicyContent.js", "js/publicPage.js",
             "privacy.html", "style/notfound.css", "style/privacy.css"
         ]);
         expect(fs.readFileSync(path.join(site, "privacy.html"), "utf8")).not.toContain("hireflow-app");
+        expect(fs.readFileSync(path.join(site, "delete-account.html"), "utf8")).not.toContain("hireflow-app");
     });
 
     test("la raíz muestra la política, sin 'Volver a HireFlow'", async ({ page }) => {

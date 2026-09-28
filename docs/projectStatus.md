@@ -197,7 +197,7 @@ Decisión de arquitectura: ver `docs/decisions.md`, entrada 012.
 ---
 # Testing
 Automáticas (en el repositorio)
-🟢 104 pruebas con Playwright Test en `tests/` (API + todas las pantallas + axe-core), `npm test`; integración continua en GitHub Actions con una MySQL creada desde cero en cada push. Ver `docs/decisions.md`, entradas 040 y 041.
+🟢 127 pruebas con Playwright Test en `tests/` (API + todas las pantallas + axe-core), `npm test`; integración continua en GitHub Actions con una MySQL creada desde cero en cada push. Ver `docs/decisions.md`, entradas 040 a 042.
 Backend
 🟢 Postman
 Frontend
@@ -253,6 +253,7 @@ Implementar:
 ✔ CV del candidato (`user_profiles`): CRUD, uso en job-match/Asistente IA y visible para la empresa con consentimiento opcional — completo
 ✔ Retirar o volver a dar el consentimiento (contacto/CV) de una postulación ya enviada — completo (entrada 034)
 ✔ Política de Privacidad en una URL pública (GitHub Pages) para Google Play — completo (entrada 035)
+✔ Preparar la app para Google Play: eliminar la cuenta (en la app y por web), PWA, `TRUST_PROXY`, `/.well-known/`, dependencias sin vulnerabilidades — completo (entrada 042)
 ✔ Política de Privacidad en francés e italiano (ya está en los 4 idiomas de la app) — completo (entrada 037)
 ✔ Mensajes de la API (errores, validaciones, confirmaciones) en los 4 idiomas según `Accept-Language` — completo (entrada 038)
 

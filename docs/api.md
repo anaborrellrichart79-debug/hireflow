@@ -186,12 +186,24 @@ Estado
 
 ## Eliminar cuenta propia
 DELETE /users/me
+Body
+{
+    "password": "la contraseña actual"
+}
+Exige la contraseña actual, para que no se pueda borrar la cuenta con una sesión abierta en un equipo ajeno (ver `docs/decisions.md`, entrada 042).
+
 Respuesta
 200 OK
 {
     "message": "Cuenta eliminada correctamente"
 }
-Efecto en cascada (según `database.md`): se eliminan automáticamente `applications`, `user_profiles`, `calendar_events`, `contacts` del usuario (ON DELETE CASCADE). En `job_offers.created_by_user` se pone a NULL (ON DELETE SET NULL), la oferta no se borra.
+Qué se borra, en una sola transacción:
+- Todo lo del usuario, en cascada: `user_profiles` (CV), `applications` (con sus notas y entrevistas), `calendar_events`, `contacts`.
+- Si es **recruiter**, también sus ofertas (`job_offers.created_by_user`) y sus empresas (`companies.created_by_user`), y con ellas las postulaciones y entrevistas que recibieron. Antes de la entrada 042 se quedaban publicadas y sin dueño.
+
+Errores
+400 — falta `password`
+403 — la contraseña no es correcta: `{"message":"La contraseña no es correcta"}`. Es 403 y no 401 a propósito: el frontend trata cualquier 401 como sesión caducada y cerraría la sesión.
 Autenticación
 Requerida (verifyToken) — solo puede eliminar la propia cuenta, no admite `:id`.
 Estado

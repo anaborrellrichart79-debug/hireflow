@@ -1,0 +1,20 @@
+{
+    "id": "./",
+    "name": "HireFlow",
+    "short_name": "HireFlow",
+    "description": "Organiza tu búsqueda de empleo: ofertas, postulaciones, entrevistas y un asistente que te ayuda con el CV.",
+    "lang": "es",
+    "dir": "ltr",
+    "start_url": "./#/",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#fff9e4",
+    "theme_color": "#ebad64",
+    "categories": ["business", "productivity"],
+    "icons": [
+        { "src": "assets/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "assets/icons/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "assets/icons/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    ]
+}

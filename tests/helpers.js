@@ -73,7 +73,7 @@ export class TestData {
         // Orden: ofertas (una empresa con ofertas no se puede borrar), empresas, usuarios
         for (const j of this.jobs) await api("DELETE", `/jobs/${j.id}`, { token: j.token });
         for (const c of this.companies) await api("DELETE", `/companies/${c.id}`, { token: c.token });
-        for (const u of this.users) await api("DELETE", "/users/me", { token: u.token });
+        for (const u of this.users) await api("DELETE", "/users/me", { token: u.token, body: { password: u.password ?? "secret123" } });
     }
 }
 
@@ -164,10 +164,11 @@ const freePort = () => new Promise((resolve) => {
 });
 
 // Arranca otra instancia de la app en un puerto libre, con su propia memoria
-// (p. ej. su propio contador de intentos de login). Devuelve { base, stop }.
-export const startServer = async () => {
+// (p. ej. su propio contador de intentos de login) y, si hace falta, variables
+// de entorno propias (p. ej. TRUST_PROXY). Devuelve { base, stop }.
+export const startServer = async (env = {}) => {
     const port = await freePort();
-    const child = spawn(process.execPath, ["server.js"], { cwd: path.join(ROOT, "backend"), env: { ...process.env, PORT: String(port) }, stdio: "ignore" });
+    const child = spawn(process.execPath, ["server.js"], { cwd: path.join(ROOT, "backend"), env: { ...process.env, ...env, PORT: String(port) }, stdio: "ignore" });
     const base = `http://localhost:${port}`;
     for (let i = 0; i < 60; i++) {
         try { await fetch(`${base}/privacy.html`); return { base, stop: () => child.kill() }; } catch { await new Promise((r) => setTimeout(r, 250)); }

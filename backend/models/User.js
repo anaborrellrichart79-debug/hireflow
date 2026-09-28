@@ -68,11 +68,32 @@ export const updateUser = async (id, userData) => {
     return result;
 };
 
-// Eliminar cuenta propia
+// Hash de la contraseña, solo para confirmar operaciones delicadas (borrar la cuenta)
+export const getPasswordHashById = async (id) => {
+    const [rows] = await db.execute("SELECT password_hash FROM users WHERE id = ?", [id]);
+    return rows[0]?.password_hash;
+};
+
+// Eliminar cuenta propia. El resto de datos personales se borra en cascada
+// (CV, postulaciones, notas, eventos, contactos). Las ofertas y empresas de
+// un recruiter se borran explícitamente: con ON DELETE SET NULL quedaban
+// publicadas y sin nadie que las gestionara, y los candidatos seguían
+// postulándose a ellas. Borrar sus ofertas borra también (en cascada) las
+// postulaciones y entrevistas que habían recibido. Todo en una transacción.
+// Ver docs/decisions.md, entrada 042.
 export const deleteUser = async (id) => {
-    const [result] = await db.execute(
-        "DELETE FROM users WHERE id = ?",
-        [id]
-    );
-    return result;
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+        await connection.execute("DELETE FROM job_offers WHERE created_by_user = ?", [id]);
+        await connection.execute("DELETE FROM companies WHERE created_by_user = ?", [id]);
+        const [result] = await connection.execute("DELETE FROM users WHERE id = ?", [id]);
+        await connection.commit();
+        return result;
+    } catch (error) {
+        await connection.rollback();
+        throw error;
+    } finally {
+        connection.release();
+    }
 };

@@ -90,6 +90,8 @@ sequenceDiagram
 | XSS | El frontend crea el DOM con `el()`/`textContent`, nunca con `innerHTML` a partir de datos. CSP de `helmet` sin scripts inline. | 011, 021, 022 |
 | Averiguar qué emails existen / fuerza bruta | Login con mismo mensaje, mismo código y mismo tiempo; máximo 10 intentos fallidos por IP cada 15 min. | 020 |
 | Contraseñas | `bcrypt`, 8–72 caracteres con letra y número. | 021 |
+| Borrar la cuenta con una sesión ajena | `DELETE /users/me` pide la contraseña actual. | 042 |
+| Falsear la IP para saltarse el límite de login | `trust proxy` solo con `TRUST_PROXY` (el número de proxies reales delante). | 042 |
 | Fugas en errores | Un 500 nunca devuelve el mensaje interno ni datos del driver. | 007 |
 | Datos de contacto y CV | Solo viajan a la empresa si el candidato dio el consentimiento correspondiente, comprobado con `CASE WHEN` en la SQL (no en el frontend). Se puede retirar. | 017, 033, 034 |
 
@@ -118,7 +120,8 @@ index.html
 - **Estado mínimo**: lo que viene de la API se vuelve a pedir al redibujar. El token JWT y el idioma viven en `localStorage`; el rol se lee del propio token (sin petición extra).
 - **Diálogos**: `openDialog()` sobre `<dialog>` nativo (foco atrapado, Escape y fondo gratis). Nunca `alert`/`confirm` nativos (entradas 017, 023, 030).
 - **Accesibilidad**: `linkLabels()` asocia cada `<label>` con su campo tras pintar cada pantalla; foco visible, "saltar al contenido", `prefers-reduced-motion`. Auditado con axe-core (WCAG 2.1 A/AA) en cada cambio de interfaz (entrada 029).
-- **Páginas independientes**: `privacy.html` y `404.html` no usan el router ni el login, para poder publicarse solas (entradas 035, 036).
+- **Páginas independientes**: `privacy.html`, `delete-account.html` y `404.html` no usan el router ni el login, para poder publicarse solas; las dos primeras comparten `publicPage.js` (entradas 035, 036, 042).
+- **App instalable (PWA)**: `manifest.webmanifest` e iconos; `sw.js` solo intercepta la navegación para mostrar `offline.html` sin conexión y **no** guarda en caché la app ni la API, para que tras un despliegue nadie se quede con la versión vieja (entrada 042).
 
 ---
 
@@ -152,7 +155,7 @@ erDiagram
 |---|---|---|
 | App completa (frontend + API) | Local, `http://localhost:3000` | `npm start` en `backend/`, con `backend/.env` (ver `.env.example`). No está desplegada en ningún servidor. |
 | Base de datos | MySQL local: `hireflow` (desarrollo) y `hireflow_demo` (datos de demostración) | `schema.sql` + `seed.sql` + `seed_ai_translations.sql`; migraciones para bases existentes. |
-| Política de Privacidad y 404 | GitHub Pages: https://anaborrellrichart79-debug.github.io/hireflow/ | `.github/workflows/privacy-page.yml` publica **solo** esos archivos en cada cambio en `main` (entradas 035, 036, 039). |
+| Política de Privacidad, "Cómo eliminar tu cuenta" y 404 | GitHub Pages: https://anaborrellrichart79-debug.github.io/hireflow/ (y `delete-account.html`) | `.github/workflows/privacy-page.yml` publica **solo** esos archivos en cada cambio en `main` (entradas 035, 036, 039, 042). |
 
 ---
 

@@ -1,0 +1,6 @@
+# Cómo avisar de un fallo de seguridad en HireFlow (RFC 9116).
+# Ver docs/decisions.md, entrada 042.
+Contact: mailto:ana.borrell.richart79@gmail.com
+Expires: 2027-09-28T00:00:00.000Z
+Preferred-Languages: es, en
+Policy: https://anaborrellrichart79-debug.github.io/hireflow/privacy.html

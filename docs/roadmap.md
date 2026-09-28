@@ -15,11 +15,12 @@ Prioridades: 🔴 bloquea publicar la app · 🟠 importante · 🟢 mejora.
 | | Tarea | Por qué | Origen |
 |---|---|---|---|
 | 🔴 | **Revisión legal de la Política de Privacidad** en los 4 idiomas | Es un borrador (lo dice la propia página); las traducciones fr/it también necesitan revisión | Entradas 017, 035, 037 |
+| ✅ | ~~Preparar la app: eliminar la cuenta (en la app y por web), PWA, `TRUST_PROXY`, `/.well-known/`~~ | Hecho | Entrada 042 |
 | 🔴 | **Desplegar la app** en un servidor con HTTPS y una base de datos gestionada | Hoy solo corre en local; la política exige tráfico cifrado en producción | Entrada 017 (sección 9 de la política) |
 | 🟢 | Cuando esté desplegada: **"Volver a HireFlow" también en la política de GitHub Pages** | Hoy solo aparece dentro de la app, porque en Pages no hay app a la que volver. Bastará con que el workflow ponga la URL de la app en `<meta name="hireflow-app">` en vez de quitarla | Entrada 039, petición de la usuaria |
-| 🔴 | **Empaquetar para Android** (PWA con TWA, o app nativa/híbrida) | Google Play necesita una app, no una web | `googlePlayDataSafety.md` |
+| 🔴 | **Empaquetar para Android** (Trusted Web Activity a partir de la PWA; hace falta la app desplegada y `assetlinks.json` en `/.well-known/`) | Google Play necesita una app, no una web | `googlePlayDataSafety.md` |
 | 🟠 | Rellenar **Data Safety** en Play Console con el borrador ya preparado | | `googlePlayDataSafety.md` |
-| 🟠 | Revisar las **4 vulnerabilidades moderadas** que marca `npm audit` en `backend/` | Detectadas al reinstalar dependencias | Sesión de septiembre 2026 |
+| ✅ | ~~Vulnerabilidades de `npm audit`~~ | Corregidas; 0 en backend y raíz | Entrada 042 |
 
 ---
 

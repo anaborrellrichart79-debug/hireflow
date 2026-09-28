@@ -5,8 +5,22 @@ import { navigate } from "../router.js";
 import { t } from "../i18n.js";
 import { openPrivacyPolicyDialog } from "../components/privacyPolicyDialog.js";
 
+// Lo fija profileForm.js al eliminar la cuenta, para avisar aquí una sola vez
+export const ACCOUNT_DELETED_KEY = "hireflow_account_deleted";
+
+const takeAccountDeletedFlag = () => {
+    try {
+        const flag = sessionStorage.getItem(ACCOUNT_DELETED_KEY);
+        sessionStorage.removeItem(ACCOUNT_DELETED_KEY);
+        return flag === "1";
+    } catch {
+        return false;
+    }
+};
+
 export const render = (container) => {
     let mode = "login";
+    const accountDeleted = takeAccountDeletedFlag();
 
     // Si la sesión anterior caducó: ruta a la que volver tras iniciar sesión.
     const sessionExpiredReturnTo = getSessionExpiredReturnTo();
@@ -108,6 +122,7 @@ export const render = (container) => {
         const form = el("form", { class: "auth-form", onSubmit: submit }, [
             el("h2", { text: mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle") }),
             mode === "login" && sessionExpiredReturnTo !== null ? infoBanner(t("auth.sessionExpired")) : null,
+            mode === "login" && accountDeleted ? infoBanner(t("auth.accountDeleted")) : null,
             errorSlot,
             ...extraFields,
             emailInput,

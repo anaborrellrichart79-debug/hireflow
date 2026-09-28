@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Página "Sin conexión": la muestra el service worker (sw.js) cuando no
+         hay red. Todo lo que usa está en su caché; sin fuentes externas.
+         Ver docs/decisions.md, entrada 042. -->
+    <title>HireFlow</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#ebad64">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style/notfound.css">
+</head>
+<body>
+    <main>
+        <section class="lost" aria-labelledby="offline-title">
+            <div class="lost-stage">
+                <p class="lost-bubble visible" id="offline-bubble">¿Sin conexión?</p>
+                <img class="lost-mascot lost-mascot-done" src="assets/mascota-soporte.svg" alt="">
+            </div>
+            <h1 id="offline-title" class="lost-title">No hay conexión a internet</h1>
+            <p id="offline-text" class="lost-text">Comprueba tu conexión y vuelve a intentarlo.</p>
+            <button type="button" id="offline-retry" class="lost-home">Reintentar</button>
+        </section>
+    </main>
+    <script type="module" src="js/offlinePage.js"></script>
+</body>
+</html>

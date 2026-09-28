@@ -54,6 +54,14 @@ initHeader();
 initRouter(mainContainer);
 initMascot();
 
+// Service worker: hace la app instalable y muestra "Sin conexión" si no hay
+// red. No guarda en caché la app ni la API (ver sw.js y decisions.md, entrada 042).
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {
+        // Sin service worker la app funciona igual; solo no es instalable
+    });
+}
+
 // Al cambiar de idioma, se vuelve a renderizar la pantalla actual sin
 // perder la posición de navegación (no es un cambio de ruta).
 onLangChange(() => refresh());

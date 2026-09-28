@@ -1,6 +1,8 @@
 import { el, errorBanner, openDialog } from "../components/ui.js";
 import { apiFetch } from "../api.js";
-import { getCurrentUser } from "../auth.js";
+import { getCurrentUser, logout } from "../auth.js";
+import { navigate } from "../router.js";
+import { ACCOUNT_DELETED_KEY } from "./login.js";
 import { t } from "../i18n.js";
 
 const errorDetail = (error) => error.errors?.map((e) => e.message).join(" · ") || error.message;
@@ -99,6 +101,52 @@ const renderCvForm = async () => {
     ]);
 };
 
+// Eliminar la cuenta desde la propia app: lo exige Google Play a cualquier
+// app que permita crear cuentas. Pide la contraseña (el backend también) y
+// explica qué se borra según el rol. Ver docs/decisions.md, entrada 042.
+const renderDeleteAccountSection = (role) => {
+    const openDeleteAccountDialog = () => {
+        const errorSlot = el("div", {});
+        const passwordInput = el("input", { type: "password", name: "current-password", autocomplete: "current-password" });
+        const cancelButton = el("button", { type: "button", class: "secondary-button", text: t("jobs.consentCancel") });
+        const confirmButton = el("button", { type: "button", class: "primary-button", text: t("profile.deleteAccountConfirm") });
+
+        const dialog = openDialog([
+            el("h2", { id: "delete-account-title", text: t("profile.deleteAccountDialogTitle") }),
+            errorSlot,
+            el("p", { text: t(role === "recruiter" ? "profile.deleteAccountTextRecruiter" : "profile.deleteAccountTextCandidate") }),
+            el("label", { text: t("profile.deleteAccountPasswordLabel") }),
+            passwordInput,
+            el("div", { class: "hf-dialog-actions" }, [cancelButton, confirmButton])
+        ], { labelledBy: "delete-account-title" });
+
+        cancelButton.addEventListener("click", () => dialog.close());
+        confirmButton.addEventListener("click", async () => {
+            errorSlot.innerHTML = "";
+            if (confirmButton.disabled) return;
+            confirmButton.disabled = true;
+            try {
+                await apiFetch("/users/me", { method: "DELETE", body: { password: passwordInput.value } });
+                dialog.close();
+                logout();
+                // El login avisa de que la cuenta se ha eliminado (ver login.js)
+                try { sessionStorage.setItem(ACCOUNT_DELETED_KEY, "1"); } catch { /* sin sessionStorage: sin aviso */ }
+                navigate("/login");
+            } catch (error) {
+                errorSlot.append(errorBanner(errorDetail(error)));
+            } finally {
+                confirmButton.disabled = false;
+            }
+        });
+    };
+
+    return el("section", { class: "hireflow-form danger-zone", "aria-labelledby": "delete-account-heading" }, [
+        el("h2", { id: "delete-account-heading", text: t("profile.deleteAccountTitle") }),
+        el("p", { class: "form-note", text: t(role === "recruiter" ? "profile.deleteAccountTextRecruiter" : "profile.deleteAccountTextCandidate") }),
+        el("button", { type: "button", class: "secondary-button danger", text: t("profile.deleteAccountButton"), onClick: openDeleteAccountDialog })
+    ]);
+};
+
 export const render = async (container) => {
     container.append(el("p", { text: t("common.loading") }));
 
@@ -165,4 +213,5 @@ export const render = async (container) => {
     if (cvForm) {
         container.append(cvForm);
     }
+    container.append(renderDeleteAccountSection(getCurrentUser()?.role));
 };

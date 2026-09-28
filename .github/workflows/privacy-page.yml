@@ -11,6 +11,10 @@ on:
       - frontend/privacy.html
       - frontend/js/privacyPage.js
       - frontend/js/privacyPolicyContent.js
+      - frontend/js/publicPage.js
+      - frontend/delete-account.html
+      - frontend/js/deleteAccountPage.js
+      - frontend/js/deleteAccountContent.js
       - frontend/style/privacy.css
       - frontend/404.html
       - frontend/js/notFoundPage.js
@@ -48,7 +52,11 @@ jobs:
           ! grep -q 'name="hireflow-app"' _site/privacy.html
           # La raíz de la web también muestra la política
           cp _site/privacy.html _site/index.html
-          cp frontend/js/privacyPage.js frontend/js/privacyPolicyContent.js _site/js/
+          cp frontend/js/privacyPage.js frontend/js/privacyPolicyContent.js frontend/js/publicPage.js _site/js/
+          # "Cómo eliminar tu cuenta": el enlace web que pide Google Play
+          sed '/<meta name="hireflow-app"/d' frontend/delete-account.html > _site/delete-account.html
+          ! grep -q 'name="hireflow-app"' _site/delete-account.html
+          cp frontend/js/deleteAccountPage.js frontend/js/deleteAccountContent.js _site/js/
           cp frontend/style/privacy.css _site/style/
           cp frontend/assets/icons/favicon.svg _site/assets/icons/
           # 404: GitHub Pages la sirve para cualquier ruta desconocida. Sus

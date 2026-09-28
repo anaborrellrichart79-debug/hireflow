@@ -1,66 +1,24 @@
 // Página pública de la Política de Privacidad (privacy.html). Sin sesión ni
 // router: se puede abrir desde cualquier sitio (Google Play, un email...) y
-// también se publica sola en GitHub Pages. Por eso solo depende de
-// privacyPolicyContent.js. Ver docs/decisions.md, entrada 035.
+// también se publica sola en GitHub Pages. Ver docs/decisions.md, entrada 035.
 import { PRIVACY_POLICY_CONTENT, getPrivacyPolicy } from "./privacyPolicyContent.js";
+import { node, pickLang, setupPublicPage } from "./publicPage.js";
 
 const AVAILABLE = Object.keys(PRIVACY_POLICY_CONTENT); // es, en, fr, it
-const LANG_NAMES = { es: "Español", en: "English", fr: "Français", it: "Italiano" };
-// Nombre accesible del selector de idioma, en el idioma de la página
-const LANG_LABEL = { es: "Idioma", en: "Language", fr: "Langue", it: "Lingua" };
-
-// Idioma: ?lang= en la URL > el que eligió en la app > el del navegador > español
-const pickLang = () => {
-    const fromUrl = new URLSearchParams(location.search).get("lang");
-    if (AVAILABLE.includes(fromUrl)) return fromUrl;
-    try {
-        const fromApp = localStorage.getItem("hireflow_lang");
-        if (AVAILABLE.includes(fromApp)) return fromApp;
-    } catch {
-        // localStorage bloqueado: se sigue con el idioma del navegador
-    }
-    const fromBrowser = (navigator.language || "").slice(0, 2);
-    return AVAILABLE.includes(fromBrowser) ? fromBrowser : "es";
+// Enlace a la página de eliminar la cuenta, al final (entrada 042)
+const DELETE_LINK = {
+    es: "¿Quieres eliminar tu cuenta? Te explicamos cómo",
+    en: "Want to delete your account? Here's how",
+    fr: "Vous voulez supprimer votre compte ? Voici comment",
+    it: "Vuoi eliminare il tuo account? Ecco come"
 };
 
-const node = (tag, text, className) => {
-    const element = document.createElement(tag);
-    if (text) element.textContent = text;
-    if (className) element.className = className;
-    return element;
-};
-
-const lang = pickLang();
+const lang = pickLang(AVAILABLE);
 const policy = getPrivacyPolicy(lang);
+const { appendBackButton } = setupPublicPage({ lang, available: AVAILABLE, title: policy.title });
 
-document.documentElement.lang = lang;
-document.title = `${policy.title} · HireFlow`;
-
-// Selector de idioma: enlaces normales (?lang=xx), funcionan sin JavaScript
-// extra y se pueden compartir tal cual
-const langNav = document.getElementById("privacy-lang");
-langNav.setAttribute("aria-label", LANG_LABEL[lang] || "Language");
-AVAILABLE.forEach((code) => {
-    const link = node("a", LANG_NAMES[code]);
-    link.href = `?lang=${code}`;
-    link.hreflang = code;
-    link.lang = code;
-    if (code === lang) link.setAttribute("aria-current", "page");
-    langNav.append(link);
-});
-
-// "Volver a HireFlow": solo si la página se sirve junto a la app (la
-// <meta name="hireflow-app"> no existe en la copia de GitHub Pages).
-const BACK_LABEL = { es: "Volver a HireFlow", en: "Back to HireFlow", fr: "Retour à HireFlow", it: "Torna a HireFlow" };
-const appUrl = document.querySelector('meta[name="hireflow-app"]')?.content;
-const backLink = (className, text) => {
-    const link = node("a", text, className);
-    link.href = appUrl;
-    return link;
-};
-if (appUrl) {
-    langNav.before(backLink("privacy-back", `← ${BACK_LABEL[lang]}`));
-}
+const deleteLink = node("a", DELETE_LINK[lang]);
+deleteLink.href = `delete-account.html?lang=${lang}`;
 
 const content = document.getElementById("privacy-content");
 content.innerHTML = "";
@@ -70,8 +28,7 @@ content.append(
     ...policy.sections.flatMap((section) => [node("h2", section.heading), node("p", section.body)]),
     node("p", policy.disclaimer, "privacy-disclaimer")
 );
+content.append(node("p", "", "privacy-related"));
+content.lastChild.append(deleteLink);
 // Al final del texto también, que es donde llega quien lo ha leído entero
-if (appUrl) {
-    content.append(node("p", "", "privacy-back-bottom"));
-    content.lastChild.append(backLink("privacy-back-button", BACK_LABEL[lang]));
-}
+appendBackButton(content);

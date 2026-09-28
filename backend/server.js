@@ -28,6 +28,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+// Detrás de un proxy (el servidor de despliegue), la IP real del usuario
+// llega en X-Forwarded-For. Sin esto, el límite de intentos de login
+// contaría a todos los usuarios como la misma IP (la del proxy). Solo se
+// activa con TRUST_PROXY (número de proxies delante, normalmente 1): si se
+// activara sin proxy, cualquiera podría falsear esa cabecera y saltarse el
+// límite. Ver docs/decisions.md, entrada 042.
+const parseTrustProxy = (value) => {
+    if (value === undefined || value === "" || value === "false") return false;
+    if (value === "true") return true;
+    return /^\d+$/.test(value) ? Number(value) : value;
+};
+app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
+
 // Cabeceras de seguridad (CSP, nosniff, anti-clickjacking, sin X-Powered-By...).
 // La CSP de helmet se ajusta a lo que carga el frontend: todo desde el propio
 // servidor salvo la fuente Lato de Google Fonts. upgrade-insecure-requests se
@@ -54,6 +67,9 @@ app.use(express.json());
 // fetch a rutas relativas ("/api/...") y el navegador nunca las trata como
 // cross-origin. El routing de pantallas es client-side (hash), así que no
 // hace falta ningún fallback especial aquí para rutas desconocidas.
+// /.well-known/ (security.txt; en el futuro, assetlinks.json para la app de
+// Android) va aparte: express.static ignora las carpetas que empiezan por punto.
+app.use("/.well-known", express.static(path.join(__dirname, "../frontend/.well-known")));
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 app.use("/api/applications", applicationRouter);

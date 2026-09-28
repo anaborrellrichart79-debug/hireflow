@@ -35,7 +35,10 @@ No aplica: HireFlow no está dirigida a menores de 16 años (ver Política de Pr
 
 - **Por qué se comparten datos con "terceros" en el sentido de Google Play**: a ojos de Google, cada empresa/reclutador que usa HireFlow para publicar ofertas es un "tercero" respecto al candidato que se postula, aunque ambos sean usuarios de la misma app. De ahí que nombre/email/teléfono se marquen como "compartidos", condicionados siempre al consentimiento explícito capturado en `applications.consent_share_contact` (ver `backend/models/application.js`).
 - **Por qué el resto de datos (sector, ubicación) no se marca como "compartido" de forma independiente**: solo se exponen junto con el resto del perfil de contacto a la empresa correspondiente, bajo el mismo consentimiento — no se venden ni se ceden por separado a nadie más.
-- **Base para "eliminación de datos bajo petición"**: `DELETE /users/me` (`backend/controllers/userControllers.js`) + `ON DELETE CASCADE` en las tablas relacionadas (`schema.sql`).
+- **Eliminar la cuenta** (Google Play lo exige a toda app que permita crear cuentas, ver `docs/decisions.md`, entrada 042):
+  - **Desde la app**: Mi perfil → "Eliminar mi cuenta" (pide la contraseña; borrado inmediato).
+  - **URL para el campo "Eliminar cuenta" de Play Console**: **https://anaborrellrichart79-debug.github.io/hireflow/delete-account.html** (4 idiomas; explica cómo borrarla desde la app o pidiéndolo por email, qué se borra y que no se conserva nada).
+- **Base técnica de la eliminación**: `DELETE /users/me` (`backend/controllers/userControllers.js`) + `ON DELETE CASCADE` en las tablas relacionadas (`schema.sql`).
 
 ## 6. Enlace a la Política de Privacidad
 

@@ -7,7 +7,7 @@ import { requireRole } from "../middleware/roleMiddleware.js";
 import { loginLimiter } from "../middleware/rateLimiters.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
-import { createUserValidators, loginValidators, updateProfileValidators, saveCvValidators } from "../validators/userValidators.js";
+import { createUserValidators, loginValidators, updateProfileValidators, saveCvValidators, deleteAccountValidators } from "../validators/userValidators.js";
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ router.post("/login", loginLimiter, loginValidators, validate, asyncHandler(logi
 // para que Express no intente interpretar "me" como un :id.
 router.get("/me", verifyToken, asyncHandler(getProfile));
 router.put("/me", verifyToken, updateProfileValidators, validate, asyncHandler(updateProfile));
-router.delete("/me", verifyToken, asyncHandler(deleteProfile));
+router.delete("/me", verifyToken, deleteAccountValidators, validate, asyncHandler(deleteProfile));
 
 // CV extendido (tabla user_profiles) -- solo candidate, ver docs/decisions.md, entrada 033
 router.get("/me/cv", verifyToken, requireRole(["candidate"]), asyncHandler(getCv));

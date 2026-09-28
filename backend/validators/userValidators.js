@@ -38,3 +38,8 @@ export const saveCvValidators = [
     body("about").optional({ nullable: true }).isString().withMessage(msg("v.string")).isLength({ max: CV_TEXT_MAX }).withMessage(msg("v.maxLength", { max: CV_TEXT_MAX })),
     body("resume_url").optional({ nullable: true }).isURL({ protocols: ["http", "https"], require_protocol: true }).withMessage(msg("v.httpUrl")).isLength({ max: 255 }).withMessage(msg("v.maxLength", { max: 255 }))
 ];
+
+// Borrar la cuenta exige la contraseña actual (ver docs/decisions.md, entrada 042)
+export const deleteAccountValidators = [
+    body("password").notEmpty().withMessage(msg("v.required"))
+];
