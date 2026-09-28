@@ -1,0 +1,54 @@
+# Publica SOLO la Política de Privacidad en GitHub Pages, para tener la URL
+# pública que exige Google Play (ver docs/decisions.md, entrada 035).
+# No publica la app ni el resto del repositorio: copia a _site únicamente la
+# página y los archivos que necesita.
+name: Política de Privacidad (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - frontend/privacy.html
+      - frontend/js/privacyPage.js
+      - frontend/js/privacyPolicyContent.js
+      - frontend/style/privacy.css
+      - .github/workflows/privacy-page.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: privacy-page
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar solo los archivos de la política
+        run: |
+          mkdir -p _site/js _site/style _site/assets/icons
+          cp frontend/privacy.html _site/privacy.html
+          # La raíz de la web también muestra la política
+          cp frontend/privacy.html _site/index.html
+          cp frontend/js/privacyPage.js frontend/js/privacyPolicyContent.js _site/js/
+          cp frontend/style/privacy.css _site/style/
+          cp frontend/assets/icons/favicon.svg _site/assets/icons/
+          find _site -type f
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

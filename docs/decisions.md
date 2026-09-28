@@ -1075,3 +1075,27 @@ El usuario eligió que la empresa pueda ver el CV solo si el candidato da permis
 **Archivos afectados:** `backend/database/schema.sql`, `backend/database/migrations/034_applications_consent_updated_at.sql` (nuevo), `backend/models/application.js`, `backend/controllers/applicationControllers.js`, `backend/validators/applicationValidators.js`, `backend/routes/applicationRoutes.js`, `frontend/js/screens/applications.js`, `frontend/js/i18n.js` (claves `applications.privacy*` y `applications.sharing*` en los 4 idiomas), `frontend/js/privacyPolicyContent.js`, `frontend/style/components.css` (`.hf-dialog-actions`), `docs/api.md`, `docs/Database.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
 
 ---
+
+## 035 — Política de Privacidad en una URL pública (GitHub Pages)
+**Fecha:** Septiembre 2026
+
+**Problema:** Google Play exige pegar en Play Console un enlace público a la política de privacidad. La política solo existía dentro de la app, en un modal del registro. Además, la app no está desplegada en ningún servidor: solo corre en local.
+
+**Decisión 1 — una página propia, generada desde el mismo contenido.** `frontend/privacy.html` + `js/privacyPage.js` pintan la política a partir de `privacyPolicyContent.js`, el mismo módulo que usa el modal. Así la versión pública y la de la app nunca se desincronizan. La página no depende del router, del login ni del resto de módulos de la app (ni siquiera de `ui.js`), para poder publicarse sola.
+- Idioma: `?lang=` en la URL, si no el que se eligió en la app (`hireflow_lang`), si no el del navegador, y si no español. Solo es/en, que son los que tienen texto completo (entrada 017); `?lang=fr/it` o valores raros se ignoran.
+- El selector de idioma son enlaces normales (`?lang=en`), que se pueden compartir tal cual.
+- Hoja de estilos propia (`style/privacy.css`), con el acento del logo oscurecido (`#a8621a`) porque el naranja de marca no llega a 4,5:1 sobre el crema.
+
+**Decisión 2 — alojamiento en GitHub Pages, solo con esos archivos (consultada con el usuario).** El repositorio ya es público. El workflow `.github/workflows/privacy-page.yml` copia a `_site` únicamente `privacy.html` (también como `index.html`, para que la raíz muestre la política), sus dos scripts, su CSS y el favicon, y los publica con `actions/deploy-pages`. Se descartó publicar la carpeta `docs/` o `frontend/` enteras, que habrían expuesto documentación interna o una app que no funciona sin backend. Se despliega en cada push a `main` que toque esos archivos, y a mano con `workflow_dispatch`. URL: https://anaborrellrichart79-debug.github.io/hireflow/.
+
+**Decisión 3 — contacto real (decisión del usuario).** La política decía `privacy@hireflow.example`, un dominio de ejemplo que no recibe correo; Google Play puede rechazar una política sin contacto real. Pasa a ser el email de la titular del proyecto, visible en la página pública. Fecha de la política actualizada a septiembre de 2026 (desde agosto se añadieron el CV, entrada 033, y la retirada del consentimiento, entrada 034).
+
+**El modal del registro enlaza a la página** ("Abrir en una página aparte", en pestaña nueva para no perder lo escrito en el formulario).
+
+**Sigue pendiente:** la política es un borrador (lo dice la propia página). Tiene que revisarla un profesional antes de publicar en Play Store. Tampoco hay versión en francés ni italiano.
+
+**Verificación** (Playwright + axe-core): dentro de la app con la CSP real de helmet, y como paquete aislado idéntico al del workflow servido bajo `/hireflow/` (como en Pages). Comprobado: se ve sin sesión, 11 secciones, fecha nueva, cambio de idioma por enlace, prioridad de idioma (URL > app > navegador), `?lang` inválido ignorado, el modal del registro abre la página en otra pestaña sin cerrar el formulario, la raíz y `privacy.html` funcionan en el paquete aislado, 320px sin desbordamiento, axe-core 0 problemas y sin errores de consola. Tras publicar: la URL de Pages responde 200 con la política.
+
+**Archivos afectados:** `frontend/privacy.html` (nuevo), `frontend/js/privacyPage.js` (nuevo), `frontend/style/privacy.css` (nuevo), `.github/workflows/privacy-page.yml` (nuevo), `frontend/js/privacyPolicyContent.js` (contacto y fecha), `frontend/js/components/privacyPolicyDialog.js` (enlace), `frontend/js/i18n.js` (`auth.privacyOpenPage` en los 4 idiomas), `docs/googlePlayDataSafety.md`, `docs/changeLog.md`, `docs/projectStatus.md`.
+
+---

@@ -1,0 +1,60 @@
+/* Página pública de la Política de Privacidad (privacy.html). Hoja propia y
+   mínima: la página se publica sola en GitHub Pages, sin el resto de la app.
+   Mismos colores de marca que components.css. */
+:root {
+    --hf-orange: #ebad64;
+    --hf-cream: #fff9e4;
+    --hf-text: #2a2a2a;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body {
+    font-family: "Lato", Roboto, sans-serif;
+    color: var(--hf-text);
+    background: #fff;
+    line-height: 1.6;
+}
+
+.privacy-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    background: var(--hf-cream);
+    border-bottom: 1px solid #eadfc4;
+}
+
+.privacy-logo { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+/* El naranja de marca no llega a 4,5:1 sobre crema: se oscurece para texto */
+.privacy-logo .accent { color: #a8621a; }
+
+.privacy-lang { display: flex; gap: 12px; }
+.privacy-lang a { color: var(--hf-text); }
+.privacy-lang a[aria-current="page"] { font-weight: 700; text-decoration: none; }
+
+.privacy-content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+    overflow-wrap: anywhere;
+}
+
+.privacy-content h1 { margin: 0 0 4px; font-size: 28px; }
+.privacy-content h2 { margin: 28px 0 6px; font-size: 18px; }
+.privacy-content p { margin: 0 0 12px; }
+
+.privacy-updated, .privacy-disclaimer { font-size: 14px; color: #4f4f4f; }
+
+.privacy-disclaimer {
+    margin-top: 32px;
+    padding: 12px 16px;
+    border-left: 4px solid var(--hf-orange);
+    background: var(--hf-cream);
+}
+
+:focus-visible { outline: 3px solid #2a2a2a; outline-offset: 2px; }

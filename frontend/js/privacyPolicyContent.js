@@ -12,11 +12,11 @@
 export const PRIVACY_POLICY_CONTENT = {
     es: {
         title: "Política de Privacidad",
-        updated: "Última actualización: agosto de 2026",
+        updated: "Última actualización: septiembre de 2026",
         sections: [
             {
                 heading: "1. Responsable del tratamiento",
-                body: "HireFlow es una aplicación en desarrollo para conectar personas candidatas con empresas. El responsable del tratamiento de los datos es el titular del proyecto HireFlow, contactable en privacy@hireflow.example (dirección de contacto provisional mientras la app está en desarrollo)."
+                body: "HireFlow es una aplicación en desarrollo para conectar personas candidatas con empresas. El responsable del tratamiento de los datos es el titular del proyecto HireFlow, contactable en ana.borrell.richart79@gmail.com."
             },
             {
                 heading: "2. Qué datos recogemos",
@@ -40,7 +40,7 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "7. Tus derechos",
-                body: "Puedes acceder a tus datos, rectificarlos, solicitar su supresión, oponerte a su tratamiento, pedir la limitación del tratamiento o la portabilidad de tus datos, escribiendo a privacy@hireflow.example o eliminando directamente tu cuenta desde la pantalla de perfil. También puedes retirar en cualquier momento el permiso para compartir tu contacto o tu CV con una empresa, desde el botón \"Privacidad\" de cada postulación en Mis postulaciones; retirarlo no afecta a la licitud del tratamiento anterior. Si consideras que no hemos atendido tu solicitud correctamente, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es)."
+                body: "Puedes acceder a tus datos, rectificarlos, solicitar su supresión, oponerte a su tratamiento, pedir la limitación del tratamiento o la portabilidad de tus datos, escribiendo a ana.borrell.richart79@gmail.com o eliminando directamente tu cuenta desde la pantalla de perfil. También puedes retirar en cualquier momento el permiso para compartir tu contacto o tu CV con una empresa, desde el botón \"Privacidad\" de cada postulación en Mis postulaciones; retirarlo no afecta a la licitud del tratamiento anterior. Si consideras que no hemos atendido tu solicitud correctamente, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es)."
             },
             {
                 heading: "8. Usuarios fuera de España",
@@ -63,11 +63,11 @@ export const PRIVACY_POLICY_CONTENT = {
     },
     en: {
         title: "Privacy Policy",
-        updated: "Last updated: August 2026",
+        updated: "Last updated: September 2026",
         sections: [
             {
                 heading: "1. Data controller",
-                body: "HireFlow is an app in development that connects job candidates with employers. The data controller is the HireFlow project owner, reachable at privacy@hireflow.example (temporary contact address while the app is in development)."
+                body: "HireFlow is an app in development that connects job candidates with employers. The data controller is the HireFlow project owner, reachable at ana.borrell.richart79@gmail.com."
             },
             {
                 heading: "2. What data we collect",
@@ -91,7 +91,7 @@ export const PRIVACY_POLICY_CONTENT = {
             },
             {
                 heading: "7. Your rights",
-                body: "You can access, rectify or request deletion of your data, object to its processing, or request restriction of processing or data portability, by writing to privacy@hireflow.example or by deleting your account directly from the profile screen. You can also withdraw, at any time, your permission to share your contact details or your CV with a company, using the \"Privacy\" button on each application in My applications; withdrawing it does not affect the lawfulness of processing carried out before. If you believe we haven't handled your request properly, you can file a complaint with your local data protection authority (in Spain, the AEPD at aepd.es)."
+                body: "You can access, rectify or request deletion of your data, object to its processing, or request restriction of processing or data portability, by writing to ana.borrell.richart79@gmail.com or by deleting your account directly from the profile screen. You can also withdraw, at any time, your permission to share your contact details or your CV with a company, using the \"Privacy\" button on each application in My applications; withdrawing it does not affect the lawfulness of processing carried out before. If you believe we haven't handled your request properly, you can file a complaint with your local data protection authority (in Spain, the AEPD at aepd.es)."
             },
             {
                 heading: "8. Users outside Spain",

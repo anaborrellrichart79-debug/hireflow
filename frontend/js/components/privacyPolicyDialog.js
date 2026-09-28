@@ -7,9 +7,20 @@ export const openPrivacyPolicyDialog = () => {
 
     const closeButton = el("button", { type: "button", class: "secondary-button", text: t("common.close") });
 
+    // Misma política en una página pública (privacy.html), para leerla con
+    // calma o compartirla. Pestaña nueva: así no se pierde lo ya escrito en
+    // el formulario de registro. Ver docs/decisions.md, entrada 035.
+    const pageLink = el("a", {
+        href: `privacy.html?lang=${getLang()}`,
+        target: "_blank",
+        rel: "noopener",
+        text: t("auth.privacyOpenPage")
+    });
+
     const dialog = openDialog([
         el("h2", { id: "privacy-dialog-title", text: policy.title }),
         el("p", { class: "form-note", text: policy.updated }),
+        el("p", {}, [pageLink]),
         ...policy.sections.flatMap((section) => [
             el("h3", { text: section.heading }),
             el("p", { text: section.body })

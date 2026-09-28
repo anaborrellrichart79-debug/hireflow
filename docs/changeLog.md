@@ -83,6 +83,12 @@ Formato basado en Keep a Changelog.
 - Política de Privacidad (es/en) y borrador de Data Safety de Google Play: incluyen el CV entre los datos recogidos y compartidos
 - Corregido: los campos `tel` y `url` de los formularios (por ejemplo, "Teléfono" en Mi perfil) no tenían el estilo del resto
 
+## Añadido — Política de Privacidad pública (entrada 035)
+- Página pública de la Política de Privacidad, sin sesión, en es/en: `/privacy.html` dentro de la app y https://anaborrellrichart79-debug.github.io/hireflow/ en GitHub Pages (la URL que pide Google Play)
+- Workflow `.github/workflows/privacy-page.yml`: publica solo la política (no la app ni el resto del repo) cada vez que cambia su contenido
+- El modal de la política en el registro enlaza a la página ("Abrir en una página aparte")
+- Contacto de privacidad real en vez de la dirección provisional `privacy@hireflow.example`, y fecha de la política actualizada a septiembre de 2026
+
 ## Añadido — Retirar el consentimiento de una postulación (entrada 034)
 - Botón "Privacidad" en cada postulación a una oferta (Mis postulaciones): un diálogo con dos casillas para retirar o volver a dar el permiso de compartir el contacto y el CV con la empresa. El cambio se aplica al momento; la postulación sigue activa
 - Cada tarjeta de Mis postulaciones resume lo que se comparte ("Compartes: contacto y CV", "No compartes contacto ni CV"...)
@@ -95,7 +101,7 @@ Formato basado en Keep a Changelog.
 - `backend/database/migrations/033_user_profiles_cv.sql` para bases existentes (`UNIQUE(user_id)` en `user_profiles` y `applications.consent_share_cv`).
 - `backend/database/migrations/034_applications_consent_updated_at.sql` para bases existentes (`applications.consent_updated_at`).
 
-Detalle en `docs/decisions.md`, entradas 018 a 034.
+Detalle en `docs/decisions.md`, entradas 018 a 035.
 
 ---
 
